@@ -16,11 +16,13 @@ bl_info = {
 if "bpy" in locals():
     print("Reloading plugin")
     import imp
+    imp.reload(SyncOperator)
     imp.reload(SyncMeshOperator)
     imp.reload(SyncPanel)
 else:
     print("Loading plugin")
 
+    from . import SyncOperator
     from . import SyncMeshOperator
     from . import SyncPanel
 
