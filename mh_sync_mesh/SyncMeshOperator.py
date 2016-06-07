@@ -6,37 +6,23 @@ bl_info = {
     "category": "Mesh",
 }
 
+from .SyncOperator import *
+
 import bpy
-import json
 import pprint
-import socket
 
 pp = pprint.PrettyPrinter(indent=4)
 
-class SyncMHMeshOperator(bpy.types.Operator):
+class SyncMHMeshOperator(SyncOperator):
     """Synchronize the shape of a human with MH"""
     bl_idname = "mesh.sync_mh_mesh"
     bl_label = "Synchronize MH Mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def executeJsonCall(self,jsoncall):
-        
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect(('127.0.0.1', 12345))
-        client.send(jsoncall)
-     
-        data = ""
-    
-        while True:
-            buf = client.recv(1024)
-            if len(buf) > 0:
-                data += buf.strip().decode('utf-8')
-            else:
-                break
-    
-        return data;
+    def __init__(self):
+        super().__init__('getCoord', 'MESH')
 
-    def updateMesh(self,json_obj):
+    def callback(self,json_obj):
 
         print("Update mesh")
 
@@ -74,19 +60,3 @@ class SyncMHMeshOperator(bpy.types.Operator):
     #            bfile.write("{0:.8f}".format(v.co[1]))
     #            bfile.write(" ],\n")
     #        bfile.write("] } \n")
-
-    def execute(self, context):
-        print("Execute syncmesh")
-        
-        obj = context.object
-        if obj is None or not obj.type == 'MESH':
-            self.report({'ERROR'}, "Must select mesh to synchronize")
-        else:
-            #self.dumpObj()
-            json_raw = self.executeJsonCall(b'getCoord')
-            #with open("/tmp/json.json","w") as jfile:
-            #    jfile.write(json_raw)
-            json_obj = json.loads(json_raw)
-            self.updateMesh(json_obj)
-
-        return {'FINISHED'} 
