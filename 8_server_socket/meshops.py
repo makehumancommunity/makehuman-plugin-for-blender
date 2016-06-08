@@ -1,9 +1,12 @@
 import gui3d
 import mh
+import skeleton
+#from transformations import quaternion_from_matrix
 import gui
 import log
 import socket
 import json
+from sys import exc_info 
 
 class SocketMeshOps():
 
@@ -14,14 +17,24 @@ class SocketMeshOps():
 
     def evaluateOp(self,conn,data):
 
-        valid = False
+        valProblem = None
 
-        if(data == "getCoord"):
-            self.getCoord(conn)
-            valid = True
+        try:
+            if data == "getCoord":
+                self.getCoord(conn)
+            elif data == "getPose": 
+                if self.human.getSkeleton():
+                    self.getPose(conn)
+                else:
+                    valProblem = "no skeleton assigned in MH"
+            else:
+                valProblem = '"' + data + '" is not valid command'
+                
+        except:
+            ex = exc_info()
+            valProblem = "runtime exception:  " + str(ex[1])
 
-        return valid
-
+        return valProblem
 
     def getCoord(self,conn):
 
@@ -33,15 +46,44 @@ class SocketMeshOps():
             if first:
                 first = False
             else:
-                coords = coords + ","
-            coords = coords + "\n[ ";
-            coords = coords + "{0:.8f}".format(c[0]) + ", "
-            coords = coords + "{0:.8f}".format(c[1]) + ", "
-            coords = coords + "{0:.8f}".format(c[2]) + " ]"
+                coords += ","
+            coords += "\n" + arrayAsString(c);
 
-        coords = coords + "\n] }\n";
+        coords += "\n] }\n";
         #print coords
         self.parent.addMessage("Sending JSON")
         conn.send(coords)
 
+    def getPose(self,conn):
+        
+        self.parent.addMessage("Constructing JSON object with bone matrices.")
+        
+        skeleton = self.human.getSkeleton()
+        pose = '{ ';
 
+        first = True
+        
+        bones = skeleton.getBones()
+        
+        for bone in bones:
+            if first:
+                first = False
+            else:
+                pose += ","
+            
+            rmat = bone.matRestGlobal
+            pose += '\n"' + bone.name + '":[' + arrayAsString(list(rmat[0,:])) + ', ' + arrayAsString(list(rmat[1,:])) + ', ' + arrayAsString(list(rmat[2,:])) + ', ' + arrayAsString(list(rmat[3,:])) + "]"
+
+        pose += "\n}\n";
+#        print pose
+        self.parent.addMessage("Sending JSON")
+        conn.send(pose)
+        
+def arrayAsString(array):
+    ret = "[ "
+    n = len(array)
+    for i in range(n):
+        ret +="{0:.8f}".format(array[i])
+        if i + 1 < n:
+            ret += ","
+    return ret + " ]"

@@ -15,11 +15,11 @@ class MHAPI_SyncPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        row = layout.row()
         split = layout.split()
         col = split.column(align=True)
         col.operator("mesh.sync_mh_mesh", text="Vertices", icon='MESH_DATA')
         #col.operator("mesh.primitive_torus_add", text="Torus", icon='MESH_TORUS')
+        col.operator("armature.sync_pose", text="Pose", icon='ARMATURE_DATA')
 
 def register():
     print("reg")
