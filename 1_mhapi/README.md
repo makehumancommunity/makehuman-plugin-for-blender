@@ -15,11 +15,11 @@ system or MY DOCUMENTS\makehuman\v1\data on windows.
 These are calls which you would normally not need to make. They give you low-level access to internal MakeHuman objects. In most cases 
 you would do operations via calls in other namespaces, not directly on these. 
 
-### getHuman()
+**getHuman()**
 
 Returns the central human object.
 
-### getApp
+**getApp()**
 
 Returns the central "app" object.
 
@@ -27,19 +27,19 @@ Returns the central "app" object.
 
 Gives you information about file and directory locations. 
 
-### getInstallationPath(subpath = "")
+**getInstallationPath(subpath = "")**
 
 Returns the directory which contains the makehuman.py file. If subpath is given, assume that a subdirectory is indicated and return the combined path.
 
-### getUserDataPath(subpath = "")
+**getUserDataPath(subpath = "")**
 
 Returns the location of the user's "data" directory (as opposed to the installation's data directory). If subpath is given, assume that a subdirectory is indicated and return the combined path.
 
-### getUserHomePath(subpath = "")
+**getUserHomePath(subpath = "")**
 
 Returns the location of the user's makehuman directory (i.e normally ~/makehuman). If subpath is given, assume that a subdirectory is indicated and return the combined path.
 
-### getSystemDataPath(subpath = "")
+**getSystemDataPath(subpath = "")**
 
 Returns the location of the installation's "data" directory (as opposed to the user's data directory). If subpath is given, assume that a subdirectory is indicated and return the combined path.
 
@@ -47,7 +47,7 @@ Returns the location of the installation's "data" directory (as opposed to the u
 
 Operations on and info about the mesh as such (ie direct access to vertices, edges and faces)
 
-### getVertexCoordinates()
+**getVertexCoordinates()**
 
 Returns an array with the location of all vertices.
 
@@ -55,31 +55,31 @@ Returns an array with the location of all vertices.
 
 Information about hg and the current makehuman version.
 
-### getBranch()
+**getBranch()**
 
 Returns the name of the current local code branch, for example 'default'. If this is not possible to deduce, None is returned.
 
-### getRevision()
+**getRevision()**
 
 Return the full textual representation of the Hg revision, for example 'r1604 (d48f36771cc0)'. If this is not possible to deduce, None is returned.
 
-### getRevisionId()
+**getRevisionId()**
 
 Returns the hash id of the current local revision as an integer, for example d48f36771cc0. If this is not possible to deduce, None is returned.
 
-### getRevisionNumber()
+**getRevisionNumber()**
 
 Returns the number of the current local revision as an integer, for example 1604. If this is not possible to deduce, None is returned.
 
-### getVersion()
+**getVersion()**
 
 Returns the full textual description of the current version, for example 'MakeHuman unstable 20141120' or 'MakeHuman 1.0.2'.
 
-### getVersionNumberAsArray()
+**getVersionNumberAsArray()**
 
 Returns the numeric representation of the version number as cells in an array, for example [1, 0, 2].
 
-### getVersionNumberAsString()
+**getVersionNumberAsString()**
 
 Returns the string representation of the version number, for example '1.0.2'.
 
