@@ -9,9 +9,8 @@ import socket
 pp = pprint.PrettyPrinter(indent=4)
 
 class SyncOperator(bpy.types.Operator):
-    def __init__(self, operator, requiredType):
+    def __init__(self, operator):
         self.operator = operator
-        self.requiredType = requiredType
 
     def executeJsonCall(self):     
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,7 +29,7 @@ class SyncOperator(bpy.types.Operator):
         return data;
 
     def callback(self,json_obj):
-        raise 'needs to be overridden by subclass'
+        raise Exception('needs to be overridden by subclass')
 
     def execute(self, context):
         print("Execute " + self.operator)
@@ -40,12 +39,13 @@ class SyncOperator(bpy.types.Operator):
         json_raw = self.executeJsonCall()
         #with open("/tmp/json.json","w") as jfile:
         #    jfile.write(json_raw)
-        json_obj = json.loads(json_raw)
-        self.callback(json_obj)
+        
+        if "!!!" not in json_raw:
+            json_obj = json.loads(json_raw)
+            self.callback(json_obj)
+            
+        else:
+            print(json_raw)
+            raise Exception(json_raw)       
 
         return {'FINISHED'} 
-
-    @classmethod
-    def poll(cls, context):
-        ob = context.object
-        return ob and ob.type == self.requiredType

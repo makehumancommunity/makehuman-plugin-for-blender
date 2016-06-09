@@ -20,7 +20,7 @@ class SyncMHMeshOperator(SyncOperator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def __init__(self):
-        super().__init__('getCoord', 'MESH')
+        super().__init__('getCoord')
 
     def callback(self,json_obj):
 
@@ -41,7 +41,11 @@ class SyncMHMeshOperator(SyncOperator):
             obj.data.vertices[i].co[2] = data[i][1]
             i = i + 1
 
-        
+    @classmethod
+    def poll(cls, context):
+        ob = context.object
+        return ob and ob.type == 'MESH'
+
     #def dumpObj(self):
     #    print("Dump obj")
 

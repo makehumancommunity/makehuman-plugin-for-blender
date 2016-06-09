@@ -88,11 +88,11 @@ class SocketTaskView(gui3d.TaskView):
             valid = self.dirops.evaluateOp(conn,data)
 
             if not valid:
-              valid = self.meshops.evaluateOp(conn,data)
+                valProblem = self.meshops.evaluateOp(conn,data)
             
-            if not valid:
-                self.addMessage("Client command was not understandable")
-                conn.send("Uh...\n")
+                if valProblem is not None:
+                    self.addMessage("Client command was not understandable")
+                    conn.send("!!! " + valProblem)
 
             conn.close()
 

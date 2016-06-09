@@ -18,12 +18,14 @@ if "bpy" in locals():
     import imp
     imp.reload(SyncOperator)
     imp.reload(SyncMeshOperator)
+    imp.reload(SyncPoseOperator)
     imp.reload(SyncPanel)
 else:
     print("Loading plugin")
 
     from . import SyncOperator
     from . import SyncMeshOperator
+    from . import SyncPoseOperator
     from . import SyncPanel
 
 import bpy
@@ -39,5 +41,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-
+    
