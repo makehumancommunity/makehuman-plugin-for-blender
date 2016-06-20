@@ -30,9 +30,6 @@ class JsonCall():
 
 
     def initializeFromJson(self,jsonData):
-        print("JSON:\n")
-        print(jsonData)
-        print("")
 
         j = json.loads(jsonData)
         if not j:
@@ -81,6 +78,12 @@ class JsonCall():
 
 
     def _guessValueType(self,val):
+
+        if isinstance(val,basestring):
+            return "string"
+
+        if isinstance(val,str):
+            return "string"
 
         if val == None:
             return "none"
@@ -166,6 +169,9 @@ class JsonCall():
         if val == None:
             return out + "null"
 
+        if vType == "string":
+            return out + "\"" + val.replace("\"","\\\"") + "\""
+
         if vType == "dict":
             return out + self._dictAsString(val)
 
@@ -203,7 +209,7 @@ class JsonCall():
     def send(self, host = "127.0.0.1", port = 12345):
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect(('127.0.0.1', 12345))
-        client.send(bytes(self.serialize(), 'utf-8'))
+        client.send(self.serialize())
      
         data = ""
     
