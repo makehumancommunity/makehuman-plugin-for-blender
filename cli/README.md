@@ -15,7 +15,7 @@ the resulting contents of the data key of the response object.
 
 For example
 
-    python genericCommand getCoord
+    python genericCommand.py getCoord
     
 would print the vertex coordinates of the current mesh.
 
