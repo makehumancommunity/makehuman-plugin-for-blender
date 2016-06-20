@@ -25,3 +25,8 @@ human versus a running instance of MH. Currently supports
 * Synchronizing vertices
 * Synchronizing pose
 
+## Command line scripts
+
+In the "cli" directory there are scripts which are intended to run from command line, 
+and which either interact with the plugins or are used for the management of them
+
