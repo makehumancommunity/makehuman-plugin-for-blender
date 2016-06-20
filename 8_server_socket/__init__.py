@@ -81,19 +81,16 @@ class SocketTaskView(gui3d.TaskView):
             self.addMessage("Waiting for connection.")        
             conn, addr = self.socket.accept()
             self.addMessage("Connected with " + addr[0] + ":" + str(addr[1]))
-            data = conn.recv(1024)
-            data = data.strip()
+            data = conn.recv(8192)
             self.addMessage("Client says: '" + data + "'")
+            data = gui3d.app.mhapi.internals.JsonCall(data)
 
-            valid = self.dirops.evaluateOp(conn,data)
+            jsonCall = self.meshops.evaluateOp(conn,data)
 
-            if not valid:
-                valProblem = self.meshops.evaluateOp(conn,data)
-            
-                if valProblem is not None:
-                    self.addMessage("Client command was not understandable")
-                    conn.send("!!! " + valProblem)
-
+            self.addMessage("About to serialize JSON. This might take some time.")
+            response = jsonCall.serialize()
+            print "About to send:\n\n" + response
+            conn.send(response)
             conn.close()
 
     def openSocket(self):

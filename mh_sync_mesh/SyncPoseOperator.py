@@ -36,14 +36,16 @@ class SyncPoseOperator(SyncOperator):
             # the dots in collada exported bone names are replaced with '_', check for data with that changed back
             name = bone.name.replace("_", ".") if not haveDots else bone.name
             
-            if name in json_obj:
-                mat = Matrix(json_obj[name])
+            if name in json_obj.data:
+                mat = Matrix(json_obj.data[name])
                 nmat = Matrix((mat[0], -mat[2], mat[1])).to_3x3().to_4x4()
                 nmat.col[3] = bone.matrix.col[3]
                 bone.matrix = nmat
 
             else:
                 print(name + ' bone not found coming from MH')
+
+        self.report({"INFO"},"Done")
             
     def bonesHaveDots(self, bones):
         for bone in bones:
@@ -56,3 +58,4 @@ class SyncPoseOperator(SyncOperator):
     def poll(cls, context):
         ob = context.object
         return ob and ob.type == 'ARMATURE'
+

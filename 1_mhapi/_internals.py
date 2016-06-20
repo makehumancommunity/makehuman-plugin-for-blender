@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from namespace import NameSpace
+from JsonCall import JsonCall
 
 class Internals(NameSpace):
     """The *internals* namespace hierarcy consists of a number of namespaces collecting calls for gaining low-level access to internal MakeHuman functionality.
@@ -11,6 +12,7 @@ In the vast majority of cases, you would benefit from first trying to find a rel
     def __init__(self,api):
         self.api = api
         NameSpace.__init__(self)
+        self.JsonCall = JsonCall
         self.trace()
 
     def getHuman(self):

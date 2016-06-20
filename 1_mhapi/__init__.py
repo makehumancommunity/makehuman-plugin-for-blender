@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-__all__ = ["api","namespace"]
+__all__ = ["api","namespace","JsonCall"]
 
 from api import API
 

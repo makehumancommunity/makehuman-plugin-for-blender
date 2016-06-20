@@ -1,12 +1,13 @@
 import gui3d
 import mh
 import skeleton
-#from transformations import quaternion_from_matrix
 import gui
 import log
 import socket
 import json
 from sys import exc_info 
+import traceback
+import sys
 
 class SocketMeshOps():
 
@@ -15,75 +16,49 @@ class SocketMeshOps():
         self.parent = sockettaskview
         self.human = sockettaskview.human
 
-    def evaluateOp(self,conn,data):
+        self.functions = dict()
 
-        valProblem = None
+        self.functions["getCoord"] = self.getCoord
+        self.functions["getPose"] = self.getPose
+
+    def evaluateOp(self,conn,jsoncall):
 
         try:
-            if data == "getCoord":
-                self.getCoord(conn)
-            elif data == "getPose": 
-                if self.human.getSkeleton():
-                    self.getPose(conn)
-                else:
-                    valProblem = "no skeleton assigned in MH"
+            function = jsoncall.getFunction()
+    
+            if function in self.functions.keys():
+                self.functions[function](conn,jsoncall)
             else:
-                valProblem = '"' + data + '" is not valid command'
-                
+                self.parent.addMessage("Did not understand '" + function + "'")
+                jsoncall.setError('"' + function + '" is not valid command')
         except:
+            print "Exception in JSON:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
             ex = exc_info()
-            valProblem = "runtime exception:  " + str(ex[1])
+            jsoncall.setError("runtime exception:  " + str(ex[1]))
+            print ex
 
-        return valProblem
+        return jsoncall
 
-    def getCoord(self,conn):
+    def getCoord(self,conn,jsonCall):
+        jsonCall.data = self.human.mesh.coord
 
-        self.parent.addMessage("Constructing JSON object with vertex coords. This might take some time.")
-        coords = '{ "data" : [ ';
-
-        first = True
-        for c in self.human.mesh.coord:
-            if first:
-                first = False
-            else:
-                coords += ","
-            coords += "\n" + arrayAsString(c);
-
-        coords += "\n] }\n";
-        #print coords
-        self.parent.addMessage("Sending JSON")
-        conn.send(coords)
-
-    def getPose(self,conn):
+    def getPose(self,conn,jsonCall):
         
-        self.parent.addMessage("Constructing JSON object with bone matrices.")
+        self.parent.addMessage("Constructing dict with bone matrices.")
         
         skeleton = self.human.getSkeleton()
-        pose = '{ ';
+        skelobj = dict();
 
-        first = True
-        
         bones = skeleton.getBones()
         
         for bone in bones:
-            if first:
-                first = False
-            else:
-                pose += ","
-            
             rmat = bone.matRestGlobal
-            pose += '\n"' + bone.name + '":[' + arrayAsString(list(rmat[0,:])) + ', ' + arrayAsString(list(rmat[1,:])) + ', ' + arrayAsString(list(rmat[2,:])) + ', ' + arrayAsString(list(rmat[3,:])) + "]"
+            skelobj[bone.name] = [ list(rmat[0,:]), list(rmat[1,:]), list(rmat[2,:]), list(rmat[3,:]) ]
 
-        pose += "\n}\n";
-#        print pose
-        self.parent.addMessage("Sending JSON")
-        conn.send(pose)
-        
-def arrayAsString(array):
-    ret = "[ "
-    n = len(array)
-    for i in range(n):
-        ret +="{0:.8f}".format(array[i])
-        if i + 1 < n:
-            ret += ","
-    return ret + " ]"
+        print skelobj
+
+        jsonCall.data = skelobj
+

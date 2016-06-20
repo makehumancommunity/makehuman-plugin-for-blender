@@ -27,11 +27,12 @@ class SyncMHMeshOperator(SyncOperator):
         print("Update mesh")
 
         obj = bpy.context.active_object
-        data = json_obj["data"]
+        print(type(json_obj))
+        data = json_obj.data
         l = len(data)
-        print(l)
+        print("Length of vertex array in incoming data: " + str(l))
         l2 = len(obj.data.vertices)
-        print(l2)
+        print("Length of vertex array in selected object: " + str(l2))
 
         i = 0
 
@@ -41,26 +42,11 @@ class SyncMHMeshOperator(SyncOperator):
             obj.data.vertices[i].co[2] = data[i][1]
             i = i + 1
 
+        self.report({"INFO"},"Done")
+
     @classmethod
     def poll(cls, context):
         ob = context.object
         return ob and ob.type == 'MESH'
 
-    #def dumpObj(self):
-    #    print("Dump obj")
 
-    #    obj = bpy.context.active_object
-
-    #    with open("/tmp/blender.json","w") as bfile:
-    #        bfile.write("{ \"data\": [\n")
-    #        for v in obj.data.vertices:
-    #            bfile.write("[ ")
-    #            bfile.write("{0:.8f}".format(v.index))
-    #            bfile.write(", ")
-    #            bfile.write("{0:.8f}".format(v.co[0]))
-    #            bfile.write(", ")
-    #            bfile.write("{0:.8f}".format(v.co[2]))
-    #            bfile.write(", ")
-    #            bfile.write("{0:.8f}".format(v.co[1]))
-    #            bfile.write(" ],\n")
-    #        bfile.write("] } \n")
