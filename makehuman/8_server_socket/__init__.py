@@ -85,7 +85,19 @@ class SocketTaskView(gui3d.TaskView):
             self.addMessage("Client says: '" + data + "'")
             data = gui3d.app.mhapi.internals.JsonCall(data)
 
-            jsonCall = self.meshops.evaluateOp(conn,data)
+            ops = None
+
+            if self.meshops.hasOp(data.function):
+                ops = self.meshops
+
+            if self.dirops.hasOp(data.function):
+                ops = self.dirops
+
+            if ops:                
+                jsonCall = ops.evaluateOp(conn,data)
+            else:
+                jsonCall = data
+                jsonCall.error = "Unknown command"
 
             self.addMessage("About to serialize JSON. This might take some time.")
             response = jsonCall.serialize()

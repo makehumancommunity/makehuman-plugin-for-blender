@@ -21,6 +21,9 @@ class SocketMeshOps():
         self.functions["getCoord"] = self.getCoord
         self.functions["getPose"] = self.getPose
 
+    def hasOp(self,function):
+        return function in self.functions.keys()
+
     def evaluateOp(self,conn,jsoncall):
 
         try:

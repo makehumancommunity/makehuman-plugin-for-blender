@@ -4,6 +4,10 @@ import gui
 import log
 import socket
 import json
+from sys import exc_info 
+import traceback
+import sys
+import os
 
 class SocketDirOps():
 
@@ -11,29 +15,40 @@ class SocketDirOps():
 
         self.parent = sockettaskview
 
-    def evaluateOp(self,conn,data):
+        self.functions = dict()
 
-        valid = False
+        self.functions["getUserDir"] = self.getUserDir
+        self.functions["getSysDir"] = self.getSysDir
 
-        if(data == "getUserDir"):            
-            self.getUserDir(conn)
-            valid = True
+    def hasOp(self,function):
+        return function in self.functions.keys()
 
-        if(data == "getSysDir"):
-            self.getSysDir(conn)
-            valid = True
+    def evaluateOp(self,conn,jsoncall):
 
-        return valid
+        try:
+            function = jsoncall.getFunction()
+    
+            if function in self.functions.keys():
+                self.functions[function](conn,jsoncall)
+            else:
+                self.parent.addMessage("Did not understand '" + function + "'")
+                jsoncall.setError('"' + function + '" is not valid command')
+        except:
+            print "Exception in JSON:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+            ex = exc_info()
+            jsoncall.setError("runtime exception:  " + str(ex[1]))
+            print ex
+
+        return jsoncall
 
 
-    def getUserDir(self,conn):
-        pth = os.path.abspath(mh.getPath()) + "\n"
-        self.parent.addMessage("Sending user dir: " + pth)
-        conn.send(pth)
+    def getUserDir(self,conn,jsonCall):
+        jsonCall.data = os.path.abspath(mh.getPath())
 
-    def getSysDir(self,conn):
-        pth = os.path.abspath(mh.getSysPath()) + "\n"
-        self.parent.addMessage("Sending sys dir: " + pth)
-        conn.send(pth)
+    def getSysDir(self,conn,jsonCall):
+        jsonCall.data = os.path.abspath(mh.getSysPath()) 
 
 
