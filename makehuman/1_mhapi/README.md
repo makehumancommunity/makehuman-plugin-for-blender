@@ -23,6 +23,10 @@ Returns the central human object.
 
 Returns the central "app" object.
 
+**getSkeleton()**
+
+Returns the current Human's skeleton. This will return None if no skeleton is assigned.
+
 ## app.mhapi.locations
 
 Gives you information about file and directory locations. 
