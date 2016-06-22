@@ -69,7 +69,7 @@ class JsonCall():
         return self.function
 
 
-    def setError(self,error):
+    def setError(self,error):        
         self.error = error
 
 
@@ -181,13 +181,13 @@ class JsonCall():
         if vType == "numeric":
             return out + self._numberAsString(val)
 
-        return out + "\"" + str(val) + "\""
+        return out + "\"" + str(val).replace("\"","\\\"") + "\""
 
 
     def serialize(self):
         ret = "{\n";
         ret = ret + "  \"function\": \"" + self.function + "\",\n"
-        ret = ret + "  \"error\": \"" + self.error + "\",\n"
+        ret = ret + self.pythonValueToJsonValue(self.error,"error") + ",\n"
         ret = ret + "  \"params\": {\n"
 
         first = True
