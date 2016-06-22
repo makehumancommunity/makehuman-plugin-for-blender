@@ -5,12 +5,15 @@ MHAPI is a set of convenience calls intented to help you get access to things wh
 If you place 1_mhapi in the plugins directory, it will self-register so that app.mhapi becomes available. Then (in a plugin or whatever
 it is you are working with) you can make a call to one of MHAPI's functions. For example:
 
-    someDir = app.mhapi.locations.getUserDataDir()
+    from core import G
+    someDir = G.app.mhapi.locations.getUserDataDir()
 
 This would store the location of the "data" directory located amongst the user's makehuman files, i.e ~/makehuman/v1/data on a unixoid
 system or MY DOCUMENTS\makehuman\v1\data on windows. 
 
-## app.mhapi.internals
+In the following, "G.app.mhapi" has been excluded. So "internals" actually means "G.app.mhapi.internals".
+
+## internals
 
 These are calls which you would normally not need to make. They give you low-level access to internal MakeHuman objects. In most cases 
 you would do operations via calls in other namespaces, not directly on these. 
@@ -27,7 +30,7 @@ Returns the central "app" object.
 
 Returns the current Human's skeleton. This will return None if no skeleton is assigned.
 
-## app.mhapi.locations
+## locations
 
 Gives you information about file and directory locations. 
 
@@ -47,7 +50,7 @@ Returns the location of the user's makehuman directory (i.e normally ~/makehuman
 
 Returns the location of the installation's "data" directory (as opposed to the user's data directory). If subpath is given, assume that a subdirectory is indicated and return the combined path.
 
-## app.mhapi.mesh
+## mesh
 
 Operations on and info about the mesh as such (ie direct access to vertices, edges and faces)
 
@@ -55,7 +58,7 @@ Operations on and info about the mesh as such (ie direct access to vertices, edg
 
 Returns an array with the location of all vertices.
 
-## app.mhapi.modifiers
+## modifiers
 
 Gives you control and information about modifiers and targets.
 
@@ -103,7 +106,7 @@ Get the full list of available modifiers.
 
 -
 
-## app.mhapi.version
+## version
 
 Information about hg and the current makehuman version.
 
