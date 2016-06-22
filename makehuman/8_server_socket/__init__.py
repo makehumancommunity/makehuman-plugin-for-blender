@@ -32,6 +32,7 @@ from thread import *
 
 from dirops import SocketDirOps
 from meshops import SocketMeshOps
+from modops import SocketModifierOps
 
 class SocketTaskView(gui3d.TaskView):
 
@@ -56,6 +57,7 @@ class SocketTaskView(gui3d.TaskView):
 
         self.dirops = SocketDirOps(self)
         self.meshops = SocketMeshOps(self)
+        self.modops = SocketModifierOps(self)
 
     def addMessage(self,message,newLine = True):
         if newLine:
@@ -92,6 +94,9 @@ class SocketTaskView(gui3d.TaskView):
 
             if self.dirops.hasOp(data.function):
                 ops = self.dirops
+
+            if self.modops.hasOp(data.function):
+                ops = self.modops
 
             if ops:                
                 jsonCall = ops.evaluateOp(conn,data)
