@@ -58,7 +58,7 @@ class SocketMeshOps():
         bones = skeleton.getBones()
         
         for bone in bones:
-            rmat = bone.matRestGlobal
+            rmat = bone.getRestMatrix('zUpFaceNegY')
             skelobj[bone.name] = [ list(rmat[0,:]), list(rmat[1,:]), list(rmat[2,:]), list(rmat[3,:]) ]
 
         print skelobj
