@@ -30,32 +30,37 @@ class SyncPoseOperator(SyncOperator):
         skeleton = bpy.context.active_object
         bones = skeleton.pose.bones
         bpy.ops.object.mode_set(mode='POSE')       
-        haveDots = self.bonesHaveDots(bones)
-
-        for bone in bones:
-            # the dots in collada exported bone names are replaced with '_', check for data with that changed back
-            name = bone.name.replace("_", ".") if not haveDots else bone.name
+        bpy.ops.pose.select_all(action='SELECT')
+        bpy.ops.pose.transforms_clear()
+        self.haveDots = self.bonesHaveDots(bones)
             
-            if name in json_obj.data:
-                mat = Matrix(json_obj.data[name])
-                nmat = Matrix((mat[0], -mat[2], mat[1])).to_3x3().to_4x4()
-                nmat.col[3] = bone.matrix.col[3]
-                bone.matrix = nmat
-
-            else:
-                print(name + ' bone not found coming from MH')
+        #appy as passed back
+        for bone in bones:
+            self.apply(bone, json_obj)
 
         self.report({"INFO"},"Done")
+
+    def apply(self, bone, json_obj):
+        # the dots in collada exported bone names are replaced with '_', check for data with that changed back
+        name = bone.name.replace("_", ".") if not self.haveDots else bone.name
+        
+        if name in json_obj.data:
+            bone.matrix = Matrix(json_obj.data[name])
+                
+            # this operation every bone causes all matrices to be applied in one run
+            bpy.ops.pose.select_all(action='SELECT')
             
+        else:
+            print(name + ' bone not found coming from MH')
+          
     def bonesHaveDots(self, bones):
         for bone in bones:
             if "." in bone.name:
                 return True
             
         return False
-    
+     
     @classmethod
     def poll(cls, context):
         ob = context.object
         return ob and ob.type == 'ARMATURE'
-
