@@ -19,8 +19,9 @@ class SocketModifierOps():
 
         self.functions = dict()
 
-        self.functions["getAvailableModifierNames"] = self.getAvailableModifierNames
+        self.functions["applyModifier"] = self.applyModifier
         self.functions["getAppliedTargets"] = self.getAppliedTargets
+        self.functions["getAvailableModifierNames"] = self.getAvailableModifierNames
 
     def hasOp(self,function):
         return function in self.functions.keys()
@@ -52,5 +53,18 @@ class SocketModifierOps():
 
     def getAppliedTargets(self,conn,jsonCall):
         jsonCall.data = self.api.modifiers.getAppliedTargets()
+
+    def applyModifier(self,conn,jsonCall):
+        modifierName = jsonCall.getParam("modifier")
+        power = float(jsonCall.getParam("power"))
+        modifier = self.api.internals.getHuman().getModifier(modifierName)
+
+        if not modifier:
+            jsonCall.setError("No such modifier")
+            return;
+
+        self.api.modifiers.applyModifier(modifierName,power,True)
+        jsonCall.setData("OK")
+
 
 

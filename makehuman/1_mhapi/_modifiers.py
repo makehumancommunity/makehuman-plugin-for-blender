@@ -9,6 +9,8 @@ import gui
 import gui3d
 import log
 import os
+import algos3d
+import events3d
 from cStringIO import StringIO
 from core import G
 from codecs import open
@@ -22,15 +24,38 @@ class Modifiers(NameSpace):
         self.human = api.internals.getHuman()
         self.trace()
 
-    def applyModifier(self, modifierName, power):
+    def _threadSafeApplyAllTargets(self):
+        algos3d.resetObj(self.human.meshData)
+        for (targetPath, morphFactor) in self.human.targetsDetailStack.iteritems():
+            algos3d.loadTranslationTarget(self.human.meshData, targetPath, morphFactor, None, 0, 0)
+        self.human._updateOriginalMeshCoords(self.human.meshData.name, self.human.meshData.coord)
+        self.human.updateProxyMesh()
+        self.human.callEvent('onChanged', events3d.HumanEvent(self.human, 'targets'))
+        self.human.refreshStaticMeshes()
+        if self.human.isSubdivided():
+            self.human.updateSubdivisionMesh()
+            self.human.mesh.calcNormals()
+            self.human.mesh.update()
+        else:
+            self.human.meshData.calcNormals(1, 1)
+            self.human.meshData.update()
+        pass
+
+    def applyModifier(self, modifierName, power, assumeThreading = False):
         modifier = self.human.getModifier(modifierName)
-        modifier.setValue(value)
-        self.human.applyAllTargets()
+        modifier.setValue(power)
+        if assumeThreading:
+            self._threadSafeApplyAllTargets()
+        else:
+            self.human.applyAllTargets()
         mh.redraw()
 
-    def applyTarget(self,targetName,power):
+    def applyTarget(self,targetName,power, assumeThreading = False):
         self.human.setDetail(mh.getSysDataPath("targets/" + targetName + ".target"), power)
-        self.human.applyAllTargets()
+        if assumeThreading:
+            self._threadSafeApplyAllTargets()
+        else:
+            self.human.applyAllTargets()
         mh.redraw()
 
     def getAppliedTargets(self):
