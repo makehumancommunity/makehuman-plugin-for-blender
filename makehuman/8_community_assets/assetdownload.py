@@ -28,6 +28,7 @@ import log
 import json
 import urllib2
 import os
+import re
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -59,7 +60,6 @@ class AssetDownloadTaskView(gui3d.TaskView):
             "Target",
             "Clothes",
             "Hair",
-            "Proxy",
             "Skin"
         ]
 
@@ -77,6 +77,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         self.categoryList.setData(categories)
         self.categoryList.setCurrentRow(0)
+        self.categoryList.selectionModel().selectionChanged.connect(self.onCategoryChange)
 
         self.selectBox.addWidget(gui.TextView("\nAsset"))
         self.assetList = self.selectBox.addWidget(gui.ListView())
@@ -89,11 +90,11 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.assetList.selectionModel().selectionChanged.connect(self.onAssetChange)
 
         self.selectBox.addWidget(gui.TextView(" "))
-        self.showButton = self.selectBox.addWidget(gui.Button('Asset homepage'))
-
-        @self.showButton.mhEvent
-        def onClicked(event):
-            self.showButtonClick()
+#        self.showButton = self.selectBox.addWidget(gui.Button('Asset homepage'))
+#
+#        @self.showButton.mhEvent
+#        def onClicked(event):
+#            self.showButtonClick()
 
         self.downloadButton = self.selectBox.addWidget(gui.Button('Download'))
 
@@ -116,6 +117,8 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         self.assetInfoBox = gui.GroupBox("Asset info")
         self.assetInfoText = self.assetInfoBox.addWidget(gui.TextView("No asset selected"))
+        self.assetDescription = self.assetInfoBox.addWidget(gui.TextView("-"))
+        self.assetDescription.setWordWrap(True)
 
         layout.addWidget(self.assetInfoBox)
 
@@ -139,6 +142,14 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.addTopWidget(self.mainPanel)
 
         self.setupAssetDir()
+
+    def showMessage(self,message,title="Information"):
+        self.msg = QtGui.QMessageBox()
+        self.msg.setIcon(QtGui.QMessageBox.Information)
+        self.msg.setText(message)
+        self.msg.setWindowTitle(title)
+        self.msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        self.msg.show()
 
     def onTypeChange(self):
         assetType = str(self.typeList.currentItem().text)
@@ -169,8 +180,14 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
     def onCategoryChange(self):
         assetType = str(self.typeList.currentItem().text)
+        log.debug("onCategoryChange() " + assetType)
+
         if assetType == "Clothes":
-            pass
+            category = str(self.categoryList.currentItem().text)
+            self.assetList.setData(sorted(self.clothesNames[category]))
+            self.screenshot.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
+            self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
+            self.assetInfoText.setText("Nothing selected")
 
     def onAssetChange(self):
         assetType = str(self.typeList.currentItem().text)
@@ -181,12 +198,27 @@ class AssetDownloadTaskView(gui3d.TaskView):
             self.onSelectTarget()
         if assetType == "Skin":
             self.onSelectSkin()
+        if assetType == "Clothes":
+            self.onSelectClothes()
+        if assetType == "Hair":
+            self.onSelectHair()
 
     def showButtonClick(self):
-        print "showButton"
+        self.showMessage("message","title")
 
     def downloadButtonClick(self):      
-        print "downloadButton"    
+        assetType = str(self.typeList.currentItem().text)
+
+        log.debug("Download: " + assetType)
+
+        if assetType == "Target":
+            self.downloadTarget()
+        if assetType == "Skin":
+            self.downloadSkin()
+        if assetType == "Clothes":
+            self.downloadClothes()
+        if assetType == "Hair":
+            self.downloadHair()
 
     def refreshButtonClick(self):
 
@@ -325,7 +357,8 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 assetJson = json.loads(jsonstring)
                 self.loadAssetsFromJson(assetJson)
 
-    def setThumbScreenshot(self,assetDir):
+    def setThumbScreenshot(self,asset):
+        assetDir = os.path.join(self.root,str(asset["nid"]))
         screenshot = os.path.join(assetDir,"screenshot.png")
         thumbnail = os.path.join(assetDir,"thumb.png")
  
@@ -341,6 +374,39 @@ class AssetDownloadTaskView(gui3d.TaskView):
  
         self.thumbnail.setGeometry(0,0,128,128)
 
+    def setDescription(self,asset):
+        desc = "<big>" + asset["title"] + "</big><br />\n&nbsp;<br />\n"
+        desc = desc + "<b><tt>Author.........: </tt></b>" + asset["username"] + "<br />\n"
+
+        if "license" in asset.keys():
+            desc = desc + "<b><tt>License........: </tt></b>" + asset["license"] + "<br />\n"
+        if "compatibility" in asset.keys():
+            desc = desc + "<b><tt>Compatibility..: </tt></b>" + asset["compatibility"] + "<br />\n"
+
+
+        key = None
+
+        if asset["type"] == "clothes":
+            key = "mhclo"
+        if asset["type"] == "hair":
+            key = "mhclo"
+        if asset["type"] == "skin":
+            key = "mhmat"
+        if asset["type"] == "target":
+            key = "file"
+
+        if key:
+            url = asset["files"][key]
+            fn = url.rsplit('/', 1)[-1]
+            fn = fn.replace("." + key,"")
+            fn = fn.replace("_"," ")            
+            desc = desc + "<b><tt>Name in MH.....: </tt></b>" + fn + "<br />\n"
+
+        self.assetInfoText.setText(desc)
+        self.assetDescription.setText(asset["description"])
+
+        #desc = desc + asset["description"]
+
     def onSelectTarget(self):
         foundAsset = None
         name = str(self.assetList.currentItem().text)
@@ -349,15 +415,8 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 foundAsset = asset
 
         if foundAsset:
-            desc = "<big>" + foundAsset["title"] + "</big><br />\n&nbsp;<br />\n"
-            desc = desc + "<b><tt>Author...: </tt></b>" + foundAsset["username"] + "<br />\n"
-            desc = desc + "&nbsp;<br />\n"
-            desc = desc + foundAsset["description"]
-
-            self.assetInfoText.setText(desc)
-
-            assetDir = os.path.join(self.root,str(foundAsset["nid"]))
-            self.setThumbScreenshot(assetDir)
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
 
     def onSelectSkin(self):
         foundAsset = None
@@ -367,14 +426,138 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 foundAsset = asset
 
         if foundAsset:
-            desc = "<big>" + foundAsset["title"] + "</big><br />\n&nbsp;<br />\n"
-            desc = desc + "<b><tt>Author...: </tt></b>" + foundAsset["username"] + "<br />\n"
-            desc = desc + "&nbsp;<br />\n"
-            desc = desc + foundAsset["description"]
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
 
-            self.assetInfoText.setText(desc)
+    def onSelectClothes(self):
+        foundAsset = None
+        category = str(self.categoryList.currentItem().text)
+        name = str(self.assetList.currentItem().text)
+        for asset in self.clothesAssets[category]:
+            if str(asset["title"]) == name:
+                foundAsset = asset
 
-            assetDir = os.path.join(self.root,str(foundAsset["nid"]))
-            self.setThumbScreenshot(assetDir)
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+
+    def onSelectHair(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.hairAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+
+    def downloadAsset(self,asset,typeHint = None):
+        files = asset["files"]
+
+        if typeHint:
+            assetTypeDir = os.path.join(mhapi.locations.getUserDataPath(typeHint))        
+        else:
+            assetTypeDir = os.path.join(mhapi.locations.getUserDataPath(asset["type"]))        
+
+        name = asset["title"]
+        name = re.sub(r"\s","_",name)
+        name = re.sub(r"\W","",name)
+
+        if typeHint == "custom":
+            assetDir = assetTypeDir
+        else:
+            assetDir = os.path.join(assetTypeDir,name)
+
+        log.debug("Downloading to: " + assetDir)
+
+        if not os.path.exists(assetDir):
+            os.makedirs(assetDir)
+
+        self.progress = Progress()
+        self.progress(0.0,0.1)
+
+        increment = 0.8 / len(files.keys())
+        current = 0.1
+
+        key = None
+
+        if asset["type"] == "clothes":
+            key = "mhclo"
+        if asset["type"] == "hair":
+            key = "mhclo"
+        if asset["type"] == "skin":
+            key = "mhmat"
+        if asset["type"] == "target":
+            key = "file"
+
+        msg = "Asset was downloaded"
+        base = ""
+
+        if key:
+            url = asset["files"][key]
+            mbase = url.rsplit('/', 1)[-1]
+            mbase = mbase.replace("." + key,"")
+            base = mbase
+            mbase = mbase.replace("_"," ")            
+            msg = msg + " as \"" + mbase + "\""
+
+        for f in files.keys():
+            if f != "render":
+                current = current + increment
+                url = files[f]
+                if f == "thumb":
+                    fn = base + ".thumb"
+                else:
+                    fn = url.rsplit('/', 1)[-1]
+                saveAs = os.path.join(assetDir,fn)
+                log.debug("Downloading " + url)
+                self.downloadUrl(url,saveAs)
+                self.progress(current, current + increment)
+
+        self.progress(1.0)
+
+        self.showMessage(msg)
+
+    def downloadClothes(self):
+        foundAsset = None
+        category = str(self.categoryList.currentItem().text)
+        name = str(self.assetList.currentItem().text)
+        for asset in self.clothesAssets[category]:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset)
+
+    def downloadHair(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.hairAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"hair")
+
+    def downloadTarget(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.targetAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"custom")
+
+    def downloadSkin(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.skinAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"skins")
 
 
