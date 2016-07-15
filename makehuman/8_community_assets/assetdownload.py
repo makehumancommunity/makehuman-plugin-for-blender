@@ -250,7 +250,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         try:            
             web = urllib2.urlopen(url)
             data = web.read()
-            with open(saveAs,"w") as f:
+            with open(saveAs,"wb") as f:
                 f.write(data)                
         except:
             return False
