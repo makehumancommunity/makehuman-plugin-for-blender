@@ -15,7 +15,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class SyncMHMeshOperator(SyncOperator):
     """Synchronize the shape of a human with MH"""
-    bl_idname = "mesh.sync_mh_mesh"
+    bl_idname = "mh_community.sync_mh_mesh"
     bl_label = "Synchronize MH Mesh"
     bl_options = {'REGISTER', 'UNDO'}
 

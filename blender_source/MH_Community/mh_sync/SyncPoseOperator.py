@@ -16,7 +16,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class SyncPoseOperator(SyncOperator):
     """Synchronize the pose of the skeleton of a human with MH"""
-    bl_idname = "armature.sync_pose"
+    bl_idname = "mh_community.sync_pose"
     bl_label = "Synchronize MH Pose"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -27,15 +27,15 @@ class SyncPoseOperator(SyncOperator):
 
         print("Update pose")
         
-        skeleton = bpy.context.active_object
-        bones = skeleton.pose.bones
+        self.skeleton = bpy.context.active_object
+        self.bones = self.skeleton.pose.bones
         bpy.ops.object.mode_set(mode='POSE')       
         bpy.ops.pose.select_all(action='SELECT')
         bpy.ops.pose.transforms_clear()
-        self.haveDots = self.bonesHaveDots(bones)
+        self.haveDots = self.bonesHaveDots()
             
         #appy as passed back
-        for bone in bones:
+        for bone in self.bones:
             self.apply(bone, json_obj)
 
         self.report({"INFO"},"Done")
@@ -53,12 +53,29 @@ class SyncPoseOperator(SyncOperator):
         else:
             print(name + ' bone not found coming from MH')
           
-    def bonesHaveDots(self, bones):
-        for bone in bones:
+    def bonesHaveDots(self):
+        for bone in self.bones:
             if "." in bone.name:
                 return True
             
         return False
+    
+    def getRootBone(self):
+        for bone in self.bones:
+            if bone.parent is None:
+                return bone
+            
+        # cannot really happen, but
+        return None
+    
+    def getRestTranslation(self, bone):
+        # need to change to edit mode to work with editbones
+        bpy.ops.object.mode_set(mode='EDIT')
+        for editBone in self.skeleton.data.edit_bones:
+            if editBone.name == bone.name:
+                ret = editBone.matrix.to_translation()
+                bpy.ops.object.mode_set(mode='POSE')
+                return ret
      
     @classmethod
     def poll(cls, context):
