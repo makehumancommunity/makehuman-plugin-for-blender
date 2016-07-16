@@ -323,7 +323,10 @@ class AssetDownloadTaskView(gui3d.TaskView):
             if not found:
                 log.debug("Unmatched asset type. " + str(asset["nid"]) + " (" + asset["type"] + "): " + asset["title"])
 
-        self.assetList.setData(sorted(self.targetNames))
+        self.assetList.setData(sorted(self.hairNames))
+        self.typeList.setCurrentItem("Hair")
+        self.categoryList.setCurrentItem("All")
+
 
     def setupOneAsset(self, jsonHash):
 
