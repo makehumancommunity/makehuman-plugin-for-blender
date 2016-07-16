@@ -53,8 +53,9 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.selectBox = self.addLeftWidget(gui.GroupBox('Select asset'))
 
         self.selectBox.addWidget(gui.TextView("\nType"))
-        self.typeList = self.selectBox.addWidget(gui.ListView())
-        self.typeList.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
+        #self.typeList = self.selectBox.addWidget(gui.ListView())
+        #self.typeList.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
+
 
         types = [
             "Target",
@@ -63,21 +64,21 @@ class AssetDownloadTaskView(gui3d.TaskView):
             "Skin"
         ]
 
-        self.typeList.setData(types)
-        self.typeList.setCurrentRow(0)
-        self.typeList.selectionModel().selectionChanged.connect(self.onTypeChange)
+        self.typeList = mhapi.ui.createComboBox(types,self.onTypeChange)
+        self.selectBox.addWidget(self.typeList)
 
-        self.selectBox.addWidget(gui.TextView("\nCategory"))
-        self.categoryList = self.selectBox.addWidget(gui.ListView())
-        self.categoryList.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
+        #self.typeList.setData(types)
+        #self.typeList.setCurrentRow(0)
+        #self.typeList.selectionModel().selectionChanged.connect(self.onTypeChange)
 
         categories = [
             "All"
         ]
 
-        self.categoryList.setData(categories)
+        self.selectBox.addWidget(gui.TextView("\nCategory"))
+        self.categoryList = mhapi.ui.createComboBox(categories,self.onCategoryChange)
+        self.selectBox.addWidget(self.categoryList)
         self.categoryList.setCurrentRow(0)
-        self.categoryList.selectionModel().selectionChanged.connect(self.onCategoryChange)
 
         self.selectBox.addWidget(gui.TextView("\nAsset"))
         self.assetList = self.selectBox.addWidget(gui.ListView())
@@ -90,11 +91,6 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.assetList.selectionModel().selectionChanged.connect(self.onAssetChange)
 
         self.selectBox.addWidget(gui.TextView(" "))
-#        self.showButton = self.selectBox.addWidget(gui.Button('Asset homepage'))
-#
-#        @self.showButton.mhEvent
-#        def onClicked(event):
-#            self.showButtonClick()
 
         self.downloadButton = self.selectBox.addWidget(gui.Button('Download'))
 
@@ -143,6 +139,9 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         self.setupAssetDir()
 
+    def comboChange(self,item = None):
+        log.debug("comboChange")
+
     def showMessage(self,message,title="Information"):
         self.msg = QtGui.QMessageBox()
         self.msg.setIcon(QtGui.QMessageBox.Information)
@@ -151,12 +150,14 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.msg.setStandardButtons(QtGui.QMessageBox.Ok)
         self.msg.show()
 
-    def onTypeChange(self):
-        assetType = str(self.typeList.currentItem().text)
+    def onTypeChange(self,item = None):
+        assetType = str(item)
+        log.debug("onTypeChange: " + assetType)
+
         if assetType == "Clothes":
             cats = sorted(self.clothesAssets.keys())
             self.categoryList.setData(cats)
-            self.assetList.setData([])
+            self.assetList.setData(sorted(self.clothesNames["All"]))
         else:
             self.categoryList.setData(["All"])
             self.categoryList.setCurrentRow(0)
@@ -174,23 +175,27 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
             self.assetList.setData(sorted(assets))
 
+        self.categoryList.setCurrentItem("All")
+
         self.screenshot.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
         self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
         self.assetInfoText.setText("Nothing selected")
 
-    def onCategoryChange(self):
-        assetType = str(self.typeList.currentItem().text)
+    def onCategoryChange(self,item = None):
+        assetType = str(self.typeList.getCurrentItem())
         log.debug("onCategoryChange() " + assetType)
 
-        if assetType == "Clothes":
-            category = str(self.categoryList.currentItem().text)
+        if assetType == "Clothes":            
+            category = str(self.categoryList.getCurrentItem())
+            if category == '' or not category:
+                category = "All"
             self.assetList.setData(sorted(self.clothesNames[category]))
             self.screenshot.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
             self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
             self.assetInfoText.setText("Nothing selected")
 
     def onAssetChange(self):
-        assetType = str(self.typeList.currentItem().text)
+        assetType = str(self.typeList.getCurrentItem())
 
         log.debug("Asset change: " + assetType)
 
@@ -207,7 +212,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.showMessage("message","title")
 
     def downloadButtonClick(self):      
-        assetType = str(self.typeList.currentItem().text)
+        assetType = str(self.typeList.getCurrentItem())
 
         log.debug("Download: " + assetType)
 
@@ -291,6 +296,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
                     found = True
                 else:
                     self.clothesAssets["All"].append(asset)
+                    self.clothesNames["All"].append(asset["title"])
                     if not aCat in self.clothesAssets.keys():
                         self.clothesAssets[aCat] = []
                     if not aCat in self.clothesNames.keys():
@@ -431,7 +437,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
     def onSelectClothes(self):
         foundAsset = None
-        category = str(self.categoryList.currentItem().text)
+        category = str(self.categoryList.getCurrentItem())
         name = str(self.assetList.currentItem().text)
         for asset in self.clothesAssets[category]:
             if str(asset["title"]) == name:
@@ -521,7 +527,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
     def downloadClothes(self):
         foundAsset = None
-        category = str(self.categoryList.currentItem().text)
+        category = str(self.categoryList.getCurrentItem())
         name = str(self.assetList.currentItem().text)
         for asset in self.clothesAssets[category]:
             if str(asset["title"]) == name:
