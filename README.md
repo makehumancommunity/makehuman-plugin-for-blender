@@ -12,6 +12,10 @@ MakeHuman plugin. This doesn't do anything in itself, it just provides convenien
 for getting info about stuff in makehuman or controlling stuff in makehuman. See README
 in the directory.
 
+### makehuman/8_community_assets
+
+MakeHuman plugin for downloading assets from the community repos. This depends on 1_mhapi
+
 ### makehuman/8_server_socket
 
 MakeHuman plugin, opens a socket server inside MH and accepts some basic commands. This
