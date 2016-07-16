@@ -27,3 +27,6 @@ class API(NameSpace):
         from _modifiers import Modifiers
         self.modifiers = Modifiers(self)
 
+        from _ui import UI
+        self.ui = UI(self)
+
