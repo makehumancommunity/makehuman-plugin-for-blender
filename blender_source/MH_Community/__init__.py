@@ -8,7 +8,7 @@ bl_info = {
     "blender": (2, 77, 0),
     "location": "View3D > Properties > MH",
     "description": "Post import MakeHuman operations",
-    "wiki_url": "https://github.com/makehumancommunity/community-plugins",
+    "wiki_url": "https://github.com/makehumancommunity/community-plugins/tree/master/blender_source/MH_Community",
     "category": "MakeHuman"}
 
 if "bpy" in locals():
@@ -28,7 +28,7 @@ else:
     from . import snap_on_ik_rig
     from . import amputate_fingers
     from . import rig_info
-    
+
 import bpy
 
 class Community_Panel(bpy.types.Panel):
@@ -39,11 +39,11 @@ class Community_Panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        
+
         layout.label(text="Mesh Operations:", icon="MESH_DATA")
         layout.operator("mh_community.sync_mh_mesh", text="Sync with MH")
         layout.operator("mh_community.separate_eyes", text="Separate Eyes")
-        
+
         layout.separator()
 
         layout.label(text="Bone Operations:", icon="ARMATURE_DATA")
@@ -60,6 +60,6 @@ def unregister():
 
 if __name__ == "__main__":
     unregister()
-    register()   
-    
+    register()
+
 print("MH community plug-in load complete")
