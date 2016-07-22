@@ -6,18 +6,18 @@ class RigInfo:
         # in the case where a test bone (wt dot) is not truely unique, order of tests might be important
         game = GameRigInfo(armature)
         if game.matches(): return game
-        
+
         default = DefaultRigInfo(armature)
         if default.matches(): return default
-        
+
         return None
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # pass not only a unique bone name, but one that has a dot.  Collada would change that to a '_'
     def __init__(self, armature, name, uniqueBoneName):
         self.armature = armature
         self.name = name
         self.uniqueBoneName = uniqueBoneName
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def matches(self):
         boneWithoutDot = self.uniqueBoneName.replace(".", "_")
         for bone in self.armature.data.bones:
@@ -25,36 +25,44 @@ class RigInfo:
             if bone.name == boneWithoutDot:
                 self.dot = '_'
                 return True
-            
+
             if bone.name == self.uniqueBoneName:
                 self.dot = '.'
                 return True
-            
-        return False
 
+        return False
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # determine all the meshes which are controlled by skeleton,
+    def getMeshesForRig(self, scene):
+        meshes = []
+        for object in [object for object in scene.objects]:
+            if object.type == 'MESH' and len(object.vertex_groups) > 0 and self.armature == object.find_armature():
+                meshes.append(object)
+
+        return meshes
 #===============================================================================
 class GameRigInfo (RigInfo):
     def __init__(self, armature):
         super().__init__(armature, 'Game Rig', 'ball_r')
-        
+
         self.pelvis = 'pelvis'
         self.root = 'Root'
         self.kneeIKChainLength  = 1
         self.footIKChainLength  = 2
         self.handIKChainLength  = 2
         self.elbowIKChainLength = 1
-        
-    # for IK rigging support    
+
+    # for IK rigging support
     def upperArm(self, isLeft): return 'upperarm_' + ('l' if isLeft else 'r')
     def lowerArm(self, isLeft): return 'lowerarm_' + ('l' if isLeft else 'r')
     def hand    (self, isLeft): return 'hand_'     + ('l' if isLeft else 'r')
-    # - - - 
+    # - - -
     def thigh   (self, isLeft): return 'thigh_'    + ('l' if isLeft else 'r')
     def calf    (self, isLeft): return 'calf_'     + ('l' if isLeft else 'r')
-    def foot    (self, isLeft): return 'foot_'     + ('l' if isLeft else 'r')               
-    
+    def foot    (self, isLeft): return 'foot_'     + ('l' if isLeft else 'r')
+
     def ikSpecialProcessing(self):
-        return 
+        return
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for Finger rigging support
     def thumbParent(self, isLeft): return 'thumb_01_' + ('l' if isLeft else 'r')
@@ -71,7 +79,7 @@ class GameRigInfo (RigInfo):
         ret.append('index_02_' + ('l' if isLeft else 'r'))
         ret.append('index_03_' + ('l' if isLeft else 'r'))
         return ret
-        
+
     def middleFingerParent(self, isLeft): return 'hand_' + ('l' if isLeft else 'r')
     def middleFingerBones(self , isLeft):
         ret = []
@@ -79,7 +87,7 @@ class GameRigInfo (RigInfo):
         ret.append('middle_02_' + ('l' if isLeft else 'r'))
         ret.append('middle_03_' + ('l' if isLeft else 'r'))
         return ret
-        
+
     def ringFingerParent(self, isLeft): return 'hand_' + ('l' if isLeft else 'r')
     def ringFingerBones(self , isLeft):
         ret = []
@@ -87,7 +95,7 @@ class GameRigInfo (RigInfo):
         ret.append('ring_02_' + ('l' if isLeft else 'r'))
         ret.append('ring_03_' + ('l' if isLeft else 'r'))
         return ret
-        
+
     def pinkyFingerParent(self, isLeft): return 'hand_' + ('l' if isLeft else 'r')
     def pinkyFingerBones(self , isLeft):
         ret = []
@@ -95,36 +103,36 @@ class GameRigInfo (RigInfo):
         ret.append('pinky_02_' + ('l' if isLeft else 'r'))
         ret.append('pinky_03_' + ('l' if isLeft else 'r'))
         return ret
-#===============================================================================                
+#===============================================================================
 class DefaultRigInfo (RigInfo):
     def __init__(self, armature):
         super().__init__(armature, 'Default Rig', 'metacarpal1.L')
-        
+
         self.pelvis = 'spine05'
         self.root = 'root'
         self.kneeIKChainLength =  2
         self.footIKChainLength =  4
         self.handIKChainLength =  5
         self.elbowIKChainLength = 3
-    
-    # for IK rigging support    
+
+    # for IK rigging support
     def upperArm(self, isLeft): return 'upperarm02' + self.dot + ('L' if isLeft else 'R')
     def lowerArm(self, isLeft): return 'lowerarm02' + self.dot + ('L' if isLeft else 'R')
     def hand    (self, isLeft): return 'wrist'      + self.dot + ('L' if isLeft else 'R')
-    # - - - 
+    # - - -
     def thigh   (self, isLeft): return 'upperleg02' + self.dot + ('L' if isLeft else 'R')
-    def calf    (self, isLeft): return 'lowerleg02' + self.dot + ('L' if isLeft else 'R')  
+    def calf    (self, isLeft): return 'lowerleg02' + self.dot + ('L' if isLeft else 'R')
     def foot    (self, isLeft): return 'foot'       + self.dot + ('L' if isLeft else 'R')
-    
+
     def ikSpecialProcessing(self):
         bpy.ops.object.mode_set(mode='EDIT')
         eBones = self.armature.data.edit_bones
-        
+
         newParent = eBones[self.pelvis]
         eBones['pelvis' + self.dot + 'L'].parent = newParent
         eBones['pelvis' + self.dot + 'R'].parent = newParent
-        
-        return    
+
+        return
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for Finger rigging support
     def thumbParent(self, isLeft): return 'finger1-1' + self.dot + ('L' if isLeft else 'R')
@@ -141,7 +149,7 @@ class DefaultRigInfo (RigInfo):
         ret.append('finger2-2' + self.dot + ('L' if isLeft else 'R'))
         ret.append('finger2-3' + self.dot + ('L' if isLeft else 'R'))
         return ret
-        
+
     def middleFingerParent(self, isLeft): return 'metacarpal2' + self.dot + ('L' if isLeft else 'R')
     def middleFingerBones(self , isLeft):
         ret = []
@@ -149,7 +157,7 @@ class DefaultRigInfo (RigInfo):
         ret.append('finger3-2' + self.dot + ('L' if isLeft else 'R'))
         ret.append('finger3-3' + self.dot + ('L' if isLeft else 'R'))
         return ret
-        
+
     def ringFingerParent(self, isLeft): return 'metacarpal3' + self.dot + ('L' if isLeft else 'R')
     def ringFingerBones(self , isLeft):
         ret = []
@@ -157,7 +165,7 @@ class DefaultRigInfo (RigInfo):
         ret.append('finger4-2' + self.dot + ('L' if isLeft else 'R'))
         ret.append('finger4-3' + self.dot + ('L' if isLeft else 'R'))
         return ret
-        
+
     def pinkyFingerParent(self, isLeft): return 'metacarpal4' + self.dot + ('L' if isLeft else 'R')
     def pinkyFingerBones(self , isLeft):
         ret = []
