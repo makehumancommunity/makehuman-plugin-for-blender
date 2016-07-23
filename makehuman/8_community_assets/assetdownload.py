@@ -181,6 +181,46 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
         self.assetInfoText.setText("Nothing selected")
 
+    def getScreenshotPath(self,asset):
+        if not asset:
+            return None
+        if not "files" in asset:
+            return None
+
+        files = asset["files"]
+
+        r = None
+
+        if "render" in files:
+            r = files["render"]
+        else:
+            if "illustration" in files:
+                r = files["illustration"]
+
+        if not r:
+            return None
+
+        fn = r.rsplit('/', 1)[-1]
+
+        if not fn:
+            return None
+
+        extension = os.path.splitext(fn)[1]
+
+        if not extension:
+            return None
+
+        extension = extension.lower()
+
+        filename = "screenshot" + extension
+        assetDir = os.path.join(self.root,str(asset["nid"]))
+        fullPath = os.path.join(assetDir,filename)
+
+        log.debug("Screenshot path: " + str(fullPath))
+
+        return fullPath
+
+
     def onCategoryChange(self,item = None):
         assetType = str(self.typeList.getCurrentItem())
         log.debug("onCategoryChange() " + assetType)
@@ -336,7 +376,8 @@ class AssetDownloadTaskView(gui3d.TaskView):
         if "files" in jsonHash.keys():
             files = jsonHash["files"]
             if "render" in files.keys():
-                fn = os.path.join(assetDir,"screenshot.png")
+                #fn = os.path.join(assetDir,"screenshot.png")
+                fn = self.getScreenshotPath(jsonHash)
                 if not os.path.exists(fn):                    
                     log.debug("Downloading " + files["render"])
                     self.downloadUrl(files["render"],fn)
@@ -368,10 +409,10 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
     def setThumbScreenshot(self,asset):
         assetDir = os.path.join(self.root,str(asset["nid"]))
-        screenshot = os.path.join(assetDir,"screenshot.png")
+        screenshot = self.getScreenshotPath(asset)
         thumbnail = os.path.join(assetDir,"thumb.png")
  
-        if os.path.exists(screenshot):
+        if screenshot and os.path.exists(screenshot):
             self.screenshot.setPixmap(QtGui.QPixmap(os.path.abspath(screenshot)))
         else:
             self.screenshot.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
