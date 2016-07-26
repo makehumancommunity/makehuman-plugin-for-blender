@@ -44,7 +44,8 @@ class SnapOnIKKRig(bpy.types.Operator):
         self.addKneeAndFootIK(False)
 
         # tell BabylonJS exporter not to export IK bones
-        context.scene.ignoreIKBones = True
+        if hasattr(context.scene, "ignoreIKBones"):
+            context.scene.ignoreIKBones = True
 
         return {'FINISHED'}
 
