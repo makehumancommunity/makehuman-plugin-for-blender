@@ -214,7 +214,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         filename = "screenshot" + extension
         assetDir = os.path.join(self.root,str(asset["nid"]))
-        fullPath = os.path.join(assetDir,filename)
+        fullPath = mhapi.locations.getUnicodeAbsPath(os.path.join(assetDir,filename))
 
         log.debug("Screenshot path: " + str(fullPath))
 
@@ -399,7 +399,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         if not os.path.exists(self.root):
             os.makedirs(self.root)
 
-        assets = os.path.join(self.root,"assets.json")    
+        assets = mhapi.locations.getUnicodeAbsPath(os.path.join(self.root,"assets.json"))
 
         if os.path.exists(assets):
             with open(assets,"r") as f:
@@ -408,9 +408,9 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 self.loadAssetsFromJson(assetJson)
 
     def setThumbScreenshot(self,asset):
-        assetDir = os.path.join(self.root,str(asset["nid"]))
+        assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(self.root,str(asset["nid"])))
         screenshot = self.getScreenshotPath(asset)
-        thumbnail = os.path.join(assetDir,"thumb.png")
+        thumbnail = mhapi.locations.getUnicodeAbsPath(os.path.join(assetDir,"thumb.png"))
  
         if screenshot and os.path.exists(screenshot):
             self.screenshot.setPixmap(QtGui.QPixmap(os.path.abspath(screenshot)))
@@ -506,9 +506,9 @@ class AssetDownloadTaskView(gui3d.TaskView):
         files = asset["files"]
 
         if typeHint:
-            assetTypeDir = os.path.join(mhapi.locations.getUserDataPath(typeHint))        
+            assetTypeDir = mhapi.locations.getUserDataPath(typeHint)        
         else:
-            assetTypeDir = os.path.join(mhapi.locations.getUserDataPath(asset["type"]))        
+            assetTypeDir = mhapi.locations.getUserDataPath(asset["type"])        
 
         name = asset["title"]
         name = re.sub(r"\s","_",name)
@@ -517,7 +517,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         if typeHint == "custom":
             assetDir = assetTypeDir
         else:
-            assetDir = os.path.join(assetTypeDir,name)
+            assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(assetTypeDir,name))
 
         log.debug("Downloading to: " + assetDir)
 
