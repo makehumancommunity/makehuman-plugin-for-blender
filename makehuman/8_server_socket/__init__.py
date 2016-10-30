@@ -125,7 +125,7 @@ taskview = None
 
 
 def load(app):
-    category = app.getCategory('Utilities')
+    category = app.getCategory('Community')
     taskview = category.addTask(SocketTaskView(category))
 
 def unload(app):
