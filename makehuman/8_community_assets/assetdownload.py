@@ -216,7 +216,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         assetDir = os.path.join(self.root,str(asset["nid"]))
         fullPath = mhapi.locations.getUnicodeAbsPath(os.path.join(assetDir,filename))
 
-        log.debug("Screenshot path: " + str(fullPath))
+        log.debug("Screenshot path: " + fullPath)
 
         return fullPath
 
