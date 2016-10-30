@@ -3,6 +3,8 @@
 from namespace import NameSpace
 
 import getpath
+import os
+import sys
 
 class Locations(NameSpace):
     """This namespace wraps all calls that are related to file and directory locations."""
@@ -12,24 +14,36 @@ class Locations(NameSpace):
         NameSpace.__init__(self)
         self.trace()
 
+    def getUnicodeAbsPath(self,path):
+        """Returns the abspath version of path, and ensures that it is correctly encoded"""
+        ap = os.path.abspath(path)
+        en = sys.getfilesystemencoding()
+        if isinstance(ap,unicode) or en == "UTF-8":
+            # Assume we already have a valid UTF-8 string
+            upath = ap
+        else:
+            # Assume we need to perform encoding            
+            upath = unicode(ap,en)
+        return upath
+
     def getInstallationPath(self,subpath = ""):
-        """Returns the directory which contains the makehuman.py file"""
+        """Returns the unicode-encoded absolut path to the directory which contains the makehuman.py file"""
         self.trace()
-        return getpath.getSysPath(subpath)
+        return self.getUnicodeAbsPath(getpath.getSysPath(subpath))
 
     def getSystemDataPath(self,subpath = ""):
-        """Returns the location of the installation's "data" directory (as opposed to the user's data directory)"""
+        """Returns unicode-encoded absolut path to the location of the installation's "data" directory (as opposed to the user's data directory)"""
         self.trace()
-        return getpath.getSysDataPath(subpath)
+        return self.getUnicodeAbsPath(getpath.getSysDataPath(subpath))
 
     def getUserHomePath(self,subpath = ""):
-        """Returns the location of the user's makehuman directory (i.e normally ~/makehuman)."""
+        """Returns unicode-encoded absolute path to the location of the user's makehuman directory (i.e normally ~/makehuman)."""
         self.trace()
-        return getpath.getHomePath(subpath)
+        return self.getUnicodeAbsPath(getpath.getHomePath(subpath))
 
     def getUserDataPath(self,subpath = ""):
-        """Returns the location of the user's "data" directory (as opposed to the installation's data directory)"""
+        """Returns unicode-encoded absolute path to the location of the user's "data" directory (as opposed to the installation's data directory)"""
         self.trace()
-        return getpath.getDataPath(subpath)
+        return self.getUnicodeAbsPath(getpath.getDataPath(subpath))
 
 
