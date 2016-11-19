@@ -299,6 +299,16 @@ class AssetEditorTaskView(gui3d.TaskView):
                     if not value:
                         value = "-"
                     desc += "<b><tt>" + k.ljust(15,".") + ": </tt></b>" + value + "<br />\n"
+            for k in asset["pertinentExtraKeys"]:
+                value = asset[k]
+                if not value:
+                    valuestr = "-"
+                else:
+                    valuestr = ""
+                    for item in list(value):
+                        valuestr = valuestr + " " + item
+
+                desc += "<b><tt>" + k.ljust(15,".") + ": </tt></b>" + valuestr + "<br />\n"
                 
         self.assetInfoText.setText(desc)
 
