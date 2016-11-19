@@ -18,6 +18,18 @@ The following keys are always present for all types of assets:
 * name -- the name of the asset, as set in the asset file
 * uuid -- the unique hex identifier for the asset
 
+### Proxy type assets
+
+If the asset is a proxy type asset (for proxymesh, clothes, hair...), the following keys are also set
+
+* basemesh -- version of basemesh, in practice always "hm08"
+* obj_file -- The (usually relative) path to the object file
+* max_pole -- The max pole setting
+* z_depth
+* x_scale
+* y_scale
+* z_scale
+
 ## Comment section keys
 
 * license
