@@ -17,11 +17,12 @@ class Assets(NameSpace):
         self.trace()
 
         self.extensionToType = dict()
-        self.extensionToType[".mhmat"] = "material";
-        self.extensionToType[".mhclo"] = "proxy";
-        self.extensionToType[".proxy"] = "proxy";
-        self.extensionToType[".target"] = "target";
-
+        self.extensionToType[".mhmat"] = "material"
+        self.extensionToType[".mhclo"] = "proxy"
+        self.extensionToType[".proxy"] = "proxy"
+        self.extensionToType[".target"] = "target"
+        
+        self.genericExtraKeys = ["tag"]
         self.genericKeys = ["name","uuid"]
         self.genericCommentKeys = ["license","homepage","author"]
 
@@ -29,13 +30,13 @@ class Assets(NameSpace):
     
     def _parseGenericAssetInfo(self,fullPath):
 
-        info = dict();
+        info = dict()
 
         fPath, ext = os.path.splitext(fullPath)
         basename = os.path.basename(fullPath)
 
         info["type"] = self.extensionToType[ext]
-        info["absolute path"] = fullPath;
+        info["absolute path"] = fullPath
         info["extension"] = ext
         info["basename"] = basename
         info["rawlines"] = []
@@ -55,6 +56,14 @@ class Assets(NameSpace):
             m = re.match(r"^#\s+([a-zA-Z_]+)\s+(.*)$",line)
             if(m):
                 info["rawcommentkeys"].append([m.group(1),m.group(2)])
+        
+        for genericExtraKeyName in self.genericExtraKeys:
+            info[genericExtraKeyName] = set()
+            for rawkey in info["rawkeys"]:
+                rawKeyName = rawkey[0]
+                rawKeyValue = rawkey[1]
+                if rawKeyName == genericExtraKeyName:
+                    info[genericExtraKeyName].add(rawKeyValue)
 
         for genericKeyName in self.genericKeys:
             info[genericKeyName] = None
@@ -72,7 +81,7 @@ class Assets(NameSpace):
                 if commentKeyName == genericCommentKeyName:
                     info[commentKeyName] = commentKeyValue
 
-        return info;
+        return info
 
     def _parseProxyKeys(self,assetInfo):
         for pk in self.proxyKeys:
@@ -90,17 +99,19 @@ class Assets(NameSpace):
             key = k[0]
             value = k[1]
             if key == "material":
-                assetInfo[materials].append(value)
+                assetInfo['materials'].append(value)
 
     def _addPertinentKeyInfo(self,assetInfo):
 
         pertinentKeys = list(self.genericKeys)
+        pertinentExtraKeys = list(self.genericExtraKeys)
         pertinentCommentKeys = list(self.genericCommentKeys)
 
         if assetInfo["type"] == "proxy":
             pertinentKeys.extend(self.proxyKeys)
 
         assetInfo["pertinentKeys"] = pertinentKeys
+        assetInfo["pertinentExtraKeys"] = pertinentExtraKeys
         assetInfo["pertinentCommentKeys"] = pertinentCommentKeys
 
 
@@ -128,5 +139,5 @@ class Assets(NameSpace):
             info.pop("rawkeys",None)
             info.pop("rawcommentkeys",None)
 
-        return info;
+        return info
 
