@@ -26,7 +26,7 @@ So far this repo contains the following plugins:
 ### makehuman/1_mhapi
 
 MakeHuman plugin. This doesn't do anything in itself, it just provides convenience methods
-for getting info about stuff in makehuman or controlling stuff in makehuman. See README
+for getting info about stuff in makehuman or controlling stuff in makehuman. See the [README](makehuman/1_mhapi/README.md)
 in the directory.
 
 ### makehuman/8_community_assets

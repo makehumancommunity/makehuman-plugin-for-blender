@@ -19,7 +19,7 @@ These are calls related to reading, parsing and manipulating assets.
 
 **openAssetFile(path, strip = False)** 
 
-This opens an asset file and returns an [assetInfo.md](assetInfo) dict. If strip is set to True, the raw data is excluded from the dict. 
+This opens an asset file and returns an [assetInfo](assetInfo.md) dict. If strip is set to True, the raw data is excluded from the dict. 
 
 ## internals
 
