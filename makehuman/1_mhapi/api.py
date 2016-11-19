@@ -9,6 +9,9 @@ class API(NameSpace):
         NameSpace.__init__(self)
         self.trace()
 
+        from _assets import Assets
+        self.assets = Assets(self)
+
         from _internals import Internals
         self.internals = Internals(self)
 
