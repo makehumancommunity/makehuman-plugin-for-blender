@@ -13,6 +13,14 @@ system or MY DOCUMENTS\makehuman\v1\data on windows.
 
 In the following, "G.app.mhapi" has been excluded. So "internals" actually means "G.app.mhapi.internals".
 
+## assets
+
+These are calls related to reading, parsing and manipulating assets.
+
+**openAssetFile(path, strip = False)** 
+
+This opens an asset file and returns an [assetInfo.md](assetInfo) dict. If strip is set to True, the raw data is excluded from the dict. 
+
 ## internals
 
 These are calls which you would normally not need to make. They give you low-level access to internal MakeHuman objects. In most cases 
