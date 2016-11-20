@@ -7,6 +7,7 @@ import os
 import sys
 import re
 import codecs
+import shutil
 
 class Assets(NameSpace):
     """This namespace wraps all calls that are related to reading and managing assets."""
@@ -40,6 +41,8 @@ class Assets(NameSpace):
         info["extension"] = ext
         info["basename"] = basename
         info["rawlines"] = []
+        info["location"] = os.path.dirname(fullPath)
+        info["parentdir"] = os.path.basename(info["location"])
 
         with codecs.open(fullPath,'r','utf8') as f:
             contents = f.readlines()
@@ -141,3 +144,38 @@ class Assets(NameSpace):
 
         return info
 
+    def writeAssetFile(self, assetInfo, createBackup = True):
+        if not assetInfo:
+            print "Cannot use None as assetInfo"
+            return False
+
+        ap = assetInfo["absolute path"]
+        bak = ap + ".bak"
+
+        if createBackup and os.path.isfile(ap):
+            shutil.copy(ap,bak)
+
+        print ap
+
+        with codecs.open(ap,'w','utf8') as f:
+            for line in assetInfo["rawlines"]:
+                allowWrite = True
+                m = re.match(r"^([a-zA-Z_]+)\s+(.*)$",line)
+                if m:
+                    key = m.group(1)
+                    if key in assetInfo["pertinentKeys"]:
+                        print "exists"
+                        allowWrite = False
+                        if not assetInfo[key] is None:
+                            f.write(key + " " + assetInfo[key] + "\x0a")
+
+                m = re.match(r"^#\s+([a-zA-Z_]+)\s+(.*)$",line)
+                if m:
+                    key = m.group(1)
+                    if key in assetInfo["pertinentCommentKeys"]:
+                        allowWrite = False
+                        if not assetInfo[key] is None:
+                            f.write("# " + key + " " + assetInfo[key] + "\x0a")
+                if allowWrite:
+                    f.write(line + "\x0a")
+        return True
