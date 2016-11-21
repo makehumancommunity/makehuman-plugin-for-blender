@@ -20,7 +20,7 @@ Abstract
 This plugin edits assets
 
 """
-#Todo: implement writeAssetData(), refactor AssetEditor() (see below), yet no quality checking,  material chooser, ...
+#Todo: implement writeAssetData(), yet no quality checking,  material chooser, ...
 
 import gui3d
 import qtgui
@@ -61,10 +61,6 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.notfound = mhapi.locations.getSystemDataPath("notfound.thumb")
 
         self.asset = None
-        self.reset_asset = dict()
-        self.reset_asset[0] = 1
-        self.reset_asset[1] = None
-        self.reset_asset['current'] = 1
 
         self.editkey = "Author"
 
@@ -84,67 +80,20 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.typeList = mhapi.ui.createComboBox(types, self.onTypeChange)
         self.selectBox.addWidget(self.typeList)
 
-#  ...and editor type selector ...
+#  ...and editor type selector
 
-        self.selectBox.addWidget(gui.TextView("\nEdit:"))
-
-        edittype  = [
-                     ]
+        self.selectBox.addWidget(gui.TextView("\nEdit Type:"))
+        edittype  = []
 
         self.tagList = mhapi.ui.createComboBox(edittype, self.onEditChange)
         self.selectBox.addWidget(self.tagList)
 
+ # The editor box
         self.EditBox = self.addLeftWidget(gui.GroupBox("Edit: "))
-#        ret_val = self.New_AssetEditor(self.editkey, self.reset_asset[self.reset_asset['current']], caption=self.editkey, length=5)
 
-#       if ret_val is not None:
 
-#           print"On Default:"
-#           print "current    :", self.reset_asset['current']
-#           print "0          :",  self.reset_asset['0']
 
-#           if self.reset_asset['current'] == self.reset_asset[0]:
-#               self.reset_asset[0] += 1
-#               self.reset_asset['current'] += 1
-#               self.reset_asset[self.reset_asset[0]] = ret_val
-
-#           if self.reset_asset['current'] < self.reset_asset[0]:
-#               for i in range(self.reset_asset['current'])+1,self.reset_asset[0]+1:
-#                   self.reset_asset.pop(i,None)
-#               self.reset_asset[0] = self.reset_asset['current'] +1
-#               self.reset_asset[self.reset_asset[0]] = ret_val
-
-# ...and history
-
-        self.historyBox = self.addLeftWidget(gui.GroupBox('History:   '))
-        self.UndoButton = self.historyBox.addWidget(gui.Button('Undo'))
-        self.RedoButton = self.historyBox.addWidget(gui.Button('Redo'))
-
-        @self.UndoButton.mhEvent
-        def onClicked(event):
-            print "Before Undo:"
-            print "current    :", self.reset_asset['current']
-            print "0          :", self.reset_asset[0]
-            print self.reset_asset['current'] > 1
-            if self.reset_asset['current'] > 1:
-                self.reset_asset['current'] -= 1
-                self.set_assetInfoText(self.reset_asset['current'])
-            else:
-                pass
-
-        @self.RedoButton.mhEvent
-        def onClicked(event):
-            print "On Redo:"
-            print "current    :", self.reset_asset['current']
-            print "0          :", self.reset_asset[0]
-            print self.reset_asset['current'] < self.reset_asset[0]
-            if self.reset_asset['current'] < self.reset_asset[0]:
-                self.reset_asset['current'] += 1
-                self.set_assetInfoText(self.reset_asset['current'])
-            else:
-                pass
-
-        # The filechooser:
+# The filechooser:
 
         self.filechooser = self.addRightWidget(fc.IconListFileChooser(assetfolder, extensions, 'thumb', self.notfound, None, name=caption, noneItem=False))
         self.filechooser.setIconSize(50,50)
@@ -158,7 +107,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.assetInfoBox = gui.GroupBox("Asset info")
         self.assetInfoText = self.assetInfoBox.addWidget(gui.TextView(""))
         layout.addWidget(self.assetInfoBox)
-        self.set_assetInfoText(self.reset_asset[self.reset_asset['current']])
+        self.set_assetInfoText(self.asset)
 
         self.assetThumbBox = gui.GroupBox("Asset thumbnail (if any)")
         self.thumbnail = self.assetThumbBox.addWidget(gui.TextView())
@@ -176,11 +125,8 @@ class AssetEditorTaskView(gui3d.TaskView):
                 self.thumbnail.setPixmap(QtGui.QPixmap(self.notfound))
             self.thumbnail.setGeometry(0,0,128,128)
 
-            # self.asset = assetInfo
-            self.reset_asset[1] = copy.deepcopy(assetInfo)
-            self.reset_asset[0] = 1
-            self.reset_asset['current'] = 1
-            self.set_assetInfoText(self.reset_asset[self.reset_asset['current']])
+            self.asset = assetInfo
+            self.set_assetInfoText(self.asset)
 
             self.tagList.clear()
             
@@ -191,12 +137,14 @@ class AssetEditorTaskView(gui3d.TaskView):
             for k in assetInfo["pertinentExtraKeys"]:
                 self.tagList.addItem(k)
 
+            self.getNewData()
 
 # Update filechooser on asset type:
     def onTypeChange(self, item=None):
 
         assetType = str(item)
-        log.debug("onTypeChange: " + assetType)
+        # log.debug("onTypeChange: " + assetType)
+
 
         self.filechooser.hide()
 
@@ -218,7 +166,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         if assetType == "Eyelashes":
             assetfolder = [mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
             extensions = 'mhclo'
-    # Mini Todo: show filechooser caption based on asset type ...
+
         self.selected_Type = assetType
         self.filechooser.extensions = extensions
         self.filechooser.setPaths(assetfolder)
@@ -227,50 +175,27 @@ class AssetEditorTaskView(gui3d.TaskView):
 
 # Show  asset editor on edit type
     def onEditChange(self, item=None):
+
         self.editkey = str(item)
-        self.ret_val = None
-        self.ret_val = self.New_AssetEditor(self.editkey, self.reset_asset[self.reset_asset['current']], caption=self.editkey, length=5)
-
-        print "On EditChange: "
-
-        print "current    :", self.reset_asset['current']
-        print "0          :", self.reset_asset[0]
-
-        if self.ret_val is not None:
-            if self.reset_asset['current'] == self.reset_asset[0]:
-                self.reset_asset[0] += 1
-                self.reset_asset['current'] += 1
-                self.reset_asset[self.reset_asset[0]] = self.ret_val
-
-            if self.reset_asset['current'] < self.reset_asset[0]:
-                for i in range(self.reset_asset['current'])+1,self.reset_asset[0]+1:
-                    self.reset_asset.pop(i,None)
-
-                self.reset_asset[0] = self.reset_asset['current'] +1
-                self.reset_asset['current'] = self.reset_asset[0]
-                self.reset_asset[self.reset_asset[0]] = self.ret_val
+        self.getNewData()
 
 
-    def New_AssetEditor(self, key = None, data = None, caption = "", length=int(5)):
+    def AssetEditor(self, key = None, data = None, length=int(5)):
+
+
+        if not data:
+            print "No data"
+
+        if not key:
+            print "No key"
+
+        if not key in data:
+            print "Not in data ", key
 
         for child in self.EditBox.children[:]:
             self.EditBox.removeWidget(child)
 
-
-        if not key:
-            print "No key"
-            return None
-
-        if not data:
-            print "No asset"
-            return None
-
-        if not key in data:
-            print key + " is not in asset"
-            return None
-
-
-        if key in data["pertinentExtraKeys"]:
+        if key in data['pertinentExtraKeys']:
             itemlist = list(data[key])
             if length < len(itemlist):
                 length = len(itemlist)
@@ -278,15 +203,15 @@ class AssetEditorTaskView(gui3d.TaskView):
             for i in range(0, length - len(itemlist)):
                 itemlist.append(" ")
 
-            Set_TextEditBoxes = [self.EditBox.addWidget(qtgui.TextEdit(items)) for items in itemlist]
-            # Set_ActionBox = self.EditBox.addWidget(gui.GroupBox(""))
+            self.Set_TextEditBoxes = [self.EditBox.addWidget(qtgui.TextEdit(items)) for items in itemlist]
             Set_UButton = self.EditBox.addWidget(gui.Button('Update'))
 
             @Set_UButton.mhEvent
             def onClicked(event):
 
+                print "On set update"
                 change_set = set()
-                for set_texteditbox in Set_TextEditBoxes:
+                for set_texteditbox in self.Set_TextEditBoxes:
                     change_set.add(set_texteditbox.getText())
 
                 if "" in change_set:
@@ -294,24 +219,36 @@ class AssetEditorTaskView(gui3d.TaskView):
                 if " " in change_set:
                     change_set.remove(" ")
 
+                print change_set
+
                 data[key] = change_set
-                self.set_assetInfoText(data)
+
 
         else:
-            Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(data[key]))
-            #Str_ActionBox = self.EditBox.addWidget(gui.GroupBox(""))
+            self.Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(data[key]))
             Str_UButton = self.EditBox.addWidget(gui.Button('Update'))
 
             @Str_UButton.mhEvent
             def onClicked(event):
-
-                data[key] = Str_TextEditBox.getText()
-                self.set_assetInfoText(data)
-
+                val = self.Str_TextEditBox.getText()
+                print "On string update", val
+                data[key] = val
+                print data[key]
 
         return data
 
 
+    
+    def getNewData(self):
+
+        ret_val = self.AssetEditor(self.editkey, self.asset, length=5)
+
+        print "On getNewData  :   ", ret_val[self.editkey]
+
+        if ret_val is not None:
+
+            self.asset = ret_val
+            self.set_assetInfoText(self.asset)
 
 #Todo: Implement asset file writter:
 
@@ -325,7 +262,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         if not asset:
             desc = "<big>Nothing selected</big>"
         else:
-            print asset
+
             desc = "<big>" + asset["name"] + "</big><br />\n&nbsp;<br />\n"
             for k in asset["pertinentCommentKeys"]:
                 value = asset[k]
