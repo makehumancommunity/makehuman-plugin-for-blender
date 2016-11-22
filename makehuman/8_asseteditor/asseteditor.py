@@ -208,20 +208,17 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @Set_UButton.mhEvent
             def onClicked(event):
-
                 print "On set update"
                 change_set = set()
                 for set_texteditbox in self.Set_TextEditBoxes:
                     change_set.add(set_texteditbox.getText())
-
                 if "" in change_set:
                     change_set.remove("")
                 if " " in change_set:
                     change_set.remove(" ")
-
                 print change_set
-
                 data[key] = change_set
+                self.set_assetInfoText(self.asset)
 
 
         else:
@@ -234,21 +231,11 @@ class AssetEditorTaskView(gui3d.TaskView):
                 print "On string update", val
                 data[key] = val
                 print data[key]
+                self.set_assetInfoText(self.asset)
 
-        return data
-
-
-    
     def getNewData(self):
+        self.AssetEditor(self.editkey, self.asset, length=5)
 
-        ret_val = self.AssetEditor(self.editkey, self.asset, length=5)
-
-        print "On getNewData  :   ", ret_val[self.editkey]
-
-        if ret_val is not None:
-
-            self.asset = ret_val
-            self.set_assetInfoText(self.asset)
 
 #Todo: Implement asset file writter:
 
