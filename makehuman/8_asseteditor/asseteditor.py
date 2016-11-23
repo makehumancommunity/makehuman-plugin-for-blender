@@ -77,7 +77,8 @@ class AssetEditorTaskView(gui3d.TaskView):
                   "Teeth",
                   "ProxyMeshes",
                   "Eyebrows",
-                  "Eyelashes"
+                  "Eyelashes",
+                  "Materials"
                   ]
 
         self.typeList = mhapi.ui.createComboBox(types, self.onTypeChange)
@@ -192,6 +193,17 @@ class AssetEditorTaskView(gui3d.TaskView):
         if assetType == "Eyelashes":
             assetfolder = [mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
             extensions = 'mhclo'
+        if assetType == "Materials":
+            assetfolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes'),
+                           mhapi.locations.getSystemDataPath('hair'), mhapi.locations.getUserDataPath('hair'),
+                           mhapi.locations.getSystemDataPath('teeth'), mhapi.locations.getUserDataPath('theeth'),
+                           mhapi.locations.getSystemDataPath('eyebrows'), mhapi.locations.getUserDataPath('eyebrows'),
+                           mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
+            extensions = "mhmat"
+
+
+
+
 
         self.selected_Type = assetType
         self.filechooser.extensions = extensions
