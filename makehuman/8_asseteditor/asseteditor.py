@@ -74,6 +74,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.selectBox.addWidget(gui.TextView("\nType:"))
 
         types = [ "Clothes",
+                  "Models",
                   "Hair",
                   "Teeth",
                   "ProxyMeshes",
@@ -201,6 +202,9 @@ class AssetEditorTaskView(gui3d.TaskView):
                            mhapi.locations.getSystemDataPath('eyebrows'), mhapi.locations.getUserDataPath('eyebrows'),
                            mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
             extensions = "mhmat"
+        if assetType == "Models":
+            assetfolder = mhapi.locations.getUserHomePath('models')
+            extensions = "mhm"
 
 
 
@@ -305,7 +309,10 @@ class AssetEditorTaskView(gui3d.TaskView):
             desc = "<big>Nothing selected</big>"
         else:
 
-            desc = "<big>" + asset["name"] + "</big><br />\n&nbsp;<br />\n"
+            if not asset['name']:
+                desc = "<big>" + " " + "</big><br />\n&nbsp;<br />\n"
+            else:
+                desc = "<big>" + asset["name"] + "</big><br />\n&nbsp;<br />\n"
             for k in asset["pertinentCommentKeys"]:
                 value = asset[k]
                 if not value:

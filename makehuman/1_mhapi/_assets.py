@@ -22,6 +22,7 @@ class Assets(NameSpace):
         self.extensionToType[".mhclo"] = "proxy"
         self.extensionToType[".proxy"] = "proxy"
         self.extensionToType[".target"] = "target"
+        self.extensionToType[".mhm"] = "models"
         
         self.genericExtraKeys = ["tag"]
         self.genericKeys = ["name","uuid"]
