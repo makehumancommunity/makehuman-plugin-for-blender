@@ -36,10 +36,13 @@ class Locations(NameSpace):
         self.trace()
         return self.getUnicodeAbsPath(getpath.getSysDataPath(subpath))
 
-    def getUserHomePath(self):
+    def getUserHomePath(self, subpath = ""):
         """Returns unicode-encoded absolute path to the location of the user's makehuman directory (i.e normally ~/makehuman)."""
         self.trace()
-        return self.getUnicodeAbsPath(getpath.getHomePath())
+        if subpath == "":
+            return self.getUnicodeAbsPath(getpath.getHomePath())
+        else:
+            return self.getUnicodeAbsPath(getpath.getPath(subpath))
 
     def getUserDataPath(self,subpath = ""):
         """Returns unicode-encoded absolute path to the location of the user's "data" directory (as opposed to the installation's data directory)"""
