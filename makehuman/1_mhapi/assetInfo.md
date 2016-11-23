@@ -47,6 +47,8 @@ Note that these might have been stripped if the strip argument was set to true i
 ## Calculated and convenience keys
 
 * absolute path -- the full, absolute path to the asset
+* location -- the full absolute path to the directory containing the asset
+* parentdir -- the name (without path) of the parent directory, for example "clothes"
 * type -- asset actual type (ie "proxy" for all types of clothes for example)
 * extension -- for example .mhclo for clothes files
 * basename -- the asset filename without path
