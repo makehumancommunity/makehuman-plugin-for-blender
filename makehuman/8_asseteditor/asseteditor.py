@@ -62,7 +62,10 @@ class AssetEditorTaskView(gui3d.TaskView):
 
         self.asset = None
 
-        self.editkey = "Author"
+        self.editkey = ""
+
+        self.history = dict()
+        self.history_ptr = {'current' : 0, 'head' : 0}
 
 # selectBox contains asset type selector ...
 
@@ -90,6 +93,27 @@ class AssetEditorTaskView(gui3d.TaskView):
 
  # The editor box
         self.EditBox = self.addLeftWidget(gui.GroupBox("Edit: "))
+
+# The history box
+        self.HistoryBox = self.addLeftWidget(gui.GroupBox("History: "))
+        UndoButton = self.HistoryBox.addWidget(gui.Button('Undo'))
+        RedoButton = self.HistoryBox.addWidget(gui.Button('Redo'))
+
+        @UndoButton.mhEvent
+        def onClicked(event):
+            if self.history_ptr['current'] > 0:
+                self.history_ptr['current'] -= 1
+                self.asset = copy.deepcopy(self.history[self.history_ptr['current']])
+                self.set_assetInfoText(self.asset)
+                self.getNewData()
+
+        @RedoButton.mhEvent
+        def onClicked(event):
+            if self.history_ptr['current'] < self.history_ptr['head']:
+                self.history_ptr['current'] += 1
+                self.asset = copy.deepcopy(self.history[self.history_ptr['current']])
+                self.set_assetInfoText(self.asset)
+                self.getNewData()
 
 
 
@@ -126,6 +150,9 @@ class AssetEditorTaskView(gui3d.TaskView):
             self.thumbnail.setGeometry(0,0,128,128)
 
             self.asset = assetInfo
+            self.history.clear()
+            self.history_ptr = {'current': 0, 'head': 0}
+            self.history[0] = copy.deepcopy(self.asset)
             self.set_assetInfoText(self.asset)
 
             self.tagList.clear()
@@ -143,7 +170,6 @@ class AssetEditorTaskView(gui3d.TaskView):
     def onTypeChange(self, item=None):
 
         assetType = str(item)
-        # log.debug("onTypeChange: " + assetType)
 
 
         self.filechooser.hide()
@@ -185,12 +211,15 @@ class AssetEditorTaskView(gui3d.TaskView):
 
         if not data:
             print "No data"
+            return
 
         if not key:
             print "No key"
+            return
 
         if not key in data:
             print "Not in data ", key
+            return
 
         for child in self.EditBox.children[:]:
             self.EditBox.removeWidget(child)
@@ -208,7 +237,10 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @Set_UButton.mhEvent
             def onClicked(event):
-                print "On set update"
+                self.history[self.history_ptr['current']] = [self.editkey, self.asset[self.editkey]]
+                self.history_ptr['current'] += 1
+                if self.history_ptr['head'] < self.history_ptr['current']:
+                    self.history_ptr['head'] = self.history_ptr['current']
                 change_set = set()
                 for set_texteditbox in self.Set_TextEditBoxes:
                     change_set.add(set_texteditbox.getText())
@@ -216,10 +248,8 @@ class AssetEditorTaskView(gui3d.TaskView):
                     change_set.remove("")
                 if " " in change_set:
                     change_set.remove(" ")
-                print change_set
                 data[key] = change_set
                 self.set_assetInfoText(self.asset)
-
 
         else:
             self.Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(data[key]))
@@ -227,14 +257,18 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @Str_UButton.mhEvent
             def onClicked(event):
-                val = self.Str_TextEditBox.getText()
-                print "On string update", val
-                data[key] = val
-                print data[key]
+
+                data[key] = self.Str_TextEditBox.getText()
+                self.history_ptr['current'] += 1
+                self.history[self.history_ptr['current']] = copy.deepcopy(self.asset)
+                if self.history_ptr['head'] < self.history_ptr['current']:
+                    self.history_ptr['head'] = self.history_ptr['current']
                 self.set_assetInfoText(self.asset)
 
     def getNewData(self):
         self.AssetEditor(self.editkey, self.asset, length=5)
+
+
 
 
 #Todo: Implement asset file writter:
