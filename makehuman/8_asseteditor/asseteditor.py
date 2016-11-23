@@ -31,6 +31,7 @@ import os
 import re
 import mh
 import copy
+import uuid
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -236,6 +237,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         for child in self.EditBox.children[:]:
             self.EditBox.removeWidget(child)
 
+
         if key in data['pertinentExtraKeys']:
             itemlist = list(data[key])
             if length < len(itemlist):
@@ -266,6 +268,13 @@ class AssetEditorTaskView(gui3d.TaskView):
 
         else:
             self.Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(data[key]))
+            if key == "uuid":
+                UUIDButton = self.EditBox.addWidget(gui.Button('Generate UUID'))
+
+                @UUIDButton.mhEvent
+                def onClicked(event):
+                    self.Str_TextEditBox.setText(str(uuid.uuid4()))
+
             Str_UButton = self.EditBox.addWidget(gui.Button('Update'))
 
             @Str_UButton.mhEvent
