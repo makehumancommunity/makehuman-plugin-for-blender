@@ -237,10 +237,7 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @Set_UButton.mhEvent
             def onClicked(event):
-                self.history[self.history_ptr['current']] = [self.editkey, self.asset[self.editkey]]
-                self.history_ptr['current'] += 1
-                if self.history_ptr['head'] < self.history_ptr['current']:
-                    self.history_ptr['head'] = self.history_ptr['current']
+
                 change_set = set()
                 for set_texteditbox in self.Set_TextEditBoxes:
                     change_set.add(set_texteditbox.getText())
@@ -249,6 +246,10 @@ class AssetEditorTaskView(gui3d.TaskView):
                 if " " in change_set:
                     change_set.remove(" ")
                 data[key] = change_set
+                self.history_ptr['current'] += 1
+                self.history[self.history_ptr['current']] = copy.deepcopy(self.asset)
+                if self.history_ptr['head'] < self.history_ptr['current']:
+                    self.history_ptr['head'] = self.history_ptr['current']
                 self.set_assetInfoText(self.asset)
 
         else:
@@ -257,7 +258,6 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @Str_UButton.mhEvent
             def onClicked(event):
-
                 data[key] = self.Str_TextEditBox.getText()
                 self.history_ptr['current'] += 1
                 self.history[self.history_ptr['current']] = copy.deepcopy(self.asset)
