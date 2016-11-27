@@ -25,11 +25,54 @@ class Assets(NameSpace):
         self.extensionToType[".mhm"] = "models"
         
         self.genericExtraKeys = ["tag"]
-        self.genericKeys = ["name","uuid"]
+        self.genericKeys = ["name","description"]
         self.genericCommentKeys = ["license","homepage","author"]
 
-        self.proxyKeys = ["basemesh","obj_file","max_pole","z_depth","x_scale","y_scale","z_scale"]
-    
+        self.proxyKeys = [
+            "uuid",
+            "basemesh",
+            "obj_file",
+            "max_pole",
+            "z_depth",
+            "x_scale",
+            "y_scale",
+            "z_scale"
+        ]
+
+        self.materialKeys = [
+            "diffuseColor",
+            "specularColor",
+            "emissiveColor",
+            "ambientColor",
+            "diffuseTexture",
+            "bumpMapTexture",
+            "normalMapTexture",
+            "displacementMapTexture",
+            "specularMapTexture",
+            "transparencyMapTexture",
+            "aoMapTexture",
+            "diffuseIntensity",
+            "bumpMapIntensity",
+            "normalMapIntensity",
+            "displacementMapIntensity",
+            "specularMapIntensity",
+            "transparencyMapIntensity",
+            "aoMapIntensity",
+            "shininess",
+            "opacity",
+            "translucency",
+            "shadeless",
+            "wireframe",
+            "transparent",
+            "alphaToCoverage",
+            "backfaceCull",
+            "depthless",
+            "castShadows",
+            "receiveShadows",
+            "alphaToCoverage"
+        ] # There are also SSS settings, but I don't know if those actually works
+
+
     def _parseGenericAssetInfo(self,fullPath):
 
         info = dict()
@@ -96,6 +139,16 @@ class Assets(NameSpace):
                 if key == pk:
                     assetInfo[pk] = value
 
+    def _parseMaterialKeys(self,assetInfo):
+        for pk in self.materialKeys:
+            assetInfo[pk] = None
+            for k in assetInfo["rawkeys"]:
+                key = k[0]
+                value = k[1]
+                if key == pk:
+                    assetInfo[pk] = value
+
+
     def _parseMaterials(self,assetInfo):
         if not "materials" in assetInfo:
             assetInfo["materials"] = []
@@ -114,6 +167,9 @@ class Assets(NameSpace):
         if assetInfo["type"] == "proxy":
             pertinentKeys.extend(self.proxyKeys)
 
+        if assetInfo["type"] == "material":
+            pertinentKeys.extend(self.materialKeys)
+
         assetInfo["pertinentKeys"] = pertinentKeys
         assetInfo["pertinentExtraKeys"] = pertinentExtraKeys
         assetInfo["pertinentCommentKeys"] = pertinentCommentKeys
@@ -130,6 +186,9 @@ class Assets(NameSpace):
 
         if info["type"] == "proxy":
             self._parseProxyKeys(info)
+
+        if info["type"] == "material":
+            self._parseMaterialKeys(info)
 
         thumbPath = os.path.splitext(path)[0] + ".thumb"
 
