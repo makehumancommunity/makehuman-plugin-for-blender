@@ -20,7 +20,7 @@ Abstract
 This plugin edits assets
 
 """
-#Todo: implement writeAssetData(), refactor AssetEditor() (see below), yet no quality checking,  material chooser, ...
+#Todo: implement writeAssetData(), yet no quality checking,  material chooser, ...
 
 import gui3d
 import qtgui
@@ -31,6 +31,7 @@ import os
 import re
 import mh
 import copy
+import uuid
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -61,9 +62,11 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.notfound = mhapi.locations.getSystemDataPath("notfound.thumb")
 
         self.asset = None
-        self.reset_asset = None
 
-        self.editkey = "Author"
+        self.editkey = ""
+
+        self.history = dict()
+        self.history_ptr = {'current' : 0, 'head' : 0}
 
 # selectBox contains asset type selector ...
 
@@ -71,11 +74,13 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.selectBox.addWidget(gui.TextView("\nType:"))
 
         types = [ "Clothes",
+                  "Models",
                   "Hair",
                   "Teeth",
                   "ProxyMeshes",
                   "Eyebrows",
-                  "Eyelashes"
+                  "Eyelashes",
+                  "Materials"
                   ]
 
         self.typeList = mhapi.ui.createComboBox(types, self.onTypeChange)
@@ -83,16 +88,37 @@ class AssetEditorTaskView(gui3d.TaskView):
 
 #  ...and editor type selector
 
-        self.selectBox.addWidget(gui.TextView("\nEdit:"))
-
-        edittype  = [
-                     ]
+        self.selectBox.addWidget(gui.TextView("\nEdit Type:"))
+        edittype  = []
 
         self.tagList = mhapi.ui.createComboBox(edittype, self.onEditChange)
         self.selectBox.addWidget(self.tagList)
 
+ # The editor box
         self.EditBox = self.addLeftWidget(gui.GroupBox("Edit: "))
-        self.asset = self.AssetEditor(self.editkey, self.asset, self.reset_asset, caption=self.editkey, length=5)
+
+# The history box
+        self.HistoryBox = self.addLeftWidget(gui.GroupBox("History: "))
+        UndoButton = self.HistoryBox.addWidget(gui.Button('Undo'))
+        RedoButton = self.HistoryBox.addWidget(gui.Button('Redo'))
+
+        @UndoButton.mhEvent
+        def onClicked(event):
+            if self.history_ptr['current'] > 0:
+                self.history_ptr['current'] -= 1
+                self.asset = copy.deepcopy(self.history[self.history_ptr['current']])
+                self.set_assetInfoText(self.asset)
+                self.getNewData()
+
+        @RedoButton.mhEvent
+        def onClicked(event):
+            if self.history_ptr['current'] < self.history_ptr['head']:
+                self.history_ptr['current'] += 1
+                self.asset = copy.deepcopy(self.history[self.history_ptr['current']])
+                self.set_assetInfoText(self.asset)
+                self.getNewData()
+
+
 
 # The filechooser:
 
@@ -127,7 +153,9 @@ class AssetEditorTaskView(gui3d.TaskView):
             self.thumbnail.setGeometry(0,0,128,128)
 
             self.asset = assetInfo
-            self.reset_asset = copy.deepcopy(assetInfo)
+            self.history.clear()
+            self.history_ptr = {'current': 0, 'head': 0}
+            self.history[0] = copy.deepcopy(self.asset)
             self.set_assetInfoText(self.asset)
 
             self.tagList.clear()
@@ -136,13 +164,16 @@ class AssetEditorTaskView(gui3d.TaskView):
                 self.tagList.addItem(k)
             for k in assetInfo["pertinentCommentKeys"]:
                 self.tagList.addItem(k)
+            for k in assetInfo["pertinentExtraKeys"]:
+                self.tagList.addItem(k)
 
+            self.getNewData()
 
 # Update filechooser on asset type:
     def onTypeChange(self, item=None):
 
         assetType = str(item)
-        log.debug("onTypeChange: " + assetType)
+
 
         self.filechooser.hide()
 
@@ -164,7 +195,21 @@ class AssetEditorTaskView(gui3d.TaskView):
         if assetType == "Eyelashes":
             assetfolder = [mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
             extensions = 'mhclo'
-    # Mini Todo: show filechooser caption based on asset type ...
+        if assetType == "Materials":
+            assetfolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes'),
+                           mhapi.locations.getSystemDataPath('hair'), mhapi.locations.getUserDataPath('hair'),
+                           mhapi.locations.getSystemDataPath('teeth'), mhapi.locations.getUserDataPath('theeth'),
+                           mhapi.locations.getSystemDataPath('eyebrows'), mhapi.locations.getUserDataPath('eyebrows'),
+                           mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
+            extensions = "mhmat"
+        if assetType == "Models":
+            assetfolder = mhapi.locations.getUserHomePath('models')
+            extensions = "mhm"
+
+
+
+
+
         self.selected_Type = assetType
         self.filechooser.extensions = extensions
         self.filechooser.setPaths(assetfolder)
@@ -173,62 +218,31 @@ class AssetEditorTaskView(gui3d.TaskView):
 
 # Show  asset editor on edit type
     def onEditChange(self, item=None):
+
         self.editkey = str(item)
-        self.asset = self.AssetEditor(self.editkey, self.asset, self.reset_asset, caption=self.editkey, length=5)
+        self.getNewData()
 
-    def AssetEditor(self, key=None, data=None, restoredata=None, caption = "", length=int(5)):
 
+    def AssetEditor(self, key = None, data = None, length=int(5)):
+
+
+        if not data:
+            print "No data"
+            return
+
+        if not key:
+            print "No key"
+            return
+
+        if not key in data:
+            print "Not in data ", key
+            return
 
         for child in self.EditBox.children[:]:
             self.EditBox.removeWidget(child)
 
-        if not data:
-            print "No data"
-            return None
 
-        if not key in data:
-            print key + " is not in data"
-            return None
-
-        value = data[key]
-
-        if not value:
-            value = ""
-
-        keytype = type(value)
-
-        print keytype
-
-        self.EditBox.addWidget(gui.TextView(caption))
-
-        if keytype is str or keytype is int or keytype is unicode:
-            if keytype is int:
-                Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(str(value)))
-            if keytype is str or keytype is unicode:
-                Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(value))
-            Str_ActionBox = self.EditBox.addWidget(gui.GroupBox(""))
-            Str_UButton = Str_ActionBox.addWidget(gui.Button('Update'))
-            Str_RButton = Str_ActionBox.addWidget(gui.Button('Reset'))
-
-            @Str_UButton.mhEvent
-            def onClicked(event):
-                if keytype is int:
-                    data.setval(key, int(Str_TextEditBox.getText()))
-                if keytype is str:
-                    data.setval(key, Str_TextEditBox.getText())
-                self.set_assetInfoText(data)
-
-            @Str_RButton.mhEvent
-            def onClicked(event):
-                data.setval(key, restoredata.getval(key))
-                if keytype is int:
-                    Str_TextEditBox.setText(str(data.getval(key)))
-                if keytype is str:
-                    Str_TextEditBox.setText(data.getval(key))
-                self.set_assetInfoText(data)
-
-        if keytype is set:
-
+        if key in data['pertinentExtraKeys']:
             itemlist = list(data[key])
             if length < len(itemlist):
                 length = len(itemlist)
@@ -236,41 +250,49 @@ class AssetEditorTaskView(gui3d.TaskView):
             for i in range(0, length - len(itemlist)):
                 itemlist.append(" ")
 
-            Set_TextEditBox = [self.EditBox.addWidget(qtgui.TextEdit(items)) for items in itemlist]
-            Set_ActionBox = self.EditBox.addWidget(gui.GroupBox(""))
-            Set_UButton = Set_ActionBox.addWidget(gui.Button('Update'))
-            Set_RButton = Set_ActionBox.addWidget(gui.Button('Reset'))
+            self.Set_TextEditBoxes = [self.EditBox.addWidget(qtgui.TextEdit(items)) for items in itemlist]
+            Set_UButton = self.EditBox.addWidget(gui.Button('Update'))
 
             @Set_UButton.mhEvent
             def onClicked(event):
 
                 change_set = set()
-                for set_texteditboxes in Set_TextEditBox:
-                    change_set.add(set_texteditboxes.getText())
-
+                for set_texteditbox in self.Set_TextEditBoxes:
+                    change_set.add(set_texteditbox.getText())
                 if "" in change_set:
                     change_set.remove("")
                 if " " in change_set:
                     change_set.remove(" ")
-
                 data[key] = change_set
-                self.set_assetInfoText(data)
+                self.history_ptr['current'] += 1
+                self.history[self.history_ptr['current']] = copy.deepcopy(self.asset)
+                if self.history_ptr['head'] < self.history_ptr['current']:
+                    self.history_ptr['head'] = self.history_ptr['current']
+                self.set_assetInfoText(self.asset)
 
-            @Set_RButton.mhEvent
+        else:
+            self.Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(data[key]))
+            if key == "uuid":
+                UUIDButton = self.EditBox.addWidget(gui.Button('Generate UUID'))
+
+                @UUIDButton.mhEvent
+                def onClicked(event):
+                    self.Str_TextEditBox.setText(str(uuid.uuid4()))
+
+            Str_UButton = self.EditBox.addWidget(gui.Button('Update'))
+
+            @Str_UButton.mhEvent
             def onClicked(event):
+                data[key] = self.Str_TextEditBox.getText()
+                self.history_ptr['current'] += 1
+                self.history[self.history_ptr['current']] = copy.deepcopy(self.asset)
+                if self.history_ptr['head'] < self.history_ptr['current']:
+                    self.history_ptr['head'] = self.history_ptr['current']
+                self.set_assetInfoText(self.asset)
 
-                data[key] = restoredata[key]
-                ritemlist = list(data[key])
-                for i in range(0, len(Set_TextEditBox) - len(ritemlist)):
-                    ritemlist.append(" ")
-                i = 0
-                for set_texteditboxes in Set_TextEditBox:
-                    set_texteditboxes.setText(ritemlist[i])
-                    i += 1
+    def getNewData(self):
+        self.AssetEditor(self.editkey, self.asset, length=5)
 
-                self.set_assetInfoText(data)
-
-        return data
 
 
 
@@ -286,8 +308,11 @@ class AssetEditorTaskView(gui3d.TaskView):
         if not asset:
             desc = "<big>Nothing selected</big>"
         else:
-            print asset
-            desc = "<big>" + asset["name"] + "</big><br />\n&nbsp;<br />\n"
+
+            if not asset['name']:
+                desc = "<big>" + " " + "</big><br />\n&nbsp;<br />\n"
+            else:
+                desc = "<big>" + asset["name"] + "</big><br />\n&nbsp;<br />\n"
             for k in asset["pertinentCommentKeys"]:
                 value = asset[k]
                 if not value:
