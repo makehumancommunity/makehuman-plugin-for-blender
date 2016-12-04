@@ -32,8 +32,8 @@ import mh
 import copy
 import uuid
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt4 import *
+from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from progress import Progress
@@ -69,7 +69,7 @@ class AssetEditorTaskView(gui3d.TaskView):
 # selectBox contains asset type selector ...:
 
         self.selectBox = self.addLeftWidget(gui.GroupBox('Select Asset Type'))
-        self.selectBox.addWidget(gui.TextView("\nType:"))
+        self.selectBox.addWidget(gui.TextView("Type:"))
 
         types = [ "Clothes",
                   "Models",
@@ -84,33 +84,41 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.typeList = mhapi.ui.createComboBox(types, self.onTypeChange)
         self.selectBox.addWidget(self.typeList)
 
-#  ...and editor type selector:
-
-        self.selectBox.addWidget(gui.TextView("\nEdit Type:"))
-        edittype  = []
-
-        self.tagList = mhapi.ui.createComboBox(edittype, self.onEditChange)
-        self.selectBox.addWidget(self.tagList)
-
 # The main window:
 
         self.mainPanel = QtGui.QWidget()
-        layout = QtGui.QVBoxLayout()
-        self.mainPanel.setLayout(layout)
+        self.assetInfoText = gui.TextView("")
+
+        mainLayout = QVBoxLayout(self.mainPanel)
+        mainLayout.addWidget(self.assetInfoText)
+        mainLayout.addStretch(1)
+
+        scrollableWidget = QWidget()
+        scrollableWidget.setLayout(mainLayout)
+
+        scroll = QScrollArea()
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(scrollableWidget)
+
+        scrollLayout = QVBoxLayout()
+        scrollLayout.addWidget(scroll)
+        self.mainPanel.setLayout(scrollLayout)
+
         self.addTopWidget(self.mainPanel)
 
-        self.assetInfoBox = gui.GroupBox("Asset info")
-        self.assetInfoText = self.assetInfoBox.addWidget(gui.TextView(""))
-        layout.addWidget(self.assetInfoBox)
         self.set_assetInfoText(self.asset)
-        scroll = QtGui.QScrollArea()
-        scroll.setWidget(self.assetInfoBox)
-        scroll.setWidgetResizable(True)
-        layout.addWidget(scroll)
 
- # The editor box:
+# The editor box:
 
-        self.EditBox = self.addLeftWidget(gui.GroupBox("Edit: "))
+        self.fieldBox = gui.GroupBox("Field to edit")
+        edittype  = []
+        self.tagList = mhapi.ui.createComboBox(edittype, self.onEditChange)
+        self.fieldBox.addWidget(self.tagList)
+        self.addLeftWidget(self.fieldBox)
+
+        self.EditBox = self.addLeftWidget(gui.GroupBox("Field data: "))
 
 # The history box:
 
@@ -260,7 +268,7 @@ class AssetEditorTaskView(gui3d.TaskView):
                 itemlist.append(" ")
 
             self.Set_TextEditBoxes = [self.EditBox.addWidget(qtgui.TextEdit(items)) for items in itemlist]
-            Set_UButton = self.EditBox.addWidget(gui.Button('Update'))
+            Set_UButton = self.EditBox.addWidget(gui.Button('Set field data'))
 
             @Set_UButton.mhEvent
             def onClicked(event):
@@ -288,7 +296,7 @@ class AssetEditorTaskView(gui3d.TaskView):
                 def onClicked(event):
                     self.Str_TextEditBox.setText(str(uuid.uuid4()))
 
-            Str_UButton = self.EditBox.addWidget(gui.Button('Update'))
+            Str_UButton = self.EditBox.addWidget(gui.Button('Set field data'))
 
             @Str_UButton.mhEvent
             def onClicked(event):
@@ -326,13 +334,13 @@ class AssetEditorTaskView(gui3d.TaskView):
                 value = asset[k]
                 if not value:
                     value = "-"
-                desc += "<b><tt>" + k.ljust(15,".") + ": </tt></b>" + value + "<br />\n"
+                desc += "<b><tt>" + k.ljust(25,".") + ": </tt></b>" + value + "<br />\n"
             for k in asset["pertinentKeys"]:
                 if not k == "name":
                     value = asset[k]
                     if not value:
                         value = "-"
-                    desc += "<b><tt>" + k.ljust(15,".") + ": </tt></b>" + value + "<br />\n"
+                    desc += "<b><tt>" + k.ljust(25,".") + ": </tt></b>" + value + "<br />\n"
             for k in asset["pertinentExtraKeys"]:
                 value = asset[k]
                 if not value:
@@ -342,7 +350,7 @@ class AssetEditorTaskView(gui3d.TaskView):
                     for item in list(value):
                         valuestr = valuestr + " " + item
 
-                desc += "<b><tt>" + k.ljust(15,".") + ": </tt></b>" + valuestr + "<br />\n"
+                desc += "<b><tt>" + k.ljust(25,".") + ": </tt></b>" + valuestr + "<br />\n"
                 
         self.assetInfoText.setText(desc)
 
