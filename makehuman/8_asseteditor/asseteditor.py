@@ -17,10 +17,9 @@
 Abstract
 --------
 
-This plugin edits assets
+This plugin edits asset text files
 
 """
-# Todo: implement writeAssetData(), yet no quality checking,  material chooser, ...
 
 import gui3d
 import qtgui
@@ -109,12 +108,6 @@ class AssetEditorTaskView(gui3d.TaskView):
         scroll.setWidgetResizable(True)
         layout.addWidget(scroll)
 
-        self.assetThumbBox = gui.GroupBox("Asset thumbnail (if any)")
-        self.thumbnail = self.assetThumbBox.addWidget(gui.TextView())
-        self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
-        self.thumbnail.setGeometry(0, 0, 128, 128)
-        layout.addWidget(self.assetThumbBox)
-
  # The editor box:
 
         self.EditBox = self.addLeftWidget(gui.GroupBox("Edit: "))
@@ -140,6 +133,13 @@ class AssetEditorTaskView(gui3d.TaskView):
                 self.asset = copy.deepcopy(self.history[self.history_ptr['current']])
                 self.set_assetInfoText(self.asset)
                 self.getNewData()
+
+# Thumbnail
+        self.assetThumbBox = gui.GroupBox("Thumb (if any)")
+        self.thumbnail = self.assetThumbBox.addWidget(gui.TextView())
+        self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
+        self.thumbnail.setGeometry(0, 0, 128, 128)
+        self.addLeftWidget(self.assetThumbBox)
 
 
 
