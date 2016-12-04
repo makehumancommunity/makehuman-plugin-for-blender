@@ -69,7 +69,6 @@ class AssetEditorTaskView(gui3d.TaskView):
 # selectBox contains asset type selector ...:
 
         self.selectBox = self.addLeftWidget(gui.GroupBox('Select Asset Type'))
-        self.selectBox.addWidget(gui.TextView("Type:"))
 
         types = [ "Clothes",
                   "Models",
@@ -142,8 +141,35 @@ class AssetEditorTaskView(gui3d.TaskView):
                 self.set_assetInfoText(self.asset)
                 self.getNewData()
 
+# Save button
+
+        self.saveBox = self.addLeftWidget(gui.GroupBox("Save asset: "))
+
+        # Yes, this looks stupid. But it's necessary, because the left panel isn't
+        # set to have a fixed size. Even if word wrap is enabled, the left panel
+        # will grow if the lines aren't manyally wrapped.
+        msg = ""
+        msg = msg + "When you click the save\n"        
+        msg = msg + "button, the asset will be\n"
+        msg = msg + "written back to the original\n"
+        msg = msg + "file, but a .bak file will\n"
+        msg = msg + "be created with the original\n"
+        msg = msg + "data."
+
+        self.saveInfo = gui.TextView(msg)
+        self.saveInfo.setWordWrap(True)
+        self.saveBox.addWidget(self.saveInfo)
+        self.saveButton = self.saveBox.addWidget(gui.Button('Save'))
+
+        @self.saveButton.mhEvent
+        def onClicked(event):
+            if self.asset:
+                mhapi.assets.writeAssetFile(self.asset,True)
+                self.showMessage("Asset was saved as " + self.asset["absolute path"] + "\n\nA backup file was created in " + self.asset["absolute path"] + ".bak")
+
+
 # Thumbnail
-        self.assetThumbBox = gui.GroupBox("Thumb (if any)")
+        self.assetThumbBox = gui.GroupBox("Thumbnail (if any)")
         self.thumbnail = self.assetThumbBox.addWidget(gui.TextView())
         self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
         self.thumbnail.setGeometry(0, 0, 128, 128)
@@ -162,7 +188,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         @self.filechooser.mhEvent
         def onFileSelected(filename):
 
-            assetInfo = mhapi.assets.openAssetFile(filename,True)
+            assetInfo = mhapi.assets.openAssetFile(filename)
             if assetInfo["thumb_path"]:
                 self.thumbnail.setPixmap(QtGui.QPixmap(assetInfo["thumb_path"]))
             else:
@@ -354,3 +380,10 @@ class AssetEditorTaskView(gui3d.TaskView):
                 
         self.assetInfoText.setText(desc)
 
+    def showMessage(self,message,title="Information"):
+        self.msg = QtGui.QMessageBox()
+        self.msg.setIcon(QtGui.QMessageBox.Information)
+        self.msg.setText(message)
+        self.msg.setWindowTitle(title)
+        self.msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        self.msg.show()
