@@ -39,6 +39,8 @@ class Assets(NameSpace):
             "z_scale"
         ]
 
+        self.proxyExtraKeys = ["material"]
+
         self.materialKeys = [
             "diffuseColor",
             "specularColor",
@@ -139,6 +141,14 @@ class Assets(NameSpace):
                 if key == pk:
                     assetInfo[pk] = value
 
+        for genericExtraKeyName in self.proxyExtraKeys:
+            assetInfo[genericExtraKeyName] = set()
+            for rawkey in assetInfo["rawkeys"]:
+                rawKeyName = rawkey[0]
+                rawKeyValue = rawkey[1]
+                if rawKeyName == genericExtraKeyName:
+                    assetInfo[genericExtraKeyName].add(rawKeyValue)
+
     def _parseMaterialKeys(self,assetInfo):
         for pk in self.materialKeys:
             assetInfo[pk] = None
@@ -148,16 +158,6 @@ class Assets(NameSpace):
                 if key == pk:
                     assetInfo[pk] = value
 
-
-    def _parseMaterials(self,assetInfo):
-        if not "materials" in assetInfo:
-            assetInfo["materials"] = []
-        for k in assetInfo["rawkeys"]:
-            key = k[0]
-            value = k[1]
-            if key == "material":
-                assetInfo['materials'].append(value)
-
     def _addPertinentKeyInfo(self,assetInfo):
 
         pertinentKeys = list(self.genericKeys)
@@ -166,6 +166,7 @@ class Assets(NameSpace):
 
         if assetInfo["type"] == "proxy":
             pertinentKeys.extend(self.proxyKeys)
+            pertinentExtraKeys.extend(self.proxyExtraKeys)
 
         if assetInfo["type"] == "material":
             pertinentKeys.extend(self.materialKeys)
