@@ -39,6 +39,7 @@ from PyQt4.QtGui import *
 from progress import Progress
 from core import G
 
+from bestpractice import getBestPractice
 
 mhapi = gui3d.app.mhapi
 
@@ -87,9 +88,12 @@ class AssetEditorTaskView(gui3d.TaskView):
 
         self.mainPanel = QtGui.QWidget()
         self.assetInfoText = gui.TextView("")
+        self.bestPractice = gui.TextView("")
+        self.bestPractice.setWordWrap(True)
 
         mainLayout = QVBoxLayout(self.mainPanel)
         mainLayout.addWidget(self.assetInfoText)
+        mainLayout.addWidget(self.bestPractice)
         mainLayout.addStretch(1)
 
         scrollableWidget = QWidget()
@@ -348,6 +352,8 @@ class AssetEditorTaskView(gui3d.TaskView):
 
     def set_assetInfoText(self, asset = None):
         
+        msg = ""
+
         if not asset:
             desc = "<big>Nothing selected</big>"
         else:
@@ -377,8 +383,27 @@ class AssetEditorTaskView(gui3d.TaskView):
                         valuestr = valuestr + " " + item
 
                 desc += "<b><tt>" + k.ljust(25,".") + ": </tt></b>" + valuestr + "<br />\n"
-                
+        
+            msg = "\n<big>Best practice recommendations</big><br />&nbsp;<br />"
+            msg = msg + "If nothing is shown below this point, the asset is probably living up to all expectations.<br />"
+
+            bp = getBestPractice(self.asset)
+
+            if not bp is None:
+                msg = msg + "<ul>"
+
+                for e in bp.errors:
+                    msg = msg + "<li>&nbsp;ERROR: " + e + "</li>\n"
+
+                for w in bp.warnings:
+                    msg = msg + "<li>&nbsp;WARNING: " + w + "</li>\n"
+
+                for h in bp.hints:
+                    msg = msg + "<li>&nbsp;HINT: " + h + "</li>\n"
+
         self.assetInfoText.setText(desc)
+        self.bestPractice.setText(msg)
+
 
     def showMessage(self,message,title="Information"):
         self.msg = QtGui.QMessageBox()
