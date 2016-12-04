@@ -20,7 +20,7 @@ Abstract
 This plugin edits assets
 
 """
-#Todo: implement writeAssetData(), yet no quality checking,  material chooser, ...
+# Todo: implement writeAssetData(), yet no quality checking,  material chooser, ...
 
 import gui3d
 import qtgui
@@ -40,7 +40,6 @@ from PyQt4.QtGui import *
 from progress import Progress
 from core import G
 
-from codecs import open
 
 mhapi = gui3d.app.mhapi
 
@@ -52,7 +51,7 @@ class AssetEditorTaskView(gui3d.TaskView):
 
         gui3d.TaskView.__init__(self, category, 'Asset Editor')
 
-# Initalitsaions of some basic variables:
+# Initalisations of some basic variables:
 
         assetfolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes')]
         extensions = "mhclo"
@@ -68,7 +67,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.history = dict()
         self.history_ptr = {'current' : 0, 'head' : 0}
 
-# selectBox contains asset type selector ...
+# selectBox contains asset type selector ...:
 
         self.selectBox = self.addLeftWidget(gui.GroupBox('Select Asset Type'))
         self.selectBox.addWidget(gui.TextView("\nType:"))
@@ -86,7 +85,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.typeList = mhapi.ui.createComboBox(types, self.onTypeChange)
         self.selectBox.addWidget(self.typeList)
 
-#  ...and editor type selector
+#  ...and editor type selector:
 
         self.selectBox.addWidget(gui.TextView("\nEdit Type:"))
         edittype  = []
@@ -94,10 +93,34 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.tagList = mhapi.ui.createComboBox(edittype, self.onEditChange)
         self.selectBox.addWidget(self.tagList)
 
- # The editor box
+# The main window:
+
+        self.mainPanel = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout()
+        self.mainPanel.setLayout(layout)
+        self.addTopWidget(self.mainPanel)
+
+        self.assetInfoBox = gui.GroupBox("Asset info")
+        self.assetInfoText = self.assetInfoBox.addWidget(gui.TextView(""))
+        layout.addWidget(self.assetInfoBox)
+        self.set_assetInfoText(self.asset)
+        scroll = QtGui.QScrollArea()
+        scroll.setWidget(self.assetInfoBox)
+        scroll.setWidgetResizable(True)
+        layout.addWidget(scroll)
+
+        self.assetThumbBox = gui.GroupBox("Asset thumbnail (if any)")
+        self.thumbnail = self.assetThumbBox.addWidget(gui.TextView())
+        self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
+        self.thumbnail.setGeometry(0, 0, 128, 128)
+        layout.addWidget(self.assetThumbBox)
+
+ # The editor box:
+
         self.EditBox = self.addLeftWidget(gui.GroupBox("Edit: "))
 
-# The history box
+# The history box:
+
         self.HistoryBox = self.addLeftWidget(gui.GroupBox("History: "))
         UndoButton = self.HistoryBox.addWidget(gui.Button('Undo'))
         RedoButton = self.HistoryBox.addWidget(gui.Button('Redo'))
@@ -126,21 +149,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.filechooser.setIconSize(50,50)
         self.filechooser.enableAutoRefresh(True)
 
-        self.mainPanel = QtGui.QWidget()
-        layout = QtGui.QVBoxLayout()
-        self.mainPanel.setLayout(layout)
-        self.addTopWidget(self.mainPanel)
 
-        self.assetInfoBox = gui.GroupBox("Asset info")
-        self.assetInfoText = self.assetInfoBox.addWidget(gui.TextView(""))
-        layout.addWidget(self.assetInfoBox)
-        self.set_assetInfoText(self.asset)
-
-        self.assetThumbBox = gui.GroupBox("Asset thumbnail (if any)")
-        self.thumbnail = self.assetThumbBox.addWidget(gui.TextView())
-        self.thumbnail.setPixmap(QtGui.QPixmap(os.path.abspath(self.notfound)))
-        self.thumbnail.setGeometry(0, 0, 128, 128)
-        layout.addWidget(self.assetThumbBox)
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
@@ -170,10 +179,10 @@ class AssetEditorTaskView(gui3d.TaskView):
             self.getNewData()
 
 # Update filechooser on asset type:
+
     def onTypeChange(self, item=None):
 
         assetType = str(item)
-
 
         self.filechooser.hide()
 
@@ -207,16 +216,16 @@ class AssetEditorTaskView(gui3d.TaskView):
             extensions = "mhm"
 
 
-
-
-
         self.selected_Type = assetType
         self.filechooser.extensions = extensions
         self.filechooser.setPaths(assetfolder)
         self.filechooser.refresh()
         self.filechooser.show()
 
-# Show  asset editor on edit type
+
+
+# Show  asset editor on edit type:
+
     def onEditChange(self, item=None):
 
         self.editkey = str(item)
