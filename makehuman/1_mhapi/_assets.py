@@ -220,24 +220,78 @@ class Assets(NameSpace):
         print ap
 
         with codecs.open(ap,'w','utf8') as f:
+
+            stillNeedToDumpCommentKeys = True
+
+            writtenKeys = []
+            writtenCommentKeys = []
+            writtenExtraKeys = []
+
+            remainingKeys = list(assetInfo["pertinentKeys"]);
+            remainingCommentKeys = list(assetInfo["pertinentCommentKeys"]);
+            remainingExtraKeys = list(assetInfo["pertinentExtraKeys"]);
+
             for line in assetInfo["rawlines"]:
                 allowWrite = True
                 m = re.match(r"^([a-zA-Z_]+)\s+(.*)$",line)
                 if m:
+                    # If this is the first line without a hash sign, we want to 
+                    # dump the remaining comment keys before doing anything else
+                    if stillNeedToDumpCommentKeys:
+                        if len(remainingCommentKeys) > 0:
+                            for key in remainingCommentKeys:
+                                if not assetInfo[key] is None:
+                                    f.write("# " + key + " " + assetInfo[key] + "\x0a")
+
+                        stillNeedToDumpCommentKeys = False
+
                     key = m.group(1)
-                    if key in assetInfo["pertinentKeys"]:
-                        print "exists"
+
+                    if key in remainingKeys:
+                        print key + " is a normal key"
                         allowWrite = False
                         if not assetInfo[key] is None:
                             f.write(key + " " + assetInfo[key] + "\x0a")
+                        writtenKeys.append(key)
+                        remainingKeys.remove(key)
+
+                    if key in remainingExtraKeys:
+                        print key + " is an extra key"
+                        allowWrite = False
+
+                        if not assetInfo[key] is None and len(assetInfo[key]) > 0 and not key in writtenExtraKeys:
+                            for val in assetInfo[key]:
+                                f.write(key + " " + val + "\x0a")
+                        writtenExtraKeys.append(key)
+                        remainingExtraKeys.remove(key)
+
+                    if key in writtenExtraKeys:
+                        allowWrite = False
 
                 m = re.match(r"^#\s+([a-zA-Z_]+)\s+(.*)$",line)
                 if m:
                     key = m.group(1)
-                    if key in assetInfo["pertinentCommentKeys"]:
+
+                    if key in remainingCommentKeys:
+                        print key + " is a comment key"
                         allowWrite = False
                         if not assetInfo[key] is None:
                             f.write("# " + key + " " + assetInfo[key] + "\x0a")
+                        writtenCommentKeys.append(key)
+                        remainingCommentKeys.remove(key)
+
                 if allowWrite:
                     f.write(line + "\x0a")
+
+            if len(remainingKeys) > 0:
+                for key in remainingKeys:
+                    if not assetInfo[key] is None:
+                        f.write(key + " " + assetInfo[key] + "\x0a")
+
+            if len(remainingExtraKeys) > 0:
+                for key in remainingExtraKeys:
+                    if not assetInfo[key] is None and len(assetInfo[key]) > 0:
+                        for val in assetInfo[key]:
+                            f.write(key + " " + val + "\x0a")
+
         return True
