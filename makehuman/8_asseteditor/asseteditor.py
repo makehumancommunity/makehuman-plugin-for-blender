@@ -30,7 +30,7 @@ import os
 import re
 import mh
 import copy
-import uuid
+#import uuid
 
 from PyQt4 import *
 from PyQt4.QtCore import *
@@ -328,6 +328,7 @@ class AssetEditorTaskView(gui3d.TaskView):
 
                 @UUIDButton.mhEvent
                 def onClicked(event):
+                    import uuid
                     self.Str_TextEditBox.setText(str(uuid.uuid4()))
 
             Str_UButton = self.EditBox.addWidget(gui.Button('Set field data'))
