@@ -206,12 +206,16 @@ class AssetEditorTaskView(gui3d.TaskView):
             self.set_assetInfoText(self.asset)
 
             self.tagList.clear()
+
+            newList = []
+
+            newList.extend(assetInfo["pertinentKeys"])
+            newList.extend(assetInfo["pertinentCommentKeys"])
+            newList.extend(assetInfo["pertinentExtraKeys"])
             
-            for k in assetInfo["pertinentKeys"]:
-                self.tagList.addItem(k)
-            for k in assetInfo["pertinentCommentKeys"]:
-                self.tagList.addItem(k)
-            for k in assetInfo["pertinentExtraKeys"]:
+            newList.sort()
+
+            for k in newList:
                 self.tagList.addItem(k)
 
             self.getNewData()
