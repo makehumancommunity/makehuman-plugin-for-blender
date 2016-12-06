@@ -37,7 +37,7 @@ from progress import Progress
 from core import G
 
 # delete ?
- 
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -144,8 +144,10 @@ class AssetEditorTaskView(gui3d.TaskView):
         @UndoButton.mhEvent
         def onClicked(event):
             if self.history_ptr['current'] > 0:
+                key, val = self.history[self.history_ptr['current']]
+                self.history[self.history_ptr['current']] = [key, self.asset[key]]
                 self.history_ptr['current'] -= 1
-                self.asset = copy.deepcopy(self.history[self.history_ptr['current']])
+                self.asset[key] = val
                 self.set_assetInfoText(self.asset)
                 self.getNewData()
 
@@ -153,7 +155,9 @@ class AssetEditorTaskView(gui3d.TaskView):
         def onClicked(event):
             if self.history_ptr['current'] < self.history_ptr['head']:
                 self.history_ptr['current'] += 1
-                self.asset = copy.deepcopy(self.history[self.history_ptr['current']])
+                key, val = self.history[self.history_ptr['current']]
+                self.history[self.history_ptr['current']] = [key, self.asset[key]]
+                self.asset[key] = val
                 self.set_assetInfoText(self.asset)
                 self.getNewData()
 
@@ -214,7 +218,6 @@ class AssetEditorTaskView(gui3d.TaskView):
             self.asset = assetInfo
             self.history.clear()
             self.history_ptr = {'current': 0, 'head': 0}
-            self.history[0] = copy.deepcopy(self.asset)
             self.set_assetInfoText(self.asset)
 
             self.tagList.clear()
@@ -318,7 +321,8 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @Set_UButton.mhEvent
             def onClicked(event):
-
+                print "Debug :", self.history_ptr
+                print "Debug :", self.history
                 change_set = set()
                 for set_texteditbox in self.Set_TextEditBoxes:
                     change_set.add(set_texteditbox.getText())
@@ -326,12 +330,11 @@ class AssetEditorTaskView(gui3d.TaskView):
                     change_set.remove("")
                 if " " in change_set:
                     change_set.remove(" ")
-                data[key] = change_set
                 self.history_ptr['current'] += 1
-                self.history[self.history_ptr['current']] = copy.deepcopy(self.asset)
-                if self.history_ptr['head'] < self.history_ptr['current']:
-                    self.history_ptr['head'] = self.history_ptr['current']
-                self.set_assetInfoText(self.asset)
+                self.history[self.history_ptr['current']] = [key, data[key]]
+                data[key] = change_set
+                self.history_ptr['head'] = self.history_ptr['current']
+                self.set_assetInfoText(data)
 
         else:
             self.Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(data[key]))
@@ -346,12 +349,11 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @Str_UButton.mhEvent
             def onClicked(event):
-                data[key] = self.Str_TextEditBox.getText()
                 self.history_ptr['current'] += 1
-                self.history[self.history_ptr['current']] = copy.deepcopy(self.asset)
-                if self.history_ptr['head'] < self.history_ptr['current']:
-                    self.history_ptr['head'] = self.history_ptr['current']
-                self.set_assetInfoText(self.asset)
+                self.history[self.history_ptr['current']] = [key, data[key]]
+                data[key] = self.Str_TextEditBox.getText()
+                self.history_ptr['head'] = self.history_ptr['current']
+                self.set_assetInfoText(data)
 
     def getNewData(self):
         self.AssetEditor(self.editkey, self.asset, length=5)
