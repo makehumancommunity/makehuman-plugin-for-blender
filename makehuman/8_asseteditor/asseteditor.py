@@ -25,23 +25,35 @@ import gui3d
 import qtgui
 import filechooser as fc
 import gui
-import log
 import os
+import copy
+
+# currently unused imports:
+import log
 import re
 import mh
-import copy
-#import uuid
-
 from PyQt4 import *
+from progress import Progress
+from core import G
+
+# delete ?
+ 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-from progress import Progress
-from core import G
+import sys
+if sys.platform == "win32":
+    from . import uuid4 as uuid
+else:
+    import uuid
+
+
 
 from bestpractice import getBestPractice
 
 mhapi = gui3d.app.mhapi
+
+
 
 
 # The AssetEditor task:
@@ -328,7 +340,6 @@ class AssetEditorTaskView(gui3d.TaskView):
 
                 @UUIDButton.mhEvent
                 def onClicked(event):
-                    import uuid
                     self.Str_TextEditBox.setText(str(uuid.uuid4()))
 
             Str_UButton = self.EditBox.addWidget(gui.Button('Set field data'))
