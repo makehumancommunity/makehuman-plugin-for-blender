@@ -129,7 +129,7 @@ class _ProxyBestPractice(_GenericBestPractice):
     def _processWarnings(self):
 
         if not self.testKey("material"):
-            self.warnings.add("No material has been assigned")
+            self.warnings.append("No material has been assigned")
 
     def _processErrors(self):
         self.testFile("material")
