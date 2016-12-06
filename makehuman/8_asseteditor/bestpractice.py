@@ -61,7 +61,7 @@ class _GenericBestPractice(object):
     def _dontUseAGPL(self):
         if self.testKey("license"):
             if "AGPL" in self.assetInfo["license"]:
-                self.warnings.append("License is set to AGPL. As only CC and CC-BY is allowed in the asset repos, AGPL is probably there because MakeClothes set it per default.")
+                self.warnings.append("License is set to AGPL. As only CC0 and CC-BY is allowed in the asset repos, AGPL is probably there because MakeClothes set it per default.")
 
     def testFile(self,keyName,notAnError = False):
 

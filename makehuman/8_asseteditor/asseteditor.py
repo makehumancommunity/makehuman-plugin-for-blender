@@ -315,8 +315,6 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @Set_UButton.mhEvent
             def onClicked(event):
-                print "Debug :", self.history_ptr
-                print "Debug :", self.history
                 change_set = set()
                 for set_texteditbox in self.Set_TextEditBoxes:
                     change_set.add(set_texteditbox.getText())
