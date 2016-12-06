@@ -299,7 +299,7 @@ class AssetEditorTaskView(gui3d.TaskView):
                 length = len(itemlist)
 
             for i in range(0, length - len(itemlist)):
-                itemlist.append(" ")
+                itemlist.append("")
 
             self.Set_TextEditBoxes = [self.EditBox.addWidget(qtgui.TextEdit(items)) for items in itemlist]
             Set_UButton = self.EditBox.addWidget(gui.Button('Set field data'))
@@ -346,12 +346,6 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.AssetEditor(self.editkey, self.asset, length=5)
 
 
-
-
-#Todo: Implement asset file writter:
-
-    def writeAssetData(self, filename, TAssets):
-        pass
 
 # The asset info window:
 
