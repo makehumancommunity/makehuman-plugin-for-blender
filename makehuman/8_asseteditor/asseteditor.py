@@ -41,19 +41,13 @@ from core import G
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-import sys
-if sys.platform == "win32":
-    from . import uuid4 as uuid
-else:
-    import uuid
-
-
+import uuid4 as uuid
 
 from bestpractice import getBestPractice
 
+
+
 mhapi = gui3d.app.mhapi
-
-
 
 
 # The AssetEditor task:
