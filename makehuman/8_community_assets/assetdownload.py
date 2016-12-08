@@ -61,7 +61,9 @@ class AssetDownloadTaskView(gui3d.TaskView):
             "Target",
             "Clothes",
             "Hair",
-            "Skin"
+            "Skin",
+            "Proxy",
+            "Pose"
         ]
 
         self.typeList = mhapi.ui.createComboBox(types,self.onTypeChange)
@@ -172,6 +174,8 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 assets = self.proxyNames
             if assetType == "Skin":
                 assets = self.skinNames
+            if assetType == "Pose":
+                assets = self.poseNames
 
             self.assetList.setData(sorted(assets))
 
@@ -247,6 +251,10 @@ class AssetDownloadTaskView(gui3d.TaskView):
             self.onSelectClothes()
         if assetType == "Hair":
             self.onSelectHair()
+        if assetType == "Pose":
+            self.onSelectPose()
+        if assetType == "Proxy":
+            self.onSelectProxy()
 
     def showButtonClick(self):
         self.showMessage("message","title")
@@ -264,6 +272,10 @@ class AssetDownloadTaskView(gui3d.TaskView):
             self.downloadClothes()
         if assetType == "Hair":
             self.downloadHair()
+        if assetType == "Pose":
+            self.downloadPose()
+        if assetType == "Proxy":
+            self.downloadProxy()
 
     def refreshButtonClick(self):
 
@@ -311,6 +323,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.skinAssets = []
         self.targetAssets = []
         self.proxyAssets = []
+        self.poseAssets = []
 
         self.clothesNames = dict()
         self.clothesNames["All"] = [];
@@ -319,6 +332,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.skinNames = []
         self.targetNames = []
         self.proxyNames = []
+        self.poseNames = []
 
         for key in assetJson.keys():
             asset = assetJson[key]
@@ -359,6 +373,12 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 self.proxyAssets.append(asset)
                 self.proxyNames.append(asset["title"])
                 found = True
+
+            if aType == "pose":
+                self.poseAssets.append(asset)
+                self.poseNames.append(asset["title"])
+                found = True
+
 
             if not found:
                 log.debug("Unmatched asset type. " + str(asset["nid"]) + " (" + asset["type"] + "): " + asset["title"])
@@ -468,6 +488,28 @@ class AssetDownloadTaskView(gui3d.TaskView):
             self.setDescription(foundAsset)
             self.setThumbScreenshot(foundAsset)
 
+    def onSelectPose(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.poseAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+
+    def onSelectProxy(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.proxyAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+
     def onSelectSkin(self):
         foundAsset = None
         name = str(self.assetList.currentItem().text)
@@ -540,6 +582,17 @@ class AssetDownloadTaskView(gui3d.TaskView):
             key = "mhmat"
         if asset["type"] == "target":
             key = "file"
+        if asset["type"] == "pose":
+            key = "bvh"
+        if asset["type"] == "proxy":
+            key = "file"
+
+        ext = key
+
+        if asset["type"] == "target":
+            ext = "target"
+        if asset["type"] == "proxy":
+            ext = "proxy"
 
         msg = "Asset was downloaded"
         base = ""
@@ -547,7 +600,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         if key:
             url = asset["files"][key]
             mbase = url.rsplit('/', 1)[-1]
-            mbase = mbase.replace("." + key,"")
+            mbase = mbase.replace("." + ext,"")
             base = mbase
             mbase = mbase.replace("_"," ")            
             msg = msg + " as \"" + mbase + "\""
@@ -609,5 +662,25 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         if foundAsset:
             self.downloadAsset(foundAsset,"skins")
+
+    def downloadPose(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.poseAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"poses")
+
+    def downloadProxy(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.proxyAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"proxymeshes")
 
 
