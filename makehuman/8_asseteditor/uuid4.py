@@ -17,6 +17,3 @@ def uuid4():
         elif uuid_str[i] == 'Y':
             uuid_str[i] = hex_str[random.randint(8,11)]
     return str().join(uuid_str)
-
-for i in range(30):
-    print uuid4()
