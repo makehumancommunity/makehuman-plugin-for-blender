@@ -99,17 +99,11 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.midEditBox = gui.GroupBox("Edit :")
         self.midEditBox.hide()
         self.midTextEdit = self.midEditBox.addWidget(QtGui.QTextEdit(''))
-        self.midButtonBox = gui.GroupBox('')
-        self.midButtonBox.hide()
-        self.cancelButton = self.midButtonBox.addWidget(gui.Button('Cancel'))
-        self.okButton = self.midButtonBox.addWidget(gui.Button('OK'))
-
 
         mainLayout = QVBoxLayout(self.mainPanel)
         mainLayout.addWidget(self.assetInfoText)
         mainLayout.addWidget(self.bestPractice)
         mainLayout.addWidget(self.midEditBox)
-        mainLayout.addWidget(self.midButtonBox)
         mainLayout.addStretch(1)
 
         scrollableWidget = QWidget()
@@ -173,7 +167,7 @@ class AssetEditorTaskView(gui3d.TaskView):
         # set to have a fixed size. Even if word wrap is enabled, the left panel
         # will grow if the lines aren't manyally wrapped.
         msg = ""
-        msg = msg + "When you click the save\n"        
+        msg = msg + "When you click the save\n"
         msg = msg + "button, the asset will be\n"
         msg = msg + "written back to the original\n"
         msg = msg + "file, but a .bak file will\n"
@@ -231,7 +225,7 @@ class AssetEditorTaskView(gui3d.TaskView):
             newList.extend(assetInfo["pertinentKeys"])
             newList.extend(assetInfo["pertinentCommentKeys"])
             newList.extend(assetInfo["pertinentExtraKeys"])
-            
+
             newList.sort()
 
             for k in newList:
@@ -340,32 +334,42 @@ class AssetEditorTaskView(gui3d.TaskView):
 
         elif key in ['description', 'license']:
             self.descInfo = self.EditBox.addWidget(gui.TextView('Edit ' + key + ' in middle window:'))
-            self.descEditBotton = self.EditBox.addWidget(gui.Button('Edit'))
+            self.descEditButton = self.EditBox.addWidget(gui.Button('Edit'))
 
 
-            @self.descEditBotton.mhEvent
+            @self.descEditButton.mhEvent
             def onClicked(event):
                 self.assetInfoText.hide()
                 self.bestPractice.hide()
                 self.midEditBox.show()
-                self.midButtonBox.show()
+                self.EditBox.removeWidget(self.descInfo)
+                self.EditBox.removeWidget(self.descEditButton)
+                self.cancelButton = self.EditBox.addWidget(gui.Button('Cancel'))
+                self.okButton = self.EditBox.addWidget(gui.Button('OK'))
                 self.midTextEdit.setText(data[key])
+
 
                 @self.cancelButton.mhEvent
                 def onClicked(event):
-                    self.midButtonBox.hide()
                     self.midEditBox.hide()
                     self.assetInfoText.show()
                     self.bestPractice.show()
+                    self.EditBox.removeWidget(self.cancelButton)
+                    self.EditBox.removeWidget(self.okButton)
+                    self.EditBox.addWidget(self.descInfo)
+                    self.EditBox.addWidget(self.descEditButton)
 
                 @self.okButton.mhEvent
                 def onClicked(event):
                     data[key]=self.midTextEdit.toPlainText()
-                    self.midButtonBox.hide()
                     self.midEditBox.hide()
                     self.assetInfoText.show()
                     self.bestPractice.show()
                     self.set_assetInfoText(data)
+                    self.EditBox.removeWidget(self.cancelButton)
+                    self.EditBox.removeWidget(self.okButton)
+                    self.EditBox.addWidget(self.descInfo)
+                    self.EditBox.addWidget(self.descEditButton)
 
 
         else:
