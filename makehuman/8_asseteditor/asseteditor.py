@@ -26,9 +26,9 @@ import qtgui
 import filechooser as fc
 import gui
 import os
-import copy
 
 # currently unused imports:
+import copy
 import log
 import re
 import mh
@@ -96,10 +96,20 @@ class AssetEditorTaskView(gui3d.TaskView):
         self.assetInfoText = gui.TextView("")
         self.bestPractice = gui.TextView("")
         self.bestPractice.setWordWrap(True)
+        self.midEditBox = gui.GroupBox("Edit :")
+        self.midEditBox.hide()
+        self.midTextEdit = self.midEditBox.addWidget(QtGui.QTextEdit(''))
+        self.midButtonBox = gui.GroupBox('')
+        self.midButtonBox.hide()
+        self.cancelButton = self.midButtonBox.addWidget(gui.Button('Cancel'))
+        self.okButton = self.midButtonBox.addWidget(gui.Button('OK'))
+
 
         mainLayout = QVBoxLayout(self.mainPanel)
         mainLayout.addWidget(self.assetInfoText)
         mainLayout.addWidget(self.bestPractice)
+        mainLayout.addWidget(self.midEditBox)
+        mainLayout.addWidget(self.midButtonBox)
         mainLayout.addStretch(1)
 
         scrollableWidget = QWidget()
@@ -327,6 +337,36 @@ class AssetEditorTaskView(gui3d.TaskView):
                 data[key] = change_set
                 self.history_ptr['head'] = self.history_ptr['current']
                 self.set_assetInfoText(data)
+
+        elif key in ['description', 'license']:
+            self.descInfo = self.EditBox.addWidget(gui.TextView('Edit ' + key + ' in middle window:'))
+            self.descEditBotton = self.EditBox.addWidget(gui.Button('Edit'))
+
+
+            @self.descEditBotton.mhEvent
+            def onClicked(event):
+                self.assetInfoText.hide()
+                self.bestPractice.hide()
+                self.midEditBox.show()
+                self.midButtonBox.show()
+                self.midTextEdit.setText(data[key])
+
+                @self.cancelButton.mhEvent
+                def onClicked(event):
+                    self.midButtonBox.hide()
+                    self.midEditBox.hide()
+                    self.assetInfoText.show()
+                    self.bestPractice.show()
+
+                @self.okButton.mhEvent
+                def onClicked(event):
+                    data[key]=self.midTextEdit.toPlainText()
+                    self.midButtonBox.hide()
+                    self.midEditBox.hide()
+                    self.assetInfoText.show()
+                    self.bestPractice.show()
+                    self.set_assetInfoText(data)
+
 
         else:
             self.Str_TextEditBox = self.EditBox.addWidget(qtgui.TextEdit(data[key]))
