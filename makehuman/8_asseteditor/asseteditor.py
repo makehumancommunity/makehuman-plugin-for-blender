@@ -117,6 +117,7 @@ class AssetEditorTaskView(gui3d.TaskView):
 
         scrollLayout = QVBoxLayout()
         scrollLayout.addWidget(scroll)
+
         self.mainPanel.setLayout(scrollLayout)
 
         self.addTopWidget(self.mainPanel)
@@ -339,6 +340,11 @@ class AssetEditorTaskView(gui3d.TaskView):
 
             @self.descEditButton.mhEvent
             def onClicked(event):
+                self.filechooser.setDisabled(True)
+                self.selectBox.setDisabled(True)
+                self.HistoryBox.setDisabled(True)
+                self.fieldBox.setDisabled(True)
+                self.saveBox.setDisabled(True)
                 self.assetInfoText.hide()
                 self.bestPractice.hide()
                 self.midEditBox.show()
@@ -358,6 +364,11 @@ class AssetEditorTaskView(gui3d.TaskView):
                     self.EditBox.removeWidget(self.okButton)
                     self.EditBox.addWidget(self.descInfo)
                     self.EditBox.addWidget(self.descEditButton)
+                    self.filechooser.setDisabled(False)
+                    self.selectBox.setDisabled(False)
+                    self.HistoryBox.setDisabled(False)
+                    self.fieldBox.setDisabled(False)
+                    self.saveBox.setDisabled(False)
 
                 @self.okButton.mhEvent
                 def onClicked(event):
@@ -370,6 +381,11 @@ class AssetEditorTaskView(gui3d.TaskView):
                     self.EditBox.removeWidget(self.okButton)
                     self.EditBox.addWidget(self.descInfo)
                     self.EditBox.addWidget(self.descEditButton)
+                    self.filechooser.setDisabled(False)
+                    self.selectBox.setDisabled(False)
+                    self.HistoryBox.setDisabled(False)
+                    self.fieldBox.setDisabled(False)
+                    self.saveBox.setDisabled(False)
 
 
         else:
