@@ -89,8 +89,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.extensions = "mhclo"
 
 
-        self.onEdit = False
-        self.onToggle = False
+        self.isEdit = False
+        self.isToggle = False
+        self.isUpdate = False
+        self.isReste = False
 
 
 # Define LeftWidget content here:
@@ -171,24 +173,22 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         InfoPanelLayout.addWidget(self.InfoButtonGroupBox)
 
-    # The ResetButton
 
+    # The ToggleEditButton
+        self.ToggleEditButton = gui.Button('Toggle Edit')
+        self.ToggleEditButton.sizeHint = lambda: QSize(125, 50)
+        self.ToggleEditButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        InfoButtonGroupLayout.addWidget(self.ToggleEditButton)
+        self.ToggleEditButton.setDisabled(True)
+
+    # The ResetButton
         self.ResetButton = gui.Button('Reset')
         self.ResetButton.sizeHint = lambda: QSize(125, 50)
         self.ResetButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         InfoButtonGroupLayout.addWidget(self.ResetButton)
         self.ResetButton.setDisabled(True)
 
-    # The ToggleButton
-
-        self.ToggleButton = gui.Button('Toggle')
-        self.ToggleButton.sizeHint = lambda: QSize(125, 50)
-        self.ToggleButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        InfoButtonGroupLayout.addWidget(self.ToggleButton)
-        self.ToggleButton.setDisabled(True)
-
     # The EditButton
-
         self.EditButton = gui.Button('Edit')
         self.EditButton.sizeHint = lambda: QSize(125, 50)
         self.EditButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -197,12 +197,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.InfoButtonGroupBox.setLayout(InfoButtonGroupLayout)
 
     # The AssetInfoBox
-
         self.AssetInfoBox = QGroupBox()
         AssetInfoLayout = QVBoxLayout(self.AssetInfoBox)
 
     # The AssetInfoText
-
         self.AssetInfoText = gui.TextView('')
         self.BestPracticeText = gui.TextView('')
 
@@ -225,23 +223,152 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.InfoPanel.setLayout(InfoPanelLayout)
 
-
         self.setAssetInfoText(self.asset)
 
 
+# Define EditorPanel (TopWidget) content here:
+
+    #The EditPanel
+        self.EditPanel = QWidget()
+        self.addTopWidget(self.EditPanel)
+
+        EditPanelLayout = QVBoxLayout(self.EditPanel)
+
+    #The EditButtonGroupBox
+        self.EditButtonGroupBox = QGroupBox()
+        self.EditButtonGroupBox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+
+        EditButtonGroupLayout = QHBoxLayout(self.EditButtonGroupBox)
+        EditButtonGroupLayout.addStretch(1)
+
+        EditPanelLayout.addWidget(self.EditButtonGroupBox)
+
+    # The RedoButton
+        self.RedoButton = gui.Button('Redo')
+        self.RedoButton.sizeHint = lambda: QSize(125, 50)
+        self.RedoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        EditButtonGroupLayout.addWidget(self.RedoButton)
+        self.RedoButton.setDisabled(True)
+        
+    # The UndoButton
+        self.UndoButton = gui.Button('Undo')
+        self.UndoButton.sizeHint = lambda: QSize(125, 50)
+        self.UndoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        EditButtonGroupLayout.addWidget(self.UndoButton)
+        self.UndoButton.setDisabled(True)
+
+    # The ToggleInfoButton
+        self.ToggleInfoButton = gui.Button('Toggle Info')
+        self.ToggleInfoButton.sizeHint = lambda: QSize(125, 50)
+        self.ToggleInfoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        EditButtonGroupLayout.addWidget(self.ToggleInfoButton)
+        self.ToggleInfoButton.setDisabled(True)
+
+    # The CancelButton
+        self.CancelButton = gui.Button('Cancel')
+        self.CancelButton.sizeHint = lambda: QSize(125, 50)
+        self.CancelButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        EditButtonGroupLayout.addWidget(self.CancelButton)
+        self.CancelButton.setDisabled(True)
 
 
+    # The UpdateButton
+        self.UpdateButton = gui.Button('Update')
+        self.UpdateButton.sizeHint = lambda: QSize(125, 50)
+        self.UpdateButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        EditButtonGroupLayout.addWidget(self.UpdateButton)
+        self.UpdateButton.setDisabled(False)
+
+    # The CommonDataEditBox
+        self.CommonDataEditBox = QGroupBox()
+        CommonDataEditLayout = QHBoxLayout()
+
+        EditPanelLayout.addWidget(self.CommonDataEditBox)
+
+    # The LineEditGroupBox
+        self.LineEditGroupBox = QGroupBox()
+        LineEditGroupLayout = QGridLayout()
+
+        AuthorLabel = LineEditGroupLayout.addWidget(QLabel('Author :'), 0, 0, 1, 1)
+        NameLabel = LineEditGroupLayout.addWidget(QLabel('Name :'), 1, 0, 1, 1)
+        TagsLabel = LineEditGroupLayout.addWidget(QLabel('Tags :'), 2, 0, 1, 1)
+
+        self.AuthorEdit = LineEditGroupLayout.addWidget(QLineEdit('Author'), 0, 1, 1, 1)
+        self.NameEdit = LineEditGroupLayout.addWidget(QLineEdit('Name'), 1, 1, 1, 1)
+
+        self.TagGroupBox = QGroupBox()
+        LineEditGroupLayout.addWidget(self.TagGroupBox, 2, 1, 1, 1)
+        TagGroupLayout = QVBoxLayout()
+
+        self.TagEdit = [TagGroupLayout.addWidget(QLineEdit('Tag' + str(i))) for i in range(5)]
+
+        self.TagGroupBox.setLayout(TagGroupLayout)
+        self.LineEditGroupBox.setLayout(LineEditGroupLayout)
+
+    # The TextEditGroupBox
+        self.TextEditGroupBox = QGroupBox()
+        TextEditGroupLayout = QGridLayout()
+
+        DescriptionLabel = TextEditGroupLayout.addWidget(QLabel('Description :'), 0, 0, 1, 1)
+        LicenseLabel = TextEditGroupLayout.addWidget(QLabel('License :'), 1, 0, 1, 1)
+        self.DescriptionEdit = TextEditGroupLayout.addWidget(QTextEdit('Description'), 0, 1, 1, 1)
+        self.LicenseEdit = TextEditGroupLayout.addWidget(QTextEdit('License'), 1, 1, 1, 1)
+
+        self.TextEditGroupBox.setLayout(TextEditGroupLayout)
+
+        CommonDataEditLayout.addWidget(self.LineEditGroupBox)
+        CommonDataEditLayout.addWidget(self.TextEditGroupBox)
+        self.CommonDataEditBox.setLayout(CommonDataEditLayout)
+
+    # The LongDataEditBox
+        self.LongDataEditBox = QGroupBox()
+        LongDataEditLayout = QGridLayout()
+
+        HomePageLabel = LongDataEditLayout.addWidget(QLabel('Homepage :'), 0, 0, 1, 1)
+        UUIDLabel = LongDataEditLayout.addWidget(QLabel('UUID:'), 1, 0, 1, 1)
+        self.HomePageEdit = LongDataEditLayout.addWidget(QLineEdit('http://www.makehumancommunity.org'), 0, 1, 1, 1)
+        self.UUIDEdit = LongDataEditLayout.addWidget(QLineEdit(uuid.uuid4()), 1, 1, 1, 1)
+
+        self.LongDataEditBox.setLayout(LongDataEditLayout)
+
+        EditPanelLayout.addWidget(self.LongDataEditBox)
 
 
-# Define EditoPanel (TopWidget) content here:
+        EditPanelLayout.addStretch(1)
 
-
-
-
-
+        self.EditPanel.setLayout(EditPanelLayout)
 
 
 # Define Actions here:
+
+        @self.EditButton.mhEvent
+        def onClicked(event):
+            self.SaveBox.setDisabled(True)
+            self.FileChooser.setDisabled(True)
+            self.FileChooser2.setDisabled(True)
+            self.TagFilter.setDisabled(True)
+            self.AssetTypeBox.setDisabled(True)
+
+            self.EditButton.setDisabled(True)
+            self.ToggleEditButton.setDisabled(False)
+            self.ResetButton.setDisabled(True)
+
+            self.ToggleInfoButton.setDisabled(False)
+
+            self.InfoPanel.hide()
+            self.EditPanel.show()
+
+        @self.ToggleEditButton.mhEvent
+        def onClicked(event):
+            self.ToggleEditButton.setDisabled(False)
+            self.EditPanel.show()
+            self.InfoPanel.hide()
+
+        @self.ToggleInfoButton.mhEvent
+        def onClicked(event):
+            self.ToggleEditButton.setDisabled(False)
+            self.EditPanel.hide()
+            self.InfoPanel.show()
 
         @self.SaveButton.mhEvent
         def onClicked(event):
@@ -250,7 +377,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 self.showMessage("Asset was saved as " + self.asset["absolute path"]
                                  + "\n\nA backup file was created in "
                                  + self.asset["absolute path"] + ".bak")
-
 
         @self.FileChooser.mhEvent
         def onFileSelected(filename):
@@ -274,6 +400,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.asset = assetInfo
             self.setAssetInfoText(self.asset)
 
+
 # Asset type selection event
 
     def onAssetTypeChange(self, item=None):
@@ -282,7 +409,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.FileChooser.hide()
         self.FileChooser2.hide()
-
 
         self.FileChooser.setFileLoadHandler(fc.TaggedFileLoader(self))
 
@@ -316,7 +442,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.assetFolder = mhapi.locations.getUserHomePath('models')
             self.extensions = "mhm"
 
-
         self.selectedType = assetType
         self.TagFilter.clearAll()
         if assetType == "Models" or assetType == "Materials":
@@ -332,7 +457,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.FileChooser.show()
             self.TagFilter.setDisabled(False)
 
-    # MessageBox
+# MessageBox
 
     def showMessage(self,message,title="Information"):
         self.msg = QMessageBox()
