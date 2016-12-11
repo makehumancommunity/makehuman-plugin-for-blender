@@ -267,6 +267,7 @@ class AssetEditorTaskView(gui3d.TaskView):
                            mhapi.locations.getSystemDataPath('eyebrows'), mhapi.locations.getUserDataPath('eyebrows'),
                            mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
             extensions = "mhmat"
+
         if assetType == "Models":
             assetfolder = mhapi.locations.getUserHomePath('models')
             extensions = "mhm"

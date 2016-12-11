@@ -25,11 +25,10 @@ class Assets(NameSpace):
         self.extensionToType[".mhm"] = "models"
         
         self.genericExtraKeys = ["tag"]
-        self.genericKeys = ["name","description"]
+        self.genericKeys = ["name","description", "uuid"]
         self.genericCommentKeys = ["license","homepage","author"]
 
         self.proxyKeys = [
-            "uuid",
             "basemesh",
             "obj_file",
             "max_pole",
