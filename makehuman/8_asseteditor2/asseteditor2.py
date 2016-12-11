@@ -269,7 +269,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.CancelButton.sizeHint = lambda: QSize(125, 50)
         self.CancelButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         EditButtonGroupLayout.addWidget(self.CancelButton)
-        self.CancelButton.setDisabled(True)
+        self.CancelButton.setDisabled(False)
 
 
     # The UpdateButton
@@ -293,14 +293,20 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         NameLabel = LineEditGroupLayout.addWidget(QLabel('Name :'), 1, 0, 1, 1)
         TagsLabel = LineEditGroupLayout.addWidget(QLabel('Tags :'), 2, 0, 1, 1)
 
-        self.AuthorEdit = LineEditGroupLayout.addWidget(QLineEdit('Author'), 0, 1, 1, 1)
-        self.NameEdit = LineEditGroupLayout.addWidget(QLineEdit('Name'), 1, 1, 1, 1)
+        self.AuthorEdit = QLineEdit('Author')
+        LineEditGroupLayout.addWidget(self.AuthorEdit, 0, 1, 1, 1)
+        self.NameEdit = QLineEdit('Name')
+        LineEditGroupLayout.addWidget(self.NameEdit, 1, 1, 1, 1)
 
+    # The TagGroupBox
         self.TagGroupBox = QGroupBox()
         LineEditGroupLayout.addWidget(self.TagGroupBox, 2, 1, 1, 1)
         TagGroupLayout = QVBoxLayout()
 
-        self.TagEdit = [TagGroupLayout.addWidget(QLineEdit('Tag' + str(i))) for i in range(5)]
+        self.TagEdit = [QLineEdit('Tag' + str(i)) for i in range(5)]
+        for i in self.TagEdit:
+            TagGroupLayout.addWidget(i)
+        TagGroupLayout.addStretch(1)
 
         self.TagGroupBox.setLayout(TagGroupLayout)
         self.LineEditGroupBox.setLayout(LineEditGroupLayout)
@@ -311,8 +317,14 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         DescriptionLabel = TextEditGroupLayout.addWidget(QLabel('Description :'), 0, 0, 1, 1)
         LicenseLabel = TextEditGroupLayout.addWidget(QLabel('License :'), 1, 0, 1, 1)
-        self.DescriptionEdit = TextEditGroupLayout.addWidget(QTextEdit('Description'), 0, 1, 1, 1)
-        self.LicenseEdit = TextEditGroupLayout.addWidget(QTextEdit('License'), 1, 1, 1, 1)
+        self.DescriptionEdit = QTextEdit('Description')
+        TextEditGroupLayout.addWidget(self.DescriptionEdit, 0, 1, 1, 1)
+        self.LicenseEdit = QTextEdit('License')
+        TextEditGroupLayout.addWidget(self.LicenseEdit, 1, 1, 1, 1)
+        self.DescriptionEdit.sizeHint = lambda: QSize(300, 125 )
+        self.LicenseEdit.sizeHint = lambda: QSize(300, 125)
+        self.DescriptionEdit.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.LicenseEdit.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         self.TextEditGroupBox.setLayout(TextEditGroupLayout)
 
@@ -325,9 +337,12 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         LongDataEditLayout = QGridLayout()
 
         HomePageLabel = LongDataEditLayout.addWidget(QLabel('Homepage :'), 0, 0, 1, 1)
-        UUIDLabel = LongDataEditLayout.addWidget(QLabel('UUID:'), 1, 0, 1, 1)
-        self.HomePageEdit = LongDataEditLayout.addWidget(QLineEdit('http://www.makehumancommunity.org'), 0, 1, 1, 1)
-        self.UUIDEdit = LongDataEditLayout.addWidget(QLineEdit(uuid.uuid4()), 1, 1, 1, 1)
+        self.UUIDButton = gui.Button('UUID')
+        LongDataEditLayout.addWidget(self.UUIDButton, 1, 0, 1, 1)
+        self.HomePageEdit = QLineEdit('http://www.makehumancommunity.org')
+        LongDataEditLayout.addWidget(self.HomePageEdit, 0, 1, 1, 1)
+        self.UUIDEdit = QLineEdit(uuid.uuid4())
+        LongDataEditLayout.addWidget(self.UUIDEdit, 1, 1, 1, 1)
 
         self.LongDataEditBox.setLayout(LongDataEditLayout)
 
@@ -358,6 +373,17 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.InfoPanel.hide()
             self.EditPanel.show()
 
+        @self.CancelButton.mhEvent
+        def onClicked(event):
+            self.FileChooser.setDisabled(False)
+            self.FileChooser2.setDisabled(False)
+            if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
+                self.TagFilter.setDisabled(False)
+            self.EditButton.setDisabled(False)
+            self.ToggleEditButton.setDisabled(True)
+            self.EditPanel.hide()
+            self.InfoPanel.show()
+
         @self.ToggleEditButton.mhEvent
         def onClicked(event):
             self.ToggleEditButton.setDisabled(False)
@@ -377,6 +403,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 self.showMessage("Asset was saved as " + self.asset["absolute path"]
                                  + "\n\nA backup file was created in "
                                  + self.asset["absolute path"] + ".bak")
+
+        @self.UUIDButton.mhEvent
+        def onClicked(event):
+            self.UUIDEdit.setText(uuid.uuid4())
 
         @self.FileChooser.mhEvent
         def onFileSelected(filename):
