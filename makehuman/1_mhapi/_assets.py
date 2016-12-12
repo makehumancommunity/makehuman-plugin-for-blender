@@ -23,6 +23,18 @@ class Assets(NameSpace):
         self.extensionToType[".proxy"] = "proxy"
         self.extensionToType[".target"] = "target"
         self.extensionToType[".mhm"] = "models"
+
+        self.typeToExtension = {'material'  :   'mhmat',
+                                'models'    :   'mhm',
+                                'clothes'   :   'mhclo',
+                                'hair'      :   'mhclo',
+                                'teeth'     :   'mhclo',
+                                'eyebrows'   :   'mhclo',
+                                'eyelashes' :   'mhclo',
+                                'proxymeshes':  'mhclo'
+
+
+        }
         
         self.genericExtraKeys = ["tag"]
         self.genericKeys = ["name","description", "uuid"]
@@ -75,6 +87,17 @@ class Assets(NameSpace):
 
         self.keyList = self.genericExtraKeys + self.genericCommentKeys + self.genericKeys +self.materialKeys + \
                        self.proxyExtraKeys + self.proxyKeys
+
+        self.zDepth = {"Body": 31,
+                       "Underwear and lingerie": 39,
+                       "Socks and stockings": 43,
+                       "Shirt and trousers": 47,
+                       "Sweater": 50,
+                       "Indoor jacket": 53,
+                       "Shoes and boots": 57,
+                       "Coat": 61,
+                       "Backpack": 69
+                      }
 
     def _parseGenericAssetInfo(self,fullPath):
 

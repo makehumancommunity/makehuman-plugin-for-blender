@@ -57,8 +57,7 @@ from bestpractice import getBestPractice
 
 
 mhapi = gui3d.app.mhapi
-mA = gui3d.app.mhapi.assets
-
+zDepth = mhapi.assets.zDepth
 
 # The AssetEditor task:
 class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
@@ -76,12 +75,15 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                       "ProxyMeshes",
                       "Eyebrows",
                       "Eyelashes",
-                      "Materials"
+                      "Material"
                       ]
 
 
         saveMsg = "When you click the save button, the asset will be written back to the original file, " \
                   "but a .bak file will be created with the original data."
+
+        tagWarnMsg = 'Your asset has to many Tags. The Asset Editor does not support more than 5 tags. ' \
+                     'Edit the asset in a Texteditor.'
 
         self.selectedType = None
         self.asset = None
@@ -91,34 +93,26 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.assetFolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes')]
         self.extensions = "mhclo"
 
-
         self.isEdit = False
         self.isToggle = False
         self.isUpdate = False
         self.isReste = False
+        self.tagWarn = False
+
         self.history_ptr = {'recent' : 0,
                             'head'   : 0,
                            }
-        self. histor = []
 
+        self. histor = []
 
         self.linekeys = ['author', 'name', 'uuid', 'homepage']
         self.textkeys = ['license', 'description']
+        self.intkeys  = ['z_depth', 'max_pole']
+
         self.baseDict = {k : None for k in mhapi.assets.keyList}
 
 
-
-
-
 # Define LeftWidget content here:
-
-    # The ThumbnailBox:
-
-        self.ThumbnailBox = gui.GroupBox("Thumbnail (if any)")
-        self.Thumbnail = self.ThumbnailBox.addWidget(gui.TextView())
-        self.Thumbnail.setPixmap(QPixmap(os.path.abspath(self.notfound)))
-        self.Thumbnail.setGeometry(0, 0, 128, 128)
-        self.addLeftWidget(self.ThumbnailBox)
 
     # The SaveBox:
 
@@ -138,7 +132,15 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.SaveBox.setLayout(SaveBoxLayout)
 
-        self.SaveBox.setDisabled(True)
+        self.SaveButton.setDisabled(True)
+
+    # The ThumbnailBox:
+
+        self.ThumbnailBox = gui.GroupBox("Thumbnail (if any)")
+        self.Thumbnail = self.ThumbnailBox.addWidget(gui.TextView())
+        self.Thumbnail.setPixmap(QPixmap(os.path.abspath(self.notfound)))
+        self.Thumbnail.setGeometry(0, 0, 128, 128)
+        self.addLeftWidget(self.ThumbnailBox)
 
 
 
@@ -251,7 +253,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.setAssetInfoText(self.asset)
 
-
 # Define EditorPanel (TopWidget) content here:
 
     #The EditPanel
@@ -259,6 +260,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.addTopWidget(self.EditPanel)
 
         EditPanelLayout = QVBoxLayout(self.EditPanel)
+        self.EditPanel.setLayout(EditPanelLayout)
 
     #The EditButtonGroupBox
         self.EditButtonGroupBox = QGroupBox()
@@ -305,7 +307,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         EditPanelLayout.addWidget(self.CommonDataEditBox)
 
-    # The LineEditGroupBox
+    # The LineEditGroupBox with
         self.LineEditGroupBox = QWidget()
         LineEditGroupLayout = QGridLayout()
 
@@ -318,7 +320,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.baseDict['name'] = QLineEdit('')
         LineEditGroupLayout.addWidget(self.baseDict['name'], 1, 1, 1, 1)
 
-    # The TagGroupBox
+    # The TagGroupBox and ...
         self.TagGroupBox = QGroupBox()
         LineEditGroupLayout.addWidget(self.TagGroupBox, 2, 1, 1, 1)
         TagGroupLayout = QVBoxLayout()
@@ -326,16 +328,22 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.baseDict['tag'] = [QLineEdit('') for i in range(5)]
         for i in self.baseDict['tag']: TagGroupLayout.addWidget(i)
         TagGroupLayout.addStretch(1)
-
         self.TagGroupBox.setLayout(TagGroupLayout)
+        self.TagWarn = QLabel(tagWarnMsg)
+        self.TagWarn.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.TagWarn.setWordWrap(True)
+        self.TagWarn.setGeometry(self.TagGroupBox.geometry())
+        self.TagWarn.hide()
+        LineEditGroupLayout.addWidget(self.TagWarn, 2 ,1 ,1 ,1)
+
         self.LineEditGroupBox.setLayout(LineEditGroupLayout)
 
         HomePageLabel = LineEditGroupLayout.addWidget(QLabel('Homepage :'), 3, 0, 1, 1)
         self.UUIDButton = gui.Button('UUID')
         LineEditGroupLayout.addWidget(self.UUIDButton, 4, 0, 1, 1)
-        self.baseDict['homepage'] = QLineEdit('http://www.makehumancommunity.org')
+        self.baseDict['homepage'] = QLineEdit('')
         LineEditGroupLayout.addWidget(self.baseDict['homepage'], 3, 1, 1, 1)
-        self.baseDict['uuid'] = QLineEdit(uuid.uuid4())
+        self.baseDict['uuid'] = QLineEdit()
         LineEditGroupLayout.addWidget(self.baseDict['uuid'], 4, 1, 1, 1)
 
     # The TextEditGroupBox
@@ -348,9 +356,9 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         TextEditGroupLayout.addWidget(self.baseDict['description'], 0, 1, 1, 1)
         self.baseDict['license'] = QTextEdit('License')
         TextEditGroupLayout.addWidget(self.baseDict['license'], 1, 1, 1, 1)
-        for k in self.textkeys:
-            #self.baseDict[k].setLineWrapColumnOrWidth(600)
-            self.baseDict[k].setLineWrapMode(QTextEdit.NoWrap)
+    #   self.baseDict[XXX].setLineWrapColumnOrWidth(600)
+        self.baseDict['description'].setLineWrapMode(QTextEdit.NoWrap)
+        self.baseDict['license'].setLineWrapMode(QTextEdit.NoWrap)
         self.baseDict['description'].sizeHint = lambda: QSize(450, 125 )
         self.baseDict['license'].sizeHint = lambda: QSize(450, 125)
         self.baseDict['description'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
@@ -362,16 +370,57 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         CommonDataEditLayout.addWidget(self.TextEditGroupBox)
         self.CommonDataEditBox.setLayout(CommonDataEditLayout)
 
-        EditPanelLayout.addStretch(1)
 
-        self.EditPanel.setLayout(EditPanelLayout)
+    # The asset-type dependent EditPanel:
+        self.AssetTypePanel = QGroupBox()
+        AssetTypePanelLayout = QVBoxLayout()
+        self.AssetTypePanel.setLayout(AssetTypePanelLayout)
+        EditPanelLayout.addWidget(self.AssetTypePanel)
+
+        self.ClothesPanel = QWidget()
+        ClothesLayout = QHBoxLayout()
+        self.ClothesPanel.setLayout(ClothesLayout)
+        AssetTypePanelLayout.addWidget(self.ClothesPanel)
+
+        zdepthLabel = QLabel('Z-Depth :')
+        self.baseDict['z_depth'] = QLineEdit()
+        self.baseDict['z_depth'].sizeHint = lambda: QSize(40, 30)
+        self.baseDict['z_depth'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.zDepthSelect = mhapi.ui.createComboBox(sorted(zDepth, key=zDepth.__getitem__), self.onzDepthSelect)
+        self.zDepthSelect.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        maxpoleLabel = QLabel('  max pole :')
+        self.baseDict['max_pole'] = QLineEdit()
+        self.baseDict['max_pole'].sizeHint = lambda : QSize(40, 30)
+        self.baseDict['max_pole'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        materialLabel = QLabel('  Material :')
+        self.baseDict['material'] = QLineEdit()
+        self.baseDict['material'].sizeHint = lambda : QSize(175, 30)
+        self.baseDict['material'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.MaterialButton = gui.Button('[...]')
+        self.MaterialButton.sizeHint = lambda : QSize(40, 30)
+        self.MaterialButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.locMaterialButton = gui.Button('Copy')
+        self.MaterialButton.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.locMaterialButton.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+
+        ClothesLayout.addWidget(zdepthLabel)
+        ClothesLayout.addWidget(self.baseDict['z_depth'])
+        ClothesLayout.addWidget(self.zDepthSelect)
+        ClothesLayout.addWidget(maxpoleLabel)
+        ClothesLayout.addWidget(self.baseDict['max_pole'])
+        ClothesLayout.addWidget(materialLabel)
+        ClothesLayout.addWidget(self.baseDict['material'])
+        ClothesLayout.addWidget(self.MaterialButton)
+        ClothesLayout.addStretch(1)
+
+        EditPanelLayout.addStretch(1)
 
 
 # Define Actions here:
 
         @self.EditButton.mhEvent
         def onClicked(event):
-            self.SaveBox.setDisabled(True)
+            self.SaveButton.setDisabled(True)
             self.FileChooser.setDisabled(True)
             self.FileChooser2.setDisabled(True)
             self.TagFilter.setDisabled(True)
@@ -384,15 +433,27 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.ToggleEditButton.setDisabled(False)
             self.ToggleInfoButton.setDisabled(False)
 
-            taglist = list(self.asset['tag'])
-            if len(taglist) < 5 :
-                for i in range(5 - len(taglist)): taglist.append('')
-            taglist.sort()
+            if len(self.asset['tag'])<= 5:
+                self.tagWarn = False
+                taglist = list(self.asset['tag'])
+                if len(taglist) < 5 :
+                    for i in range(5 - len(taglist)): taglist.append('')
+                taglist.sort()
+                for lineEdit in self.baseDict['tag']: lineEdit.setText(taglist.pop())
+            else:
+                self.tagWarn = True
 
-            for lineEdit in self.baseDict['tag']: lineEdit.setText(taglist.pop())
-            for k in self.linekeys + self.textkeys: self.baseDict[k].setText(self.asset[k])
+            if self.tagWarn:
+                self.TagWarn.show()
+                self.TagGroupBox.hide()
+            else:
+                self.TagWarn.hide()
+                self.TagGroupBox.show()
 
+            fileList = list(self.asset['material'])
+            self.baseDict['material'].setText(fileList [0])
 
+            for k in self.linekeys + self.textkeys + self.intkeys: self.baseDict[k].setText(self.asset[k])
 
             self.InfoPanel.hide()
             self.EditPanel.show()
@@ -400,7 +461,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         @self.UpdateButton.mhEvent
         def onClicked(event):
             self.isUpdate = True
-            self.SaveBox.setDisabled(False)
+            self.SaveButton.setDisabled(False)
             self.FileChooser.setDisabled(False)
             self.FileChooser2.setDisabled(False)
             if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
@@ -413,16 +474,20 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
             self.ToggleInfoButton.setDisabled(False)
 
-            taglist = []
-            for lineEdit in self.baseDict['tag']:
-                taglist.append(lineEdit.text())
-            self.asset['tag'] = set(taglist)
+            if not self.tagWarn:
+                taglist = []
+                for lineEdit in self.baseDict['tag']:
+                    if lineEdit.text().strip() != '':
+                        taglist.append(lineEdit.text().strip())
+                self.asset['tag'] = set(taglist)
+
+            self.asset['material'] = set(self.baseDict['material'].getText())
 
             for k in self.linekeys: self.asset[k] = self.baseDict[k].text()
             for k in self.textkeys: self.asset[k] = self.baseDict[k].toPlainText()
+            for k in self.intkeys: self.asset[k] = self.getDigitStr(self.baseDict[k].text())
 
             self.setAssetInfoText(self.asset)
-
 
             self.InfoPanel.show()
             self.EditPanel.hide()
@@ -436,12 +501,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.history_ptr['head'] = 0
             self.UndoButton.setDisabled(True)
             self.RedoButton.setDisabled(True)
+            self.SaveButton.setDisabled(True)
 
 
         @self.CancelButton.mhEvent
         def onClicked(event):
             if self.isUpdate:
-                self.SaveBox.setDisabled(False)
+                self.SaveButton.setDisabled(False)
                 self.ResetButton.setDisabled(False)
             self.FileChooser.setDisabled(False)
             self.FileChooser2.setDisabled(False)
@@ -499,6 +565,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.asset, self.strip = self.splitAssetDict(self.resteAsset)
             self.setAssetInfoText(self.asset)
             self.isUpdate = False
+            self.tagWarn = False
             self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
 
@@ -514,8 +581,17 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.asset, self.strip = self.splitAssetDict(self.resteAsset)
             self.setAssetInfoText(self.asset)
             self.isUpdate = False
+            self.tagWarn = False
             self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
+
+        @self.MaterialButton.mhEvent
+        def onClicked(event):
+            FDialog = QFileDialog()
+            FDialog.setFileMode(QFileDialog.AnyFile)
+            FDialog.setFilter('MakeHuman Material (*.mhmat)')
+            if FDialog.exec_():
+                self.baseDict['material'].setText(FDialog.selectedFiles()[0])
 
 
 # Asset type selection event
@@ -529,35 +605,17 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.FileChooser.setFileLoadHandler(fc.TaggedFileLoader(self))
 
-        if assetType == "Clothes":
-            self.assetFolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes')]
-            self.extensions = 'mhclo'
-        if assetType == "Hair":
-            self.assetFolder = [mhapi.locations.getSystemDataPath('hair'), mhapi.locations.getUserDataPath('hair')]
-            self.extensions = 'mhclo'
-        if assetType == "Teeth":
-            self.assetFolder = [mhapi.locations.getSystemDataPath('teeth'), mhapi.locations.getUserDataPath('theeth')]
-            self.extensions = 'mhclo'
-        if assetType == "ProxyMeshes":
-            self.assetFolder = [mhapi.locations.getSystemDataPath('proxymeshes'),
-                           mhapi.locations.getUserDataPath('proxymeshes')]
-            self.extensions = 'proxy'
-        if assetType == "Eyebrows":
-            self.assetFolder = [mhapi.locations.getSystemDataPath('eyebrows'), mhapi.locations.getUserDataPath('eyebrows')]
-            self.extensions = 'mhclo'
-        if assetType == "Eyelashes":
-            self.assetFolder = [mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
-            self.extensions = 'mhclo'
-        if assetType == "Materials":
-            self.assetFolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes'),
-                           mhapi.locations.getSystemDataPath('hair'), mhapi.locations.getUserDataPath('hair'),
-                           mhapi.locations.getSystemDataPath('teeth'), mhapi.locations.getUserDataPath('theeth'),
-                           mhapi.locations.getSystemDataPath('eyebrows'), mhapi.locations.getUserDataPath('eyebrows'),
-                           mhapi.locations.getSystemDataPath('eyelashes'), mhapi.locations.getUserDataPath('eyelashes')]
-            self.extensions = "mhmat"
-        if assetType == "Models":
+        self.assetFoler = []
+        if assetType == "Material":
+            for type in ['clothes', 'hair','teeth', 'eyebrows', 'eyelashes']:
+                self.assetFolder += [mhapi.locations.getSystemDataPath(type), mhapi.locations.getUserDataPath(type)]
+        elif assetType == "Models":
             self.assetFolder = mhapi.locations.getUserHomePath('models')
             self.extensions = "mhm"
+
+        else:
+            self.assetFolder = [mhapi.locations.getSystemDataPath(assetType.lower()), mhapi.locations.getUserDataPath(assetType.lower())]
+            self.extensions = mhapi.assets.typeToExtension[assetType.lower()]
 
         self.selectedType = assetType
         self.TagFilter.clearAll()
@@ -573,6 +631,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.FileChooser.refresh()
             self.FileChooser.show()
             self.TagFilter.setDisabled(False)
+
+    def onzDepthSelect(self, item=None):
+        if item:
+            self.baseDict['z_depth'].setText(str(zDepth[item]))
 
 # MessageBox
 
@@ -697,3 +759,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             meta = {k : d1[k] for k in d1.keys()}
             meta.update(d2)
             return meta
+
+    def getDigitStr(self, string=''):
+        val = ''
+        for i in string:
+            if i.isdigit():
+                val += i
+        if val.isdigit():
+            return val
+        else:
+            return '0'
