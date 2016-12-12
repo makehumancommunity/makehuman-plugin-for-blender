@@ -73,6 +73,8 @@ class Assets(NameSpace):
             "alphaToCoverage"
         ] # There are also SSS settings, but I don't know if those actually works
 
+        self.keyList = self.genericExtraKeys + self.genericCommentKeys + self.genericKeys +self.materialKeys + \
+                       self.proxyExtraKeys + self.proxyKeys
 
     def _parseGenericAssetInfo(self,fullPath):
 

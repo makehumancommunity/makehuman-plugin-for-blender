@@ -57,6 +57,7 @@ from bestpractice import getBestPractice
 
 
 mhapi = gui3d.app.mhapi
+mA = gui3d.app.mhapi.assets
 
 
 # The AssetEditor task:
@@ -84,6 +85,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.selectedType = None
         self.asset = None
+        self.strip = None
+        self.resteAsset = None
 
         self.assetFolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes')]
         self.extensions = "mhclo"
@@ -93,6 +96,18 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.isToggle = False
         self.isUpdate = False
         self.isReste = False
+        self.history_ptr = {'recent' : 0,
+                            'head'   : 0,
+                           }
+        self. histor = []
+
+
+        self.linekeys = ['author', 'name', 'uuid', 'homepage']
+        self.textkeys = ['license', 'description']
+        self.baseDict = {k : None for k in mhapi.assets.keyList}
+
+
+
 
 
 # Define LeftWidget content here:
@@ -123,12 +138,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.SaveBox.setLayout(SaveBoxLayout)
 
-    # The tag filter
-
-        self.SaveBox.setDisabled(False)
-
-
-
+        self.SaveBox.setDisabled(True)
 
 
 
@@ -173,6 +183,20 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         InfoPanelLayout.addWidget(self.InfoButtonGroupBox)
 
+    # The RedoButton
+        self.RedoButton = gui.Button('Redo')
+        self.RedoButton.sizeHint = lambda: QSize(125, 50)
+        self.RedoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        InfoButtonGroupLayout.addWidget(self.RedoButton)
+        self.RedoButton.setDisabled(True)
+
+    # The UndoButton
+        self.UndoButton = gui.Button('Undo')
+        self.UndoButton.sizeHint = lambda: QSize(125, 50)
+        self.UndoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        InfoButtonGroupLayout.addWidget(self.UndoButton)
+        self.UndoButton.setDisabled(True)
+
 
     # The ToggleEditButton
         self.ToggleEditButton = gui.Button('Toggle Edit')
@@ -193,16 +217,18 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.EditButton.sizeHint = lambda: QSize(125, 50)
         self.EditButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         InfoButtonGroupLayout.addWidget(self.EditButton)
+        self.EditButton.setDisabled(True)
 
         self.InfoButtonGroupBox.setLayout(InfoButtonGroupLayout)
 
     # The AssetInfoBox
-        self.AssetInfoBox = QGroupBox()
+        self.AssetInfoBox = QWidget()
         AssetInfoLayout = QVBoxLayout(self.AssetInfoBox)
 
     # The AssetInfoText
         self.AssetInfoText = gui.TextView('')
         self.BestPracticeText = gui.TextView('')
+        self.BestPracticeText.setWordWrap(True)
 
         AssetInfoLayout.addWidget(self.AssetInfoText)
         AssetInfoLayout.addWidget(self.BestPracticeText)
@@ -243,19 +269,12 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         EditPanelLayout.addWidget(self.EditButtonGroupBox)
 
-    # The RedoButton
-        self.RedoButton = gui.Button('Redo')
-        self.RedoButton.sizeHint = lambda: QSize(125, 50)
-        self.RedoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        EditButtonGroupLayout.addWidget(self.RedoButton)
-        self.RedoButton.setDisabled(True)
-        
-    # The UndoButton
-        self.UndoButton = gui.Button('Undo')
-        self.UndoButton.sizeHint = lambda: QSize(125, 50)
-        self.UndoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        EditButtonGroupLayout.addWidget(self.UndoButton)
-        self.UndoButton.setDisabled(True)
+    # The AdvancedButton
+        self.AdvancedButton = gui.Button('Advanced')
+        self.AdvancedButton.sizeHint = lambda: QSize(125, 50)
+        self.AdvancedButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        EditButtonGroupLayout.addWidget(self.AdvancedButton)
+        self.AdvancedButton.setDisabled(True)
 
     # The ToggleInfoButton
         self.ToggleInfoButton = gui.Button('Toggle Info')
@@ -278,6 +297,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.UpdateButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         EditButtonGroupLayout.addWidget(self.UpdateButton)
         self.UpdateButton.setDisabled(False)
+        self.setAssetInfoText(self.asset)
 
     # The CommonDataEditBox
         self.CommonDataEditBox = QGroupBox()
@@ -286,68 +306,61 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         EditPanelLayout.addWidget(self.CommonDataEditBox)
 
     # The LineEditGroupBox
-        self.LineEditGroupBox = QGroupBox()
+        self.LineEditGroupBox = QWidget()
         LineEditGroupLayout = QGridLayout()
 
         AuthorLabel = LineEditGroupLayout.addWidget(QLabel('Author :'), 0, 0, 1, 1)
         NameLabel = LineEditGroupLayout.addWidget(QLabel('Name :'), 1, 0, 1, 1)
         TagsLabel = LineEditGroupLayout.addWidget(QLabel('Tags :'), 2, 0, 1, 1)
 
-        self.AuthorEdit = QLineEdit('Author')
-        LineEditGroupLayout.addWidget(self.AuthorEdit, 0, 1, 1, 1)
-        self.NameEdit = QLineEdit('Name')
-        LineEditGroupLayout.addWidget(self.NameEdit, 1, 1, 1, 1)
+        self.baseDict['author'] = QLineEdit('')
+        LineEditGroupLayout.addWidget(self.baseDict['author'], 0, 1, 1, 1)
+        self.baseDict['name'] = QLineEdit('')
+        LineEditGroupLayout.addWidget(self.baseDict['name'], 1, 1, 1, 1)
 
     # The TagGroupBox
         self.TagGroupBox = QGroupBox()
         LineEditGroupLayout.addWidget(self.TagGroupBox, 2, 1, 1, 1)
         TagGroupLayout = QVBoxLayout()
 
-        self.TagEdit = [QLineEdit('Tag' + str(i)) for i in range(5)]
-        for i in self.TagEdit:
-            TagGroupLayout.addWidget(i)
+        self.baseDict['tag'] = [QLineEdit('') for i in range(5)]
+        for i in self.baseDict['tag']: TagGroupLayout.addWidget(i)
         TagGroupLayout.addStretch(1)
 
         self.TagGroupBox.setLayout(TagGroupLayout)
         self.LineEditGroupBox.setLayout(LineEditGroupLayout)
 
+        HomePageLabel = LineEditGroupLayout.addWidget(QLabel('Homepage :'), 3, 0, 1, 1)
+        self.UUIDButton = gui.Button('UUID')
+        LineEditGroupLayout.addWidget(self.UUIDButton, 4, 0, 1, 1)
+        self.baseDict['homepage'] = QLineEdit('http://www.makehumancommunity.org')
+        LineEditGroupLayout.addWidget(self.baseDict['homepage'], 3, 1, 1, 1)
+        self.baseDict['uuid'] = QLineEdit(uuid.uuid4())
+        LineEditGroupLayout.addWidget(self.baseDict['uuid'], 4, 1, 1, 1)
+
     # The TextEditGroupBox
-        self.TextEditGroupBox = QGroupBox()
+        self.TextEditGroupBox = QWidget()
         TextEditGroupLayout = QGridLayout()
 
         DescriptionLabel = TextEditGroupLayout.addWidget(QLabel('Description :'), 0, 0, 1, 1)
         LicenseLabel = TextEditGroupLayout.addWidget(QLabel('License :'), 1, 0, 1, 1)
-        self.DescriptionEdit = QTextEdit('Description')
-        TextEditGroupLayout.addWidget(self.DescriptionEdit, 0, 1, 1, 1)
-        self.LicenseEdit = QTextEdit('License')
-        TextEditGroupLayout.addWidget(self.LicenseEdit, 1, 1, 1, 1)
-        self.DescriptionEdit.sizeHint = lambda: QSize(300, 125 )
-        self.LicenseEdit.sizeHint = lambda: QSize(300, 125)
-        self.DescriptionEdit.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.LicenseEdit.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.baseDict['description'] = QTextEdit('Description')
+        TextEditGroupLayout.addWidget(self.baseDict['description'], 0, 1, 1, 1)
+        self.baseDict['license'] = QTextEdit('License')
+        TextEditGroupLayout.addWidget(self.baseDict['license'], 1, 1, 1, 1)
+        for k in self.textkeys:
+            #self.baseDict[k].setLineWrapColumnOrWidth(600)
+            self.baseDict[k].setLineWrapMode(QTextEdit.NoWrap)
+        self.baseDict['description'].sizeHint = lambda: QSize(450, 125 )
+        self.baseDict['license'].sizeHint = lambda: QSize(450, 125)
+        self.baseDict['description'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.baseDict['license'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         self.TextEditGroupBox.setLayout(TextEditGroupLayout)
 
         CommonDataEditLayout.addWidget(self.LineEditGroupBox)
         CommonDataEditLayout.addWidget(self.TextEditGroupBox)
         self.CommonDataEditBox.setLayout(CommonDataEditLayout)
-
-    # The LongDataEditBox
-        self.LongDataEditBox = QGroupBox()
-        LongDataEditLayout = QGridLayout()
-
-        HomePageLabel = LongDataEditLayout.addWidget(QLabel('Homepage :'), 0, 0, 1, 1)
-        self.UUIDButton = gui.Button('UUID')
-        LongDataEditLayout.addWidget(self.UUIDButton, 1, 0, 1, 1)
-        self.HomePageEdit = QLineEdit('http://www.makehumancommunity.org')
-        LongDataEditLayout.addWidget(self.HomePageEdit, 0, 1, 1, 1)
-        self.UUIDEdit = QLineEdit(uuid.uuid4())
-        LongDataEditLayout.addWidget(self.UUIDEdit, 1, 1, 1, 1)
-
-        self.LongDataEditBox.setLayout(LongDataEditLayout)
-
-        EditPanelLayout.addWidget(self.LongDataEditBox)
-
 
         EditPanelLayout.addStretch(1)
 
@@ -365,24 +378,89 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.AssetTypeBox.setDisabled(True)
 
             self.EditButton.setDisabled(True)
-            self.ToggleEditButton.setDisabled(False)
             self.ResetButton.setDisabled(True)
-
+            self.UndoButton.setDisabled(True)
+            self.RedoButton.setDisabled(True)
+            self.ToggleEditButton.setDisabled(False)
             self.ToggleInfoButton.setDisabled(False)
+
+            taglist = list(self.asset['tag'])
+            if len(taglist) < 5 :
+                for i in range(5 - len(taglist)): taglist.append('')
+            taglist.sort()
+
+            for lineEdit in self.baseDict['tag']: lineEdit.setText(taglist.pop())
+            for k in self.linekeys + self.textkeys: self.baseDict[k].setText(self.asset[k])
+
+
 
             self.InfoPanel.hide()
             self.EditPanel.show()
 
-        @self.CancelButton.mhEvent
+        @self.UpdateButton.mhEvent
         def onClicked(event):
+            self.isUpdate = True
+            self.SaveBox.setDisabled(False)
             self.FileChooser.setDisabled(False)
             self.FileChooser2.setDisabled(False)
             if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
                 self.TagFilter.setDisabled(False)
+            self.AssetTypeBox.setDisabled(False)
+
             self.EditButton.setDisabled(False)
             self.ToggleEditButton.setDisabled(True)
-            self.EditPanel.hide()
+            self.ResetButton.setDisabled(False)
+
+            self.ToggleInfoButton.setDisabled(False)
+
+            taglist = []
+            for lineEdit in self.baseDict['tag']:
+                taglist.append(lineEdit.text())
+            self.asset['tag'] = set(taglist)
+
+            for k in self.linekeys: self.asset[k] = self.baseDict[k].text()
+            for k in self.textkeys: self.asset[k] = self.baseDict[k].toPlainText()
+
+            self.setAssetInfoText(self.asset)
+
+
             self.InfoPanel.show()
+            self.EditPanel.hide()
+
+        @self.ResetButton.mhEvent
+        def onClicked(event):
+            self.asset, self.strip = self.splitAssetDict(self.resteAsset)
+            self.setAssetInfoText(self.asset)
+            self.ResetButton.setDisabled(True)
+            self.history_ptr['recent']= 0
+            self.history_ptr['head'] = 0
+            self.UndoButton.setDisabled(True)
+            self.RedoButton.setDisabled(True)
+
+
+        @self.CancelButton.mhEvent
+        def onClicked(event):
+            if self.isUpdate:
+                self.SaveBox.setDisabled(False)
+                self.ResetButton.setDisabled(False)
+            self.FileChooser.setDisabled(False)
+            self.FileChooser2.setDisabled(False)
+            if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
+                self.TagFilter.setDisabled(False)
+            self.AssetTypeBox.setDisabled(False)
+            if self.history_ptr['head'] > 0:
+                self.UndoButton.setDisabled(False)
+            if self.history_ptr['recent'] < self.history_ptr['head']:
+                self.UndoButton.setDisabled(False)
+
+            self.EditButton.setDisabled(False)
+            self.ToggleEditButton.setDisabled(True)
+
+
+            self.ToggleInfoButton.setDisabled(False)
+
+            self.InfoPanel.show()
+            self.EditPanel.hide()
 
         @self.ToggleEditButton.mhEvent
         def onClicked(event):
@@ -398,15 +476,16 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         @self.SaveButton.mhEvent
         def onClicked(event):
-            if self.asset:
-                mhapi.assets.writeAssetFile(self.asset,True)
-                self.showMessage("Asset was saved as " + self.asset["absolute path"]
+            saveAsset = self.joinDict(self.asset, self.strip)
+            if saveAsset:
+                mhapi.assets.writeAssetFile(saveAsset,True)
+                self.showMessage("Asset was saved as " + saveAsset["absolute path"]
                                  + "\n\nA backup file was created in "
-                                 + self.asset["absolute path"] + ".bak")
+                                 + saveAsset["absolute path"] + ".bak")
 
         @self.UUIDButton.mhEvent
         def onClicked(event):
-            self.UUIDEdit.setText(uuid.uuid4())
+            self.baseDict['uuid'].setText(uuid.uuid4())
 
         @self.FileChooser.mhEvent
         def onFileSelected(filename):
@@ -416,7 +495,11 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             else:
                 self.Thumbnail.setPixmap(QPixmap(self.notfound))
             self.Thumbnail.setGeometry(0, 0, 128, 128)
-            self.asset = assetInfo
+            self.resteAsset = assetInfo
+            self.asset, self.strip = self.splitAssetDict(self.resteAsset)
+            self.setAssetInfoText(self.asset)
+            self.isUpdate = False
+            self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
 
         @self.FileChooser2.mhEvent
@@ -427,7 +510,11 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             else:
                 self.Thumbnail.setPixmap(QPixmap(self.notfound))
             self.Thumbnail.setGeometry(0, 0, 128, 128)
-            self.asset = assetInfo
+            self.resteAsset = assetInfo
+            self.asset, self.strip = self.splitAssetDict(self.resteAsset)
+            self.setAssetInfoText(self.asset)
+            self.isUpdate = False
+            self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
 
 
@@ -581,3 +668,32 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         return tags
 
 
+# Tools :
+
+    def splitAssetDict(self, d, keys=["rawlines", "rawkeys", "rawcommentkeys"]):
+        if not d: return None, None
+        dkeys = d.keys()
+        for k in keys:
+            dkeys.remove(k)
+        d2 = {k: d[k] for k in keys}
+        d1 = {k: d[k] for k in dkeys}
+        return d1, d2
+
+    def stripAsset(self, asset=None):
+        if not asset: return None
+        else:
+            returnAsset = copy.deepcopy(asset)
+            returnAsset.pop("rawlines", None)
+            returnAsset.pop("rawkeys", None)
+            returnAsset.pop("rawcommentkeys", None)
+        return returnAsset
+
+    def joinDict(self, d1, d2):
+        if not d1:
+            return None
+        elif not d2:
+            return None
+        else:
+            meta = {k : d1[k] for k in d1.keys()}
+            meta.update(d2)
+            return meta
