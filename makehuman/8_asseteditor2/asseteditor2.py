@@ -48,15 +48,6 @@ import uuid4 as uuid
 from bestpractice import getBestPractice
 
 
-# Some documentary hints:
-
-# Setting sizeHint of a widget: QWidgetXYZ.sizeHint = lambda: QtGui.QSize( int_x. int_y )
-# Use setSizePolicy( x, y ) with QSizePolicy.* (Preffered, Fixed, Minimum, Maximum, etc)
-# To set a size ratio for two widgets w1 and w2, add a stretch factor to addWidget:
-#        addWidget(w1, 1) addWidget(w2, 2), ratio: 1:2...
-
-
-
 mhapi = gui3d.app.mhapi
 zDepth = mhapi.assets.zDepth
 
@@ -103,11 +94,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.assetFolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes')]
         self.extensions = "mhclo"
 
-        self.isEdit = False
-        self.isUpdate = False
-        self.isReset = False
-        self.tagWarn = False
-
         self.history_ptr = {'current' : 0,
                             'head'   : 0,
                            }
@@ -124,7 +110,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.baseDict = {k : None for k in mhapi.assets.keyList}
 
         self.loadedFile = ['','']
-        self.currentScreen = 0
+
 
 
 # Define LeftWidget content here:
@@ -158,11 +144,11 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
 # Define RightWidget content here:
 
-    # The AssetTypeBox:
+    # The ClothesTypeBox:
 
-        self.AssetTypeBox = self.addRightWidget(gui.GroupBox('Select Asset Type'))
+        self.ClothesTypeBox = self.addRightWidget(gui.GroupBox('Select Asset Type'))
         self.typeList = mhapi.ui.createComboBox(assetTypes, self.onAssetTypeChange)
-        self.AssetTypeBox.addWidget(self.typeList)
+        self.ClothesTypeBox.addWidget(self.typeList)
 
     # The TagFielChoose:
 
@@ -187,37 +173,37 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.addTopWidget(self.MainPanel)
         self.MainPanel.setLayout(MainPanelLayout)
 
-    # The InfoButtonGroupBox
-        self.InfoButtonGroupBox = QGroupBox()
+    # The ButtonGroupBox
+        self.ButtonGroupBox = QGroupBox()
 
-        InfoButtonGroupLayout = QHBoxLayout(self.InfoButtonGroupBox)
-        InfoButtonGroupLayout.addStretch(1)
+        ButtonGroupLayout = QHBoxLayout(self.ButtonGroupBox)
+        ButtonGroupLayout.addStretch(1)
 
-        MainPanelLayout.addWidget(self.InfoButtonGroupBox)
+        MainPanelLayout.addWidget(self.ButtonGroupBox)
 
     # The RedoButton
         self.RedoButton = defaultButton('Redo')
         self.RedoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        InfoButtonGroupLayout.addWidget(self.RedoButton)
+        ButtonGroupLayout.addWidget(self.RedoButton)
         self.RedoButton.setDisabled(True)
 
     # The UndoButton
         self.UndoButton = defaultButton('Undo')
         self.UndoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        InfoButtonGroupLayout.addWidget(self.UndoButton)
+        ButtonGroupLayout.addWidget(self.UndoButton)
         self.UndoButton.setDisabled(True)
 
     # The ResetButton
         self.ResetButton = defaultButton('Reset')
         self.ResetButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        InfoButtonGroupLayout.addWidget(self.ResetButton)
+        ButtonGroupLayout.addWidget(self.ResetButton)
         self.ResetButton.setDisabled(True)
 
     # The UpdateButton
         self.UpdateButton = defaultButton('Update')
         self.UpdateButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        InfoButtonGroupLayout.addWidget(self.UpdateButton)
-        self.InfoButtonGroupBox.setLayout(InfoButtonGroupLayout)
+        ButtonGroupLayout.addWidget(self.UpdateButton)
+        self.ButtonGroupBox.setLayout(ButtonGroupLayout)
 
 
     # The TabWidget:
@@ -324,7 +310,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         TextEditGroupLayout.addWidget(self.baseDict['description'], 0, 1, 1, 1)
         self.baseDict['license'] = QTextEdit('License')
         TextEditGroupLayout.addWidget(self.baseDict['license'], 1, 1, 1, 1)
-    #   self.baseDict[XXX].setLineWrapColumnOrWidth(600)
         self.baseDict['description'].setLineWrapMode(QTextEdit.NoWrap)
         self.baseDict['license'].setLineWrapMode(QTextEdit.NoWrap)
         self.baseDict['description'].sizeHint = lambda: QSize(450, 125 )
@@ -393,6 +378,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         EditPanelLayout.addStretch(1)
 
+    # Advanced Panel
+
 # Define Actions here:
 
 
@@ -429,12 +416,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
             self.UndoButton.setDisabled(False)
             self.SaveButton.setDisabled(False)
-            self.FileChooser.setDisabled(False)
-            self.FileChooser2.setDisabled(False)
-            if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
-                self.TagFilter.setDisabled(False)
-            self.AssetTypeBox.setDisabled(False)
-
+            self.ClothesTypeBox.setDisabled(False)
             self.ResetButton.setDisabled(False)
 
             if not self.tagWarn:
@@ -448,7 +430,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
             for k in self.linekeys: self.asset[k] = self.baseDict[k].text()
             for k in self.textkeys: self.asset[k] = self.baseDict[k].toPlainText()
-            for k in self.intkeys: self.asset[k] = self.getDigitStr(self.baseDict[k].text())
+            if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
+                for k in self.intkeys: self.asset[k] = self.getDigitStr(self.baseDict[k].text())
 
             self.setAssetInfoText(self.asset)
             self.currentScreen = 0
@@ -566,10 +549,20 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.TagWarn.hide()
             self.TagGroupBox.show()
 
-        fileList = list(self.asset['material'])
-        self.baseDict['material'].setText(fileList[0])
-
-        for k in self.linekeys + self.textkeys + self.intkeys: self.baseDict[k].setText(self.asset[k])
+        if not self.selectedType in ['Material','ProxyMeshes','Models']:
+            fileList = list(self.asset['material'])
+            self.baseDict['material'].setText(fileList[0])
+            for k in self.intkeys: self.baseDict[k].setText(self.asset[k])
+            self.CMaterialPanel.setDisabled(False)
+            self.CNumberPanel.setDisabled(False)
+        else:
+            if self.selectedType =='ProxyMeshes':
+                self.CNumberPanel.setDisabled(False)
+                self.CMaterialPanel.setDisabled(True)
+            else:
+                self.CNumberPanel.setDisabled(True)
+                self.CMaterialPanel.setDisabled(True)
+        for k in self.linekeys + self.textkeys: self.baseDict[k].setText(self.asset[k])
 
     def onAssetTypeChange(self, item=None):
 
@@ -631,18 +624,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.msg.show()
         return self.msg.exec_()
 
-    def onShow(self, event):
-        gui3d.TaskView.onShow(self, event)
-        panels = [self.InfoPanel, self.EditPanel]
-        #self.AdvancedPanel
-        print "Debug :", self.currentScreen
-        for i in range(2):
-            if i == self.currentScreen:
-                print "Show :", i
-                panels[i].show()
-            else:
-                print "Hide :", i
-                panels[i].hide()
 
 # The asset info text:
 

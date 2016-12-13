@@ -33,7 +33,7 @@ class Assets(NameSpace):
                                 'eyelashes' :   'mhclo',
                                 'tongue'    :   'mhclo',
                                 'eyes'      :   'mhclo',
-                                'proxymeshes':  'mhclo'
+                                'proxymeshes':  'proxy'
         }
         
         self.genericExtraKeys = ["tag"]
