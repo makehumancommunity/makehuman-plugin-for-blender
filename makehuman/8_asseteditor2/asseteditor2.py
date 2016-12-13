@@ -90,7 +90,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.selectedType = None
         self.asset = None
         self.strip = None
-        self.resteAsset = None
+        self.resetAsset = None
 
         self.assetFolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes')]
         self.extensions = "mhclo"
@@ -98,7 +98,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.isEdit = False
         self.isToggle = False
         self.isUpdate = False
-        self.isReste = False
+        self.isReset = False
         self.tagWarn = False
 
         self.history_ptr = {'current' : 0,
@@ -522,7 +522,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         @self.ResetButton.mhEvent
         def onClicked(event):
-            self.asset, self.strip = self.splitAssetDict(self.resteAsset)
+            self.asset, self.strip = self.splitAssetDict(self.resetAsset)
             self.setAssetInfoText(self.asset)
             self.ResetButton.setDisabled(True)
             self.history.clear()
@@ -590,8 +590,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             else:
                 self.Thumbnail.setPixmap(QPixmap(self.notfound))
             self.Thumbnail.setGeometry(0, 0, 128, 128)
-            self.resteAsset = assetInfo
-            self.asset, self.strip = self.splitAssetDict(self.resteAsset)
+            self.resetAsset = assetInfo
+            self.asset, self.strip = self.splitAssetDict(self.resetAsset)
             self.setAssetInfoText(self.asset)
             self.isUpdate = False
             self.tagWarn = False
@@ -609,8 +609,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             else:
                 self.Thumbnail.setPixmap(QPixmap(self.notfound))
             self.Thumbnail.setGeometry(0, 0, 128, 128)
-            self.resteAsset = assetInfo
-            self.asset, self.strip = self.splitAssetDict(self.resteAsset)
+            self.resetAsset = assetInfo
+            self.asset, self.strip = self.splitAssetDict(self.resetAsset)
             self.setAssetInfoText(self.asset)
             self.isUpdate = False
             self.tagWarn = False
