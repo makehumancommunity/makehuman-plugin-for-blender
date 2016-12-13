@@ -27,6 +27,7 @@ import gui
 import os
 import filecache
 import copy
+from pathfunctions import *
 
 # currently unused imports:
 
@@ -58,6 +59,13 @@ from bestpractice import getBestPractice
 
 mhapi = gui3d.app.mhapi
 zDepth = mhapi.assets.zDepth
+
+class defaultButton(gui.Button):
+    def __ini__(self, label=''):
+       super(defaultButton,self).__init__(label)
+
+    def sizeHint(self):
+        return QSize(100, 40)
 
 # The AssetEditor task:
 class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
@@ -96,7 +104,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.extensions = "mhclo"
 
         self.isEdit = False
-        self.isToggle = False
         self.isUpdate = False
         self.isReset = False
         self.tagWarn = False
@@ -130,8 +137,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.SaveInfo.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         self.SaveInfo.setWordWrap(True)
 
-        self.SaveButton = gui.Button('Save')
-        self.SaveButton.sizeHint = lambda: QSize(125,50)
+        self.SaveButton = defaultButton('Save')
         self.SaveButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         SaveBoxLayout = QVBoxLayout(self.SaveBox)
@@ -176,56 +182,52 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
 # Define MainPanel (TopWidget) content here:
 
-    # The InfoPanel
-        self.InfoPanel = QWidget()
-        self.addTopWidget(self.InfoPanel)
-
-        InfoPanelLayout = QVBoxLayout(self.InfoPanel)
+        self.MainPanel = QWidget()
+        MainPanelLayout = QVBoxLayout()
+        self.addTopWidget(self.MainPanel)
+        self.MainPanel.setLayout(MainPanelLayout)
 
     # The InfoButtonGroupBox
         self.InfoButtonGroupBox = QGroupBox()
-        
+
         InfoButtonGroupLayout = QHBoxLayout(self.InfoButtonGroupBox)
         InfoButtonGroupLayout.addStretch(1)
 
-        InfoPanelLayout.addWidget(self.InfoButtonGroupBox)
+        MainPanelLayout.addWidget(self.InfoButtonGroupBox)
 
     # The RedoButton
-        self.RedoButton = gui.Button('Redo')
-        self.RedoButton.sizeHint = lambda: QSize(125, 50)
+        self.RedoButton = defaultButton('Redo')
         self.RedoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         InfoButtonGroupLayout.addWidget(self.RedoButton)
         self.RedoButton.setDisabled(True)
 
     # The UndoButton
-        self.UndoButton = gui.Button('Undo')
-        self.UndoButton.sizeHint = lambda: QSize(125, 50)
+        self.UndoButton = defaultButton('Undo')
         self.UndoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         InfoButtonGroupLayout.addWidget(self.UndoButton)
         self.UndoButton.setDisabled(True)
 
-    # The ToggleEditButton
-        self.ToggleEditButton = gui.Button('Toggle Edit')
-        self.ToggleEditButton.sizeHint = lambda: QSize(125, 50)
-        self.ToggleEditButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        InfoButtonGroupLayout.addWidget(self.ToggleEditButton)
-        self.ToggleEditButton.setDisabled(True)
-
     # The ResetButton
-        self.ResetButton = gui.Button('Reset')
-        self.ResetButton.sizeHint = lambda: QSize(125, 50)
+        self.ResetButton = defaultButton('Reset')
         self.ResetButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         InfoButtonGroupLayout.addWidget(self.ResetButton)
         self.ResetButton.setDisabled(True)
 
-    # The EditButton
-        self.EditButton = gui.Button('Edit')
-        self.EditButton.sizeHint = lambda: QSize(125, 50)
-        self.EditButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        InfoButtonGroupLayout.addWidget(self.EditButton)
-        self.EditButton.setDisabled(True)
-
+    # The UpdateButton
+        self.UpdateButton = defaultButton('Update')
+        self.UpdateButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        InfoButtonGroupLayout.addWidget(self.UpdateButton)
         self.InfoButtonGroupBox.setLayout(InfoButtonGroupLayout)
+
+
+    # The TabWidget:
+        self.TabWidget = QTabWidget()
+        MainPanelLayout.addWidget(self.TabWidget)
+
+    # The InfoPanel
+        self.InfoPanel = QWidget()
+        self.TabWidget.addTab(self.InfoPanel, 'General Info')
+        InfoPanelLayout = QVBoxLayout(self.InfoPanel)
 
     # The AssetInfoBox
         self.AssetInfoBox = QWidget()
@@ -261,48 +263,11 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     #The EditPanel
         self.EditPanel = QWidget()
-        self.addTopWidget(self.EditPanel)
+        self.TabWidget.addTab(self.EditPanel,'Edit Common Data')
 
         EditPanelLayout = QVBoxLayout(self.EditPanel)
         self.EditPanel.setLayout(EditPanelLayout)
 
-    #The EditButtonGroupBox
-        self.EditButtonGroupBox = QGroupBox()
-        self.EditButtonGroupBox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-
-        EditButtonGroupLayout = QHBoxLayout(self.EditButtonGroupBox)
-        EditButtonGroupLayout.addStretch(1)
-
-        EditPanelLayout.addWidget(self.EditButtonGroupBox)
-
-    # The AdvancedButton
-        self.AdvancedButton = gui.Button('Advanced')
-        self.AdvancedButton.sizeHint = lambda: QSize(125, 50)
-        self.AdvancedButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        EditButtonGroupLayout.addWidget(self.AdvancedButton)
-        self.AdvancedButton.setDisabled(True)
-
-    # The ToggleInfoButton
-        self.ToggleInfoButton = gui.Button('Toggle Info')
-        self.ToggleInfoButton.sizeHint = lambda: QSize(125, 50)
-        self.ToggleInfoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        EditButtonGroupLayout.addWidget(self.ToggleInfoButton)
-        self.ToggleInfoButton.setDisabled(True)
-
-    # The CancelButton
-        self.CancelButton = gui.Button('Cancel')
-        self.CancelButton.sizeHint = lambda: QSize(125, 50)
-        self.CancelButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        EditButtonGroupLayout.addWidget(self.CancelButton)
-        self.CancelButton.setDisabled(False)
-
-    # The UpdateButton
-        self.UpdateButton = gui.Button('Update')
-        self.UpdateButton.sizeHint = lambda: QSize(125, 50)
-        self.UpdateButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        EditButtonGroupLayout.addWidget(self.UpdateButton)
-        self.UpdateButton.setDisabled(False)
-        self.setAssetInfoText(self.asset)
 
     # The CommonDataEditBox
         self.CommonDataEditBox = QGroupBox()
@@ -380,10 +345,18 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         EditPanelLayout.addWidget(self.AssetTypePanel)
 
         self.ClothesPanel = QWidget()
-        ClothesLayout = QHBoxLayout()
+        ClothesLayout = QVBoxLayout()
         self.ClothesPanel.setLayout(ClothesLayout)
         AssetTypePanelLayout.addWidget(self.ClothesPanel)
-
+        
+        self.CNumberPanel = QWidget()
+        CNumberPanelLayout = QHBoxLayout()
+        self.CNumberPanel.setLayout(CNumberPanelLayout)
+        
+        self.CMaterialPanel = QWidget()
+        CMaterialPanleLayout = QHBoxLayout()
+        self.CMaterialPanel.setLayout(CMaterialPanleLayout)
+        
         zdepthLabel = QLabel('Z-Depth :')
         self.baseDict['z_depth'] = QLineEdit()
         self.baseDict['z_depth'].sizeHint = lambda: QSize(40, 30)
@@ -394,69 +367,34 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.baseDict['max_pole'] = QLineEdit()
         self.baseDict['max_pole'].sizeHint = lambda : QSize(40, 30)
         self.baseDict['max_pole'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        materialLabel = QLabel('  Set Default Material :')
+        materialLabel = QLabel('Set Default Material :')
         self.baseDict['material'] = QLineEdit()
-        self.baseDict['material'].sizeHint = lambda : QSize(175, 30)
-        self.baseDict['material'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.MaterialButton = gui.Button('[ ... ]')
         self.MaterialButton.sizeHint = lambda : QSize(40, 30)
         self.MaterialButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.RelPathButton = gui.Button('To rel. Path...')
+        self.RelPathButton.sizeHint = lambda: QSize(90, 30)
+        self.RelPathButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-        ClothesLayout.addWidget(zdepthLabel)
-        ClothesLayout.addWidget(self.baseDict['z_depth'])
-        ClothesLayout.addWidget(self.zDepthSelect)
-        ClothesLayout.addWidget(maxpoleLabel)
-        ClothesLayout.addWidget(self.baseDict['max_pole'])
-        ClothesLayout.addWidget(materialLabel)
-        ClothesLayout.addWidget(self.baseDict['material'])
-        ClothesLayout.addWidget(self.MaterialButton)
-        ClothesLayout.addStretch(1)
+        CNumberPanelLayout.addWidget(zdepthLabel)
+        CNumberPanelLayout.addWidget(self.baseDict['z_depth'])
+        CNumberPanelLayout.addWidget(self.zDepthSelect)
+        CNumberPanelLayout.addWidget(maxpoleLabel)
+        CNumberPanelLayout.addWidget(self.baseDict['max_pole'])
+        CNumberPanelLayout.addStretch(1)
+        
+        CMaterialPanleLayout.addWidget(materialLabel)
+        CMaterialPanleLayout.addWidget(self.baseDict['material'])
+        CMaterialPanleLayout.addWidget(self.MaterialButton)
+        CMaterialPanleLayout.addWidget(self.RelPathButton)
+
+        ClothesLayout.addWidget(self.CNumberPanel)
+        ClothesLayout.addWidget(self.CMaterialPanel)
 
         EditPanelLayout.addStretch(1)
 
 # Define Actions here:
 
-        @self.EditButton.mhEvent
-        def onClicked(event):
-
-            self.SaveButton.setDisabled(True)
-            self.FileChooser.setDisabled(True)
-            self.FileChooser2.setDisabled(True)
-            self.TagFilter.setDisabled(True)
-            self.AssetTypeBox.setDisabled(True)
-
-            self.EditButton.setDisabled(True)
-            self.ResetButton.setDisabled(True)
-            self.UndoButton.setDisabled(True)
-            self.RedoButton.setDisabled(True)
-            self.ToggleEditButton.setDisabled(False)
-            self.ToggleInfoButton.setDisabled(False)
-
-            if len(self.asset['tag'])<= 5:
-                self.tagWarn = False
-                taglist = list(self.asset['tag'])
-                if len(taglist) < 5 :
-                    for i in range(5 - len(taglist)): taglist.append('')
-                taglist.sort()
-                for lineEdit in self.baseDict['tag']: lineEdit.setText(taglist.pop())
-            else:
-                self.tagWarn = True
-
-            if self.tagWarn:
-                self.TagWarn.show()
-                self.TagGroupBox.hide()
-            else:
-                self.TagWarn.hide()
-                self.TagGroupBox.show()
-
-            fileList = list(self.asset['material'])
-            self.baseDict['material'].setText(fileList [0])
-
-            for k in self.linekeys + self.textkeys + self.intkeys: self.baseDict[k].setText(self.asset[k])
-
-            self.currentScreen = 1
-            self.InfoPanel.hide()
-            self.EditPanel.show()
 
         @self.RedoButton.mhEvent
         def onClicked(event):
@@ -468,6 +406,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 self.UndoButton.setDisabled(False)
             if self.history_ptr['current'] == self.history_ptr['head']:
                 self.RedoButton.setDisabled(True)
+            self.setEditData()
 
         @self.UndoButton.mhEvent
         def onClicked(event):
@@ -479,6 +418,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 self.RedoButton.setDisabled(False)
             if self.history_ptr['current'] == 0:
                 self.UndoButton.setDisabled(True)
+            self.setEditData()
 
         @self.UpdateButton.mhEvent
         def onClicked(event):
@@ -487,7 +427,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.history_ptr['current'] += 1
             self.history_ptr['head'] = self.history_ptr['current']
 
-            self.RedoButton.setDisabled(True)
             self.UndoButton.setDisabled(False)
             self.SaveButton.setDisabled(False)
             self.FileChooser.setDisabled(False)
@@ -496,11 +435,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 self.TagFilter.setDisabled(False)
             self.AssetTypeBox.setDisabled(False)
 
-            self.EditButton.setDisabled(False)
-            self.ToggleEditButton.setDisabled(True)
             self.ResetButton.setDisabled(False)
-
-            self.ToggleInfoButton.setDisabled(False)
 
             if not self.tagWarn:
                 taglist = []
@@ -517,8 +452,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
             self.setAssetInfoText(self.asset)
             self.currentScreen = 0
-            self.InfoPanel.show()
-            self.EditPanel.hide()
 
         @self.ResetButton.mhEvent
         def onClicked(event):
@@ -531,42 +464,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.RedoButton.setDisabled(True)
             self.SaveButton.setDisabled(True)
 
-        @self.CancelButton.mhEvent
-        def onClicked(event):
-            if self.isUpdate:
-                self.SaveButton.setDisabled(False)
-                self.ResetButton.setDisabled(False)
-            self.FileChooser.setDisabled(False)
-            self.FileChooser2.setDisabled(False)
-            if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
-                self.TagFilter.setDisabled(False)
-            self.AssetTypeBox.setDisabled(False)
-            if self.history_ptr['current'] > 0:
-                self.UndoButton.setDisabled(False)
-            if self.history_ptr['current'] < self.history_ptr['head']:
-                self.RedoButton.setDisabled(False)
-
-            self.EditButton.setDisabled(False)
-            self.ToggleEditButton.setDisabled(True)
-            self.ToggleInfoButton.setDisabled(False)
-
-            self.currentScreen = 0
-            self.InfoPanel.show()
-            self.EditPanel.hide()
-
-        @self.ToggleEditButton.mhEvent
-        def onClicked(event):
-            self.ToggleEditButton.setDisabled(False)
-            self.currentScreen = 1
-            self.EditPanel.show()
-            self.InfoPanel.hide()
-
-        @self.ToggleInfoButton.mhEvent
-        def onClicked(event):
-            self.ToggleEditButton.setDisabled(False)
-            self.currentScreen = 0
-            self.EditPanel.hide()
-            self.InfoPanel.show()
 
         @self.SaveButton.mhEvent
         def onClicked(event):
@@ -593,12 +490,11 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.resetAsset = assetInfo
             self.asset, self.strip = self.splitAssetDict(self.resetAsset)
             self.setAssetInfoText(self.asset)
-            self.isUpdate = False
             self.tagWarn = False
             self.history.clear()
             self.history_ptr = {'head' : 0, 'current' : 0}
-            self.EditButton.setDisabled(False)
-            self.setAssetInfoText(self.asset)
+            self.setEditData()
+
 
         @self.FileChooser2.mhEvent
         def onFileSelected(filename):
@@ -616,20 +512,64 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.tagWarn = False
             self.history.clear()
             self.history_ptr = {'head': 0, 'current': 0}
-            self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
+            self.setEditData()
+
 
         @self.MaterialButton.mhEvent
         def onClicked(event):
+            selectedFile = None
             FDialog = QFileDialog(None, '', self.loadedFile[0])
             FDialog.setFileMode(QFileDialog.ExistingFiles)
             FDialog.setFilter('MakeHuman Material ( *.mhmat );; All files ( *.* )')
             if FDialog.exec_():
-                self.baseDict['material'].setText(FDialog.selectedFiles()[0])
+                selectedFile = FDialog.selectedFiles()[0]
+            if selectedFile:
+                materialFile = os.path.split(selectedFile)
+                if materialFile[0] == self.loadedFile[0]:
+                    self.baseDict['material'].setText(materialFile[1])
+                else:
+                    self.baseDict['material'].setText(selectedFile)
+
+        @self.RelPathButton.mhEvent
+        def onClicked(event):
+            filepath, filename = os.path.split(self.baseDict['material'].text())
+            if os.path.isfile(filepath + '/' + filename):
+                rel_path = makeRelPath(filepath, self.loadedFile[0])
+                if rel_path:
+                    self.baseDict['material'].setText(rel_path + filename)
+                else:
+                    self.baseDict['material'].setText('Failure')
+            else:
+                self.baseDict['material'].setText('File not found')
+
 
 
 # Asset type selection event
 
+
+    def setEditData(self):
+        if len(self.asset['tag']) <= 5:
+            self.tagWarn = False
+            taglist = list(self.asset['tag'])
+            if len(taglist) < 5:
+                for i in range(5 - len(taglist)): taglist.append('')
+            taglist.sort()
+            for lineEdit in self.baseDict['tag']: lineEdit.setText(taglist.pop())
+        else:
+            self.tagWarn = True
+
+        if self.tagWarn:
+            self.TagWarn.show()
+            self.TagGroupBox.hide()
+        else:
+            self.TagWarn.hide()
+            self.TagGroupBox.show()
+
+        fileList = list(self.asset['material'])
+        self.baseDict['material'].setText(fileList[0])
+
+        for k in self.linekeys + self.textkeys + self.intkeys: self.baseDict[k].setText(self.asset[k])
 
     def onAssetTypeChange(self, item=None):
 
@@ -644,6 +584,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         if assetType == "Material":
             for type in ['clothes', 'hair','teeth', 'eyebrows', 'eyelashes']:
                 self.assetFolder += [mhapi.locations.getSystemDataPath(type), mhapi.locations.getUserDataPath(type)]
+                self.extensions = 'mhmat'
         elif assetType == "Models":
             self.assetFolder = mhapi.locations.getUserHomePath('models')
             self.extensions = "mhm"
@@ -654,7 +595,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.selectedType = assetType
         self.TagFilter.clearAll()
-        if assetType == "Models" or assetType == "Materials":
+        if assetType == "Models" or assetType == "Material":
             self.FileChooser2.extensions = self.extensions
             self.FileChooser2.setPaths(self.assetFolder)
             self.FileChooser2.refresh()
