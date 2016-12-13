@@ -22,21 +22,21 @@ This plugin edits asset text files
 """
 
 import gui3d
-import qtgui
 import filechooser as fc
 import gui
 import os
 import filecache
+import copy
 
 # currently unused imports:
-import copy
+
 import log
 import re
 import mh
 from PyQt4 import *
 from progress import Progress
 from core import G
-
+import qtgui
 # delete ?
 
 from PyQt4.QtCore import *
@@ -47,7 +47,7 @@ import uuid4 as uuid
 from bestpractice import getBestPractice
 
 
-#Some documentary hints:
+# Some documentary hints:
 
 # Setting sizeHint of a widget: QWidgetXYZ.sizeHint = lambda: QtGui.QSize( int_x. int_y )
 # Use setSizePolicy( x, y ) with QSizePolicy.* (Preffered, Fixed, Minimum, Maximum, etc)
@@ -103,13 +103,15 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                             'head'   : 0,
                            }
 
-        self. histor = []
+        self.history = {}
 
         self.linekeys = ['author', 'name', 'uuid', 'homepage']
         self.textkeys = ['license', 'description']
         self.intkeys  = ['z_depth', 'max_pole']
 
         self.baseDict = {k : None for k in mhapi.assets.keyList}
+
+        self.loadedFile = ['','']
 
 
 # Define LeftWidget content here:
@@ -142,8 +144,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.Thumbnail.setGeometry(0, 0, 128, 128)
         self.addLeftWidget(self.ThumbnailBox)
 
-
-
 # Define RightWidget content here:
 
     # The AssetTypeBox:
@@ -167,7 +167,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.FileChooser2.setIconSize(50, 50)
         self.FileChooser2.enableAutoRefresh(True)
         self.FileChooser2.hide()
-
 
 # Define MainPanel (TopWidget) content here:
 
@@ -198,7 +197,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.UndoButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         InfoButtonGroupLayout.addWidget(self.UndoButton)
         self.UndoButton.setDisabled(True)
-
 
     # The ToggleEditButton
         self.ToggleEditButton = gui.Button('Toggle Edit')
@@ -292,7 +290,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         EditButtonGroupLayout.addWidget(self.CancelButton)
         self.CancelButton.setDisabled(False)
 
-
     # The UpdateButton
         self.UpdateButton = gui.Button('Update')
         self.UpdateButton.sizeHint = lambda: QSize(125, 50)
@@ -370,7 +367,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         CommonDataEditLayout.addWidget(self.TextEditGroupBox)
         self.CommonDataEditBox.setLayout(CommonDataEditLayout)
 
-
     # The asset-type dependent EditPanel:
         self.AssetTypePanel = QGroupBox()
         AssetTypePanelLayout = QVBoxLayout()
@@ -392,16 +388,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.baseDict['max_pole'] = QLineEdit()
         self.baseDict['max_pole'].sizeHint = lambda : QSize(40, 30)
         self.baseDict['max_pole'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        materialLabel = QLabel('  Material :')
+        materialLabel = QLabel('  Set Default Material :')
         self.baseDict['material'] = QLineEdit()
         self.baseDict['material'].sizeHint = lambda : QSize(175, 30)
         self.baseDict['material'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.MaterialButton = gui.Button('[...]')
+        self.MaterialButton = gui.Button('[ ... ]')
         self.MaterialButton.sizeHint = lambda : QSize(40, 30)
         self.MaterialButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.locMaterialButton = gui.Button('Copy')
-        self.MaterialButton.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.locMaterialButton.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         ClothesLayout.addWidget(zdepthLabel)
         ClothesLayout.addWidget(self.baseDict['z_depth'])
@@ -414,7 +407,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         ClothesLayout.addStretch(1)
 
         EditPanelLayout.addStretch(1)
-
 
 # Define Actions here:
 
@@ -458,9 +450,37 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.InfoPanel.hide()
             self.EditPanel.show()
 
+        @self.RedoButton.mhEvent
+        def onClicked(event):
+            if self.history_ptr['recent'] < self.history_ptr['head']:
+                self.history[self.history_ptr['recent']] = {k : self.asset[k] for k in self.asset.keys()}
+                self.history_ptr['recent'] += 1
+                self.asset = {k : self.history[self.history_ptr['recent']][k] for k in self.history[self.history_ptr['recent']]}
+                self.setAssetInfoText(self.asset)
+                self.UndoButton.setDisabled(False)
+            if self.history_ptr['recent'] == self.history_ptr['head']:
+                self.RedoButton.setDisabled(True)
+
+        @self.UndoButton.mhEvent
+        def onClicked(event):
+            if self.history_ptr['recent'] > 0:
+                self.history[self.history_ptr['recent']] = {k : self.asset[k] for k in self.asset.keys()}
+                self.history_ptr['recent'] -= 1
+                self.asset = {k : self.history[self.history_ptr['recent']][k] for k in self.history[self.history_ptr['recent']].keys()}
+                self.setAssetInfoText(self.asset)
+                self.RedoButton.setDisabled(False)
+            if self.history_ptr['recent'] == 0:
+                self.UndoButton.setDisabled(True)
+
         @self.UpdateButton.mhEvent
         def onClicked(event):
             self.isUpdate = True
+            self.history[self.history_ptr['recent']] = {k: self.asset[k] for k in self.asset.keys()}
+            self.history_ptr['recent'] += 1
+            self.history_ptr['head'] = self.history_ptr['recent']
+
+            self.RedoButton.setDisabled(True)
+            self.UndoButton.setDisabled(False)
             self.SaveButton.setDisabled(False)
             self.FileChooser.setDisabled(False)
             self.FileChooser2.setDisabled(False)
@@ -481,7 +501,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                         taglist.append(lineEdit.text().strip())
                 self.asset['tag'] = set(taglist)
 
-            self.asset['material'] = set(self.baseDict['material'].getText())
+            self.asset['material'] = set([self.baseDict['material'].text()])
 
             for k in self.linekeys: self.asset[k] = self.baseDict[k].text()
             for k in self.textkeys: self.asset[k] = self.baseDict[k].toPlainText()
@@ -497,12 +517,11 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.asset, self.strip = self.splitAssetDict(self.resteAsset)
             self.setAssetInfoText(self.asset)
             self.ResetButton.setDisabled(True)
-            self.history_ptr['recent']= 0
-            self.history_ptr['head'] = 0
+            self.history.clear()
+            self.history_ptr = {'head': 0, 'recent': 0}
             self.UndoButton.setDisabled(True)
             self.RedoButton.setDisabled(True)
             self.SaveButton.setDisabled(True)
-
 
         @self.CancelButton.mhEvent
         def onClicked(event):
@@ -514,15 +533,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
                 self.TagFilter.setDisabled(False)
             self.AssetTypeBox.setDisabled(False)
-            if self.history_ptr['head'] > 0:
+            if self.history_ptr['recent'] > 0:
                 self.UndoButton.setDisabled(False)
             if self.history_ptr['recent'] < self.history_ptr['head']:
-                self.UndoButton.setDisabled(False)
+                self.RedoButton.setDisabled(False)
 
             self.EditButton.setDisabled(False)
             self.ToggleEditButton.setDisabled(True)
-
-
             self.ToggleInfoButton.setDisabled(False)
 
             self.InfoPanel.show()
@@ -555,6 +572,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         @self.FileChooser.mhEvent
         def onFileSelected(filename):
+            self.loadedFile = os.path.split(filename)
             assetInfo = mhapi.assets.openAssetFile(filename)
             if assetInfo["thumb_path"]:
                 self.Thumbnail.setPixmap(QPixmap(assetInfo["thumb_path"]))
@@ -566,11 +584,14 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.setAssetInfoText(self.asset)
             self.isUpdate = False
             self.tagWarn = False
+            self.history.clear()
+            self.history_ptr = {'head' : 0, 'recent' : 0}
             self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
 
         @self.FileChooser2.mhEvent
         def onFileSelected(filename):
+            self.loadedFile = os.path.split(filename)
             assetInfo = mhapi.assets.openAssetFile(filename)
             if assetInfo["thumb_path"]:
                 self.Thumbnail.setPixmap(QPixmap(assetInfo["thumb_path"]))
@@ -582,14 +603,16 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.setAssetInfoText(self.asset)
             self.isUpdate = False
             self.tagWarn = False
+            self.history.clear()
+            self.history_ptr = {'head': 0, 'recent': 0}
             self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
 
         @self.MaterialButton.mhEvent
         def onClicked(event):
-            FDialog = QFileDialog()
-            FDialog.setFileMode(QFileDialog.AnyFile)
-            FDialog.setFilter('MakeHuman Material (*.mhmat)')
+            FDialog = QFileDialog(None, '', self.loadedFile[0])
+            FDialog.setFileMode(QFileDialog.ExistingFiles)
+            FDialog.setFilter('MakeHuman Material ( *.mhmat );; All files ( *.* )')
             if FDialog.exec_():
                 self.baseDict['material'].setText(FDialog.selectedFiles()[0])
 
@@ -645,6 +668,15 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.msg.setWindowTitle(title)
         self.msg.setStandardButtons(QMessageBox.Ok)
         self.msg.show()
+
+    def showMessageYN(self,message,title="Information"):
+        self.msg = QMessageBox()
+        self.msg.setIcon(QMessageBox.Information)
+        self.msg.setText(message)
+        self.msg.setWindowTitle(title)
+        self.msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        self.msg.show()
+        return self.msg.exec_()
 
 
 # The asset info text:
