@@ -29,11 +29,11 @@ class Assets(NameSpace):
                                 'clothes'   :   'mhclo',
                                 'hair'      :   'mhclo',
                                 'teeth'     :   'mhclo',
-                                'eyebrows'   :   'mhclo',
+                                'eyebrows'  :   'mhclo',
                                 'eyelashes' :   'mhclo',
+                                'tongue'    :   'mhclo',
+                                'eyes'      :   'mhclo',
                                 'proxymeshes':  'mhclo'
-
-
         }
         
         self.genericExtraKeys = ["tag"]

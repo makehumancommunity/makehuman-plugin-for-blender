@@ -69,12 +69,14 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.notfound = mhapi.locations.getSystemDataPath("notfound.thumb")
 
         assetTypes = ["Clothes",
-                      "Models",
                       "Hair",
+                      "Models",
                       "Teeth",
-                      "ProxyMeshes",
+                      "Tongue",
+                      "Eyes"
                       "Eyebrows",
                       "Eyelashes",
+                      "ProxyMeshes",
                       "Material"
                       ]
 
@@ -99,7 +101,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.isReste = False
         self.tagWarn = False
 
-        self.history_ptr = {'recent' : 0,
+        self.history_ptr = {'current' : 0,
                             'head'   : 0,
                            }
 
@@ -108,10 +110,14 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.linekeys = ['author', 'name', 'uuid', 'homepage']
         self.textkeys = ['license', 'description']
         self.intkeys  = ['z_depth', 'max_pole']
+        self.booleankeys = []
+        self.texturekeys = ["diffuseTexture", "bumpMapTexture", "normalMapTexture", "displacementMapTexture",
+                        "specularMapTexture", "transparencyMapTexture", "aoMapTexture"]
 
         self.baseDict = {k : None for k in mhapi.assets.keyList}
 
         self.loadedFile = ['','']
+        self.currentScreen = 0
 
 
 # Define LeftWidget content here:
@@ -412,6 +418,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         @self.EditButton.mhEvent
         def onClicked(event):
+
             self.SaveButton.setDisabled(True)
             self.FileChooser.setDisabled(True)
             self.FileChooser2.setDisabled(True)
@@ -447,37 +454,38 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
             for k in self.linekeys + self.textkeys + self.intkeys: self.baseDict[k].setText(self.asset[k])
 
+            self.currentScreen = 1
             self.InfoPanel.hide()
             self.EditPanel.show()
 
         @self.RedoButton.mhEvent
         def onClicked(event):
-            if self.history_ptr['recent'] < self.history_ptr['head']:
-                self.history[self.history_ptr['recent']] = {k : self.asset[k] for k in self.asset.keys()}
-                self.history_ptr['recent'] += 1
-                self.asset = {k : self.history[self.history_ptr['recent']][k] for k in self.history[self.history_ptr['recent']]}
+            if self.history_ptr['current'] < self.history_ptr['head']:
+                self.history[self.history_ptr['current']] = {k : self.asset[k] for k in self.asset.keys()}
+                self.history_ptr['current'] += 1
+                self.asset = {k : self.history[self.history_ptr['current']][k] for k in self.history[self.history_ptr['current']]}
                 self.setAssetInfoText(self.asset)
                 self.UndoButton.setDisabled(False)
-            if self.history_ptr['recent'] == self.history_ptr['head']:
+            if self.history_ptr['current'] == self.history_ptr['head']:
                 self.RedoButton.setDisabled(True)
 
         @self.UndoButton.mhEvent
         def onClicked(event):
-            if self.history_ptr['recent'] > 0:
-                self.history[self.history_ptr['recent']] = {k : self.asset[k] for k in self.asset.keys()}
-                self.history_ptr['recent'] -= 1
-                self.asset = {k : self.history[self.history_ptr['recent']][k] for k in self.history[self.history_ptr['recent']].keys()}
+            if self.history_ptr['current'] > 0:
+                self.history[self.history_ptr['current']] = {k : self.asset[k] for k in self.asset.keys()}
+                self.history_ptr['current'] -= 1
+                self.asset = {k : self.history[self.history_ptr['current']][k] for k in self.history[self.history_ptr['current']].keys()}
                 self.setAssetInfoText(self.asset)
                 self.RedoButton.setDisabled(False)
-            if self.history_ptr['recent'] == 0:
+            if self.history_ptr['current'] == 0:
                 self.UndoButton.setDisabled(True)
 
         @self.UpdateButton.mhEvent
         def onClicked(event):
             self.isUpdate = True
-            self.history[self.history_ptr['recent']] = {k: self.asset[k] for k in self.asset.keys()}
-            self.history_ptr['recent'] += 1
-            self.history_ptr['head'] = self.history_ptr['recent']
+            self.history[self.history_ptr['current']] = {k: self.asset[k] for k in self.asset.keys()}
+            self.history_ptr['current'] += 1
+            self.history_ptr['head'] = self.history_ptr['current']
 
             self.RedoButton.setDisabled(True)
             self.UndoButton.setDisabled(False)
@@ -508,7 +516,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             for k in self.intkeys: self.asset[k] = self.getDigitStr(self.baseDict[k].text())
 
             self.setAssetInfoText(self.asset)
-
+            self.currentScreen = 0
             self.InfoPanel.show()
             self.EditPanel.hide()
 
@@ -518,7 +526,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.setAssetInfoText(self.asset)
             self.ResetButton.setDisabled(True)
             self.history.clear()
-            self.history_ptr = {'head': 0, 'recent': 0}
+            self.history_ptr = {'head': 0, 'current': 0}
             self.UndoButton.setDisabled(True)
             self.RedoButton.setDisabled(True)
             self.SaveButton.setDisabled(True)
@@ -533,27 +541,30 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
                 self.TagFilter.setDisabled(False)
             self.AssetTypeBox.setDisabled(False)
-            if self.history_ptr['recent'] > 0:
+            if self.history_ptr['current'] > 0:
                 self.UndoButton.setDisabled(False)
-            if self.history_ptr['recent'] < self.history_ptr['head']:
+            if self.history_ptr['current'] < self.history_ptr['head']:
                 self.RedoButton.setDisabled(False)
 
             self.EditButton.setDisabled(False)
             self.ToggleEditButton.setDisabled(True)
             self.ToggleInfoButton.setDisabled(False)
 
+            self.currentScreen = 0
             self.InfoPanel.show()
             self.EditPanel.hide()
 
         @self.ToggleEditButton.mhEvent
         def onClicked(event):
             self.ToggleEditButton.setDisabled(False)
+            self.currentScreen = 1
             self.EditPanel.show()
             self.InfoPanel.hide()
 
         @self.ToggleInfoButton.mhEvent
         def onClicked(event):
             self.ToggleEditButton.setDisabled(False)
+            self.currentScreen = 0
             self.EditPanel.hide()
             self.InfoPanel.show()
 
@@ -585,7 +596,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.isUpdate = False
             self.tagWarn = False
             self.history.clear()
-            self.history_ptr = {'head' : 0, 'recent' : 0}
+            self.history_ptr = {'head' : 0, 'current' : 0}
             self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
 
@@ -604,7 +615,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.isUpdate = False
             self.tagWarn = False
             self.history.clear()
-            self.history_ptr = {'head': 0, 'recent': 0}
+            self.history_ptr = {'head': 0, 'current': 0}
             self.EditButton.setDisabled(False)
             self.setAssetInfoText(self.asset)
 
@@ -618,6 +629,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
 
 # Asset type selection event
+
 
     def onAssetTypeChange(self, item=None):
 
@@ -678,6 +690,18 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.msg.show()
         return self.msg.exec_()
 
+    def onShow(self, event):
+        gui3d.TaskView.onShow(self, event)
+        panels = [self.InfoPanel, self.EditPanel]
+        #self.AdvancedPanel
+        print "Debug :", self.currentScreen
+        for i in range(2):
+            if i == self.currentScreen:
+                print "Show :", i
+                panels[i].show()
+            else:
+                print "Hide :", i
+                panels[i].hide()
 
 # The asset info text:
 
