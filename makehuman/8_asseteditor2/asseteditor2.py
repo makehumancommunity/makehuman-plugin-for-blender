@@ -52,11 +52,14 @@ mhapi = gui3d.app.mhapi
 zDepth = mhapi.assets.zDepth
 
 class defaultButton(gui.Button):
-    def __ini__(self, label=''):
-       super(defaultButton,self).__init__(label)
+
+    def __init__(self, label='',size_X = 100, size_Y = 40):
+        super(defaultButton, self).__init__(label)
+        self.size_X = size_X
+        self.size_Y = size_Y
 
     def sizeHint(self):
-        return QSize(100, 40)
+        return QSize(self.size_X, self.size_Y)
 
 # The AssetEditor task:
 class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
@@ -76,7 +79,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                       "Eyebrows",
                       "Eyelashes",
                       "ProxyMeshes",
-                      "Material"
+                      "Materials"
                       ]
 
 
@@ -103,9 +106,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.linekeys = ['author', 'name', 'uuid', 'homepage']
         self.textkeys = ['license', 'description']
         self.intkeys  = ['z_depth', 'max_pole']
-        self.booleankeys = []
+        self.booleankeys = ["shadeless", "wireframe","transparent", "alphaToCoverage", "backfaceCull", "depthless",
+                            "castShadows", "receiveShadows"]
         self.texturekeys = ["diffuseTexture", "bumpMapTexture", "normalMapTexture", "displacementMapTexture",
-                        "specularMapTexture", "transparencyMapTexture", "aoMapTexture"]
+                            "specularMapTexture", "transparencyMapTexture", "aoMapTexture"]
 
         self.baseDict = {k : None for k in mhapi.assets.keyList}
 
@@ -216,7 +220,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         InfoPanelLayout = QVBoxLayout(self.InfoPanel)
 
     # The AssetInfoBox
-        self.AssetInfoBox = QWidget()
+        self.AssetInfoBox = QFrame()
         AssetInfoLayout = QVBoxLayout(self.AssetInfoBox)
 
     # The AssetInfoText
@@ -262,7 +266,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         EditPanelLayout.addWidget(self.CommonDataEditBox)
 
     # The LineEditGroupBox with
-        self.LineEditGroupBox = QWidget()
+        self.LineEditGroupBox = QFrame()
         LineEditGroupLayout = QGridLayout()
 
         AuthorLabel = LineEditGroupLayout.addWidget(QLabel('Author :'), 0, 0, 1, 1)
@@ -324,21 +328,16 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.CommonDataEditBox.setLayout(CommonDataEditLayout)
 
     # The asset-type dependent EditPanel:
-        self.AssetTypePanel = QGroupBox()
-        AssetTypePanelLayout = QVBoxLayout()
-        self.AssetTypePanel.setLayout(AssetTypePanelLayout)
-        EditPanelLayout.addWidget(self.AssetTypePanel)
 
-        self.ClothesPanel = QWidget()
+        self.ClothesPanel = QGroupBox()
         ClothesLayout = QVBoxLayout()
         self.ClothesPanel.setLayout(ClothesLayout)
-        AssetTypePanelLayout.addWidget(self.ClothesPanel)
         
-        self.CNumberPanel = QWidget()
+        self.CNumberPanel = QFrame()
         CNumberPanelLayout = QHBoxLayout()
         self.CNumberPanel.setLayout(CNumberPanelLayout)
         
-        self.CMaterialPanel = QWidget()
+        self.CMaterialPanel = QFrame()
         CMaterialPanleLayout = QHBoxLayout()
         self.CMaterialPanel.setLayout(CMaterialPanleLayout)
         
@@ -376,9 +375,68 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         ClothesLayout.addWidget(self.CNumberPanel)
         ClothesLayout.addWidget(self.CMaterialPanel)
 
+        EditPanelLayout.addWidget(self.ClothesPanel)
         EditPanelLayout.addStretch(1)
 
+
     # Advanced Panel
+        self.AdvancedPanel = QWidget()
+        AdvancedPanelLayout = QVBoxLayout()
+        self.AdvancedPanel.setLayout(AdvancedPanelLayout)
+        self.TabWidget.addTab(self.AdvancedPanel, 'Edit Advanced Data')
+
+        self.bkPanel = QFrame()
+        bkPanelLayout = QGridLayout()
+        self.bkPanel.setLayout(bkPanelLayout)
+
+        AdvancedPanelLayout.addWidget(self.bkPanel)
+
+        #for i in range(3):
+        #    bkPanelLayout.addWidget(QLabel(' Y   |   N  '), 0, i*2 + 1, 1, 1)
+
+        i =  0
+        for key in self.booleankeys:
+            bkLabel = {i : [QLabel(key.capitalize()), QFrame(), QHBoxLayout()] }
+            bkLabel[i][1].setLayout(bkLabel[i][2])
+            self.baseDict[key] = [QRadioButton('Y:'), QRadioButton('N:')]
+            bkLabel[i][2].addWidget(self.baseDict[key][0])
+            bkLabel[i][2].addWidget(self.baseDict[key][1])
+            bkLabel[i][2].addStretch(1)
+            bkPanelLayout.addWidget(bkLabel[i][1], (i // 3) + 1, (i % 3) * 2 + 1, 1, 1)
+            bkPanelLayout.addWidget(bkLabel[i][0], (i // 3) + 1, (i % 3) * 2, 1, 1)
+            i += 1
+
+        self.TexturesPanel = QFrame()
+        TexturesPanelLayout = QGridLayout()
+        self.TexturesPanel.setLayout(TexturesPanelLayout)
+        AdvancedPanelLayout.addWidget(self.TexturesPanel)
+
+        i = 0
+        for key in self.texturekeys:
+            texturesPLabel = {i : [QLabel(key.capitalize()), QLineEdit(), defaultButton('[ ... ]', 40, 30),
+                              defaultButton('To rel. Path...', 90, 30)] }
+            self.baseDict[key] = texturesPLabel[i][1]
+            texturesPLabel[i][2].setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            texturesPLabel[i][3].setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            h = 0
+            for widget in texturesPLabel[i]:
+                TexturesPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 4, 1, 1)
+                h += 1
+            i += 1
+
+          #  @texturesPLabel[i][2].mhEvent
+          #  def onClicked(event):
+          #      self.showMessage('it\'s working')
+
+
+
+        self.bkPanel.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+
+        AdvancedPanelLayout.addStretch(1)
+
+
+
+
 
 # Define Actions here:
 
@@ -432,9 +490,12 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             for k in self.textkeys: self.asset[k] = self.baseDict[k].toPlainText()
             if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
                 for k in self.intkeys: self.asset[k] = self.getDigitStr(self.baseDict[k].text())
+            if self.selectedType == 'Materials':
+                for k in self.booleankeys:
+                    self.asset[k] = 'True' if self.baseDict[k][0].isChecked() else 'False'
 
             self.setAssetInfoText(self.asset)
-            self.currentScreen = 0
+
 
         @self.ResetButton.mhEvent
         def onClicked(event):
@@ -549,7 +610,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.TagWarn.hide()
             self.TagGroupBox.show()
 
-        if not self.selectedType in ['Material','ProxyMeshes','Models']:
+        if not self.selectedType in ['Materials','ProxyMeshes','Models']:
             fileList = list(self.asset['material'])
             self.baseDict['material'].setText(fileList[0])
             for k in self.intkeys: self.baseDict[k].setText(self.asset[k])
@@ -562,6 +623,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             else:
                 self.CNumberPanel.setDisabled(True)
                 self.CMaterialPanel.setDisabled(True)
+                for key in self.booleankeys:
+                    if self.asset[key] == 'True':
+                        self.baseDict[key][0].setChecked(True)
+                        self.baseDict[key][1].setChecked(False)
+                    else:
+                        self.baseDict[key][0].setChecked(False)
+                        self.baseDict[key][1].setChecked(True)
         for k in self.linekeys + self.textkeys: self.baseDict[k].setText(self.asset[k])
 
     def onAssetTypeChange(self, item=None):
@@ -574,7 +642,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.FileChooser.setFileLoadHandler(fc.TaggedFileLoader(self))
 
         self.assetFoler = []
-        if assetType == "Material":
+        if assetType == "Materials":
             for type in ['clothes', 'hair','teeth', 'eyebrows', 'eyelashes']:
                 self.assetFolder += [mhapi.locations.getSystemDataPath(type), mhapi.locations.getUserDataPath(type)]
                 self.extensions = 'mhmat'
@@ -588,7 +656,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.selectedType = assetType
         self.TagFilter.clearAll()
-        if assetType == "Models" or assetType == "Material":
+        if assetType == "Models" or assetType == "Materials":
             self.FileChooser2.extensions = self.extensions
             self.FileChooser2.setPaths(self.assetFolder)
             self.FileChooser2.refresh()
