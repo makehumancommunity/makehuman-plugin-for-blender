@@ -740,13 +740,16 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                         self.baseDict[key][0].setChecked(False)
                         self.baseDict[key][1].setChecked(True)
                 for key in self.texturekeys + self.floatkeys:
-                    self.baseDict[key].setText(self.asset[key])
+                    if self.asset[key]:
+                        self.baseDict[key].setText(self.asset[key])
                 for key in self.rgbkeys:
                     if self.asset[key]:
                         val = self.asset[key].split()
                         for i in range(3):
                             self.baseDict[key][i].setText(val[i])
-        for key in self.linekeys + self.textkeys: self.baseDict[key].setText(self.asset[key])
+        for key in self.linekeys + self.textkeys:
+            if self.asset[key]:
+                self.baseDict[key].setText(self.asset[key])
 
     def onAssetTypeChange(self, item=None):
 
