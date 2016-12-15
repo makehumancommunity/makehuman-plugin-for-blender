@@ -93,8 +93,8 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.assetList.selectionModel().selectionChanged.connect(self.onAssetChange)
 
         self.selectBox.addWidget(gui.TextView(" "))
-
         self.downloadButton = self.selectBox.addWidget(gui.Button('Download'))
+        self.downloadButton.setDisabled(True)
 
         @self.downloadButton.mhEvent
         def onClicked(event):
@@ -240,6 +240,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
     def onAssetChange(self):
         assetType = str(self.typeList.getCurrentItem())
+        self.downloadButton.setDisabled(False)
 
         log.debug("Asset change: " + assetType)
 
