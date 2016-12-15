@@ -431,11 +431,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     # Advanced Panel
 
-        #self.AdvancedPanel = QWidget()
-        #AdvancedPanelLayout = QVBoxLayout()
-        #self.AdvancedPanel.setLayout(AdvancedPanelLayout)
-
-
         self.AdvancedPanel = QFrame()
         AdvancedPanelLayout = QVBoxLayout()
         self.AdvancedPanel.setLayout(AdvancedPanelLayout)
@@ -499,7 +494,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         floatsPanelLayout = QGridLayout()
         self.floatsPanel.setLayout(floatsPanelLayout)
         subFrame2Layout.addWidget(self.floatsPanel)
-
 
         i = 0
         for key in self.floatkeys:
@@ -572,7 +566,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         @self.UpdateButton.mhEvent
         def onClicked(event):
             self.isUpdate = True
-            self.history[self.history_ptr['current']] = {k: self.asset[k] for k in self.asset.keys()}
+            self.history[self.history_ptr['current']] = {key: self.asset[key] for key in self.asset.keys()}
             self.history_ptr['current'] += 1
             self.history_ptr['head'] = self.history_ptr['current']
 
@@ -590,13 +584,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
             self.asset['material'] = set([self.baseDict['material'].text()])
 
-            for k in self.linekeys: self.asset[k] = self.baseDict[k].text()
-            for k in self.textkeys: self.asset[k] = self.baseDict[k].toPlainText()
+            for key in self.linekeys: self.asset[key] = self.baseDict[key].text()
+            for key in self.textkeys: self.asset[key] = self.baseDict[key].toPlainText()
             if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
-                for k in self.intkeys: self.asset[k] = self.getDigitStr(self.baseDict[k].text())
+                for key in self.intkeys: self.asset[key] = self.getDigitStr(self.baseDict[key].text())
             if self.selectedType == 'Materials':
-                for k in self.booleankeys:self.asset[k] = 'True' if self.baseDict[k][0].isChecked() else 'False'
-                for k in self.texturekeys:self.asset[k]=self.baseDict[k].text()
+                for key in self.booleankeys:self.asset[key] = 'True' if self.baseDict[key][0].isChecked() else 'False'
+                for key in self.texturekeys:self.asset[key]=self.baseDict[key].text()
             self.setAssetInfoText(self.asset)
 
 
@@ -657,6 +651,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.resetAsset = assetInfo
             self.asset, self.strip = self.splitAssetDict(self.resetAsset)
             self.setAssetInfoText(self.asset)
+            print 'DEBUG      :   ', self.asset
             self.isUpdate = False
             self.tagWarn = False
             self.history.clear()
@@ -739,9 +734,18 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                     else:
                         self.baseDict[key][0].setChecked(False)
                         self.baseDict[key][1].setChecked(True)
-                for key in self.texturekeys: self.baseDict[key].setText(self.asset[key])
+                for key in self.texturekeys + self.floatkeys:
+                    print 'DEBUG     :    ', self.asset[key]
+                    self.baseDict[key].setText(self.asset[key])
+                for key in self.rgbkeys:
+                    if self.asset[key]:
+                        val = self.asset[key].split()
+                        for i in range(3):
+                            self.baseDict[key][i].setText(val[i])
 
-        for k in self.linekeys + self.textkeys: self.baseDict[k].setText(self.asset[k])
+
+
+        for key in self.linekeys + self.textkeys: self.baseDict[key].setText(self.asset[key])
 
     def onAssetTypeChange(self, item=None):
 
