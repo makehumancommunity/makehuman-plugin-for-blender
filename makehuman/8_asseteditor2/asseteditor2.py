@@ -95,7 +95,6 @@ class RelTexturePathButton(defaultButton):
 
     def onClicked(self, mhEvent):
         filepath, filename = os.path.split(self.lineEdit.text())
-        print "debug   :", self.path,'XXX    ', type(self.path)
         if os.path.isfile(filepath + '/' + filename) and self.path !='':
             rel_path = makeRelPath(filepath, self.path)
             if rel_path:
@@ -153,8 +152,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.intkeys  = ['z_depth', 'max_pole']
         self.booleankeys = ["shadeless", "wireframe","transparent", "alphaToCoverage", "backfaceCull", "depthless",
                             "castShadows", "receiveShadows"]
-        self.texturekeys = ["diffuseTexture", "bumpMapTexture", "normalMapTexture", "displacementMapTexture",
-                            "specularMapTexture", "transparencyMapTexture", "aoMapTexture"]
+        self.texturekeys = ["diffuseTexture", "bumpmapTexture", "normalmapTexture", "displacementmapTexture",
+                            "specularmapTexture", "transparencymapTexture", "aomapTexture"]
         self.floatkeys = ["diffuseIntensity", "bumpMapIntensity", "normalMapIntensity", "displacementMapIntensity",
                           "specularMapIntensity", "transparencyMapIntensity", "aoMapIntensity",  "shininess",
                           "opacity", "translucency"]
@@ -224,6 +223,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         MainPanelLayout = QVBoxLayout()
         self.addTopWidget(self.MainPanel)
         self.MainPanel.setLayout(MainPanelLayout)
+        button = QTabWidget
 
     # The ButtonGroupBox
         self.ButtonGroupBox = QGroupBox()
@@ -262,11 +262,12 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.TabWidget = QTabWidget()
         MainPanelLayout.addWidget(self.TabWidget)
 
+
 # The InfoPanel
 
     # The InfoPanel
         self.InfoPanel = QWidget()
-        tabInfoIndex = self.TabWidget.addTab(self.InfoPanel, 'General Info')
+        self.tabInfoIndex = self.TabWidget.addTab(self.InfoPanel, 'General Info')
         InfoPanelLayout = QVBoxLayout(self.InfoPanel)
 
     # The AssetInfoBox
@@ -303,7 +304,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     #The EditPanel
         self.EditPanel = QWidget()
-        tabEditIndex = self.TabWidget.addTab(self.EditPanel,'Edit Common Data')
+        self.tabEditIndex = self.TabWidget.addTab(self.EditPanel,'Edit Common Data')
 
         EditPanelLayout = QVBoxLayout(self.EditPanel)
         self.EditPanel.setLayout(EditPanelLayout)
@@ -531,10 +532,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         ScrollLayout2 = QVBoxLayout()
         ScrollLayout2.addWidget(self.AdvancedPanel)
         self.ScrollArea2.setLayout(ScrollLayout2)
-        tabAdvancedIndex = self.TabWidget.addTab(self.ScrollArea2, 'Advanced Materials Data')
+        self.tabAdvancedIndex = self.TabWidget.addTab(self.ScrollArea2, 'Advanced Materials Data')
 
-        self.TabWidget.setTabEnabled(tabEditIndex, False)
-        self.TabWidget.setTabEnabled(tabAdvancedIndex, False)
+        self.TabWidget.setTabEnabled(self.tabEditIndex, False)
+        self.TabWidget.setTabEnabled(self.tabAdvancedIndex, False)
 
 
 # Define Actions here:
@@ -589,8 +590,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
                 for key in self.intkeys: self.asset[key] = self.getDigitStr(self.baseDict[key].text())
             if self.selectedType == 'Materials':
-                for key in self.booleankeys:self.asset[key] = 'True' if self.baseDict[key][0].isChecked() else 'False'
-                for key in self.texturekeys:self.asset[key]=self.baseDict[key].text()
+                for key in self.booleankeys: self.asset[key] = 'True' if self.baseDict[key][0].isChecked() else 'False'
+                for key in self.texturekeys: self.asset[key] = self.baseDict[key].text()
+                for key in self.floatkeys: self.asset[key] = self.getFloatStr(self.baseDict[key].text())
+                for key in self.rgbkeys:
+                    self.asset[key] = ' '.join( [self.getFloatStr( self.baseDict[key][0].text() ), self.getFloatStr( self.baseDict[key][1].text() ),
+                                       self.getFloatStr( self.baseDict[key][2].text() ) ] )
+
             self.setAssetInfoText(self.asset)
 
 
@@ -635,8 +641,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.history.clear()
             self.history_ptr = {'head' : 0, 'current' : 0}
             self.setEditData()
-            self.TabWidget.setTabEnabled(tabEditIndex, True)
-            self.TabWidget.setTabEnabled(tabAdvancedIndex, False)
+            self.TabWidget.setTabEnabled(self.tabEditIndex, True)
+            self.TabWidget.setTabEnabled(self.tabAdvancedIndex, False)
 
 
         @self.FileChooser2.mhEvent
@@ -651,18 +657,17 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.resetAsset = assetInfo
             self.asset, self.strip = self.splitAssetDict(self.resetAsset)
             self.setAssetInfoText(self.asset)
-            print 'DEBUG      :   ', self.asset
             self.isUpdate = False
             self.tagWarn = False
             self.history.clear()
             self.history_ptr = {'head': 0, 'current': 0}
             self.setAssetInfoText(self.asset)
             self.setEditData()
-            self.TabWidget.setTabEnabled(tabEditIndex, True)
+            self.TabWidget.setTabEnabled(self.tabEditIndex, True)
             if self.selectedType == 'Materials':
-                self.TabWidget.setTabEnabled(tabAdvancedIndex, True)
+                self.TabWidget.setTabEnabled(self.tabAdvancedIndex, True)
             else:
-                self.TabWidget.setTabEnabled(tabAdvancedIndex, False)
+                self.TabWidget.setTabEnabled(self.tabAdvancedIndex, False)
 
 
         @self.MaterialButton.mhEvent
@@ -735,16 +740,12 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                         self.baseDict[key][0].setChecked(False)
                         self.baseDict[key][1].setChecked(True)
                 for key in self.texturekeys + self.floatkeys:
-                    print 'DEBUG     :    ', self.asset[key]
                     self.baseDict[key].setText(self.asset[key])
                 for key in self.rgbkeys:
                     if self.asset[key]:
                         val = self.asset[key].split()
                         for i in range(3):
                             self.baseDict[key][i].setText(val[i])
-
-
-
         for key in self.linekeys + self.textkeys: self.baseDict[key].setText(self.asset[key])
 
     def onAssetTypeChange(self, item=None):
