@@ -61,11 +61,56 @@ class defaultButton(gui.Button):
     def sizeHint(self):
         return QSize(self.size_X, self.size_Y)
 
+class SelectTextureButton(defaultButton, QLineEdit):
+
+    def __init__(self, lineEdit, label='', size_X=100, size_Y=40, Path=[]):
+        super(SelectTextureButton, self).__init__(label, size_X, size_Y)
+
+        self.lineEdit = lineEdit
+        self.path = Path[0]
+
+    def onClicked(self, mhEvent):
+        selectedFile = None
+        FDialog = QFileDialog(None, '', self.path)
+        FDialog.setFileMode(QFileDialog.ExistingFiles)
+        FDialog.setFilter('MakeHuman Material ( *.mhmat );; All files ( *.* )')
+        if FDialog.exec_():
+            selectedFile = FDialog.selectedFiles()[0]
+        if selectedFile:
+            textureFile = os.path.split(selectedFile)
+            if textureFile[0] == self.path:
+                self.lineEdit.setText(textureFile)
+            else:
+                self.lineEdit.setText(selectedFile)
+
+
+class RelTexturePathButton(defaultButton):
+
+
+    def __init__(self, lineEdit, label='', size_X=100, size_Y=40, Path=[]):
+        super(RelTexturePathButton, self).__init__(label, size_X, size_Y)
+
+        self.lineEdit = lineEdit
+        self.path = Path[0]
+
+    def onClicked(self, mhEvent):
+        filepath, filename = os.path.split(self.lineEdit.text())
+        print "debug   :", self.path,'XXX    ', type(self.path)
+        if os.path.isfile(filepath + '/' + filename) and self.path !='':
+            rel_path = makeRelPath(filepath, self.path)
+            if rel_path:
+                self.lineEdit.setText(rel_path + filename)
+            else:
+                self.lineEdit.setText('Failure')
+        else:
+            self.lineEdit.setText('File not found')
+
+
 # The AssetEditor task:
+
 class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
     def __init__(self, category):
         super(AssetEditor2TaskView,self).__init__(category, 'Asset Editor 2')
-
 
 # Preset Variables here:
         self.notfound = mhapi.locations.getSystemDataPath("notfound.thumb")
@@ -110,11 +155,14 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                             "castShadows", "receiveShadows"]
         self.texturekeys = ["diffuseTexture", "bumpMapTexture", "normalMapTexture", "displacementMapTexture",
                             "specularMapTexture", "transparencyMapTexture", "aoMapTexture"]
+        self.floatkeys = ["diffuseIntensity", "bumpMapIntensity", "normalMapIntensity", "displacementMapIntensity",
+                          "specularMapIntensity", "transparencyMapIntensity", "aoMapIntensity",  "shininess",
+                          "opacity", "translucency"]
+        self.rgbkeys = ["diffuseColor", "specularColor", "emissiveColor", "ambientColor"]
 
         self.baseDict = {k : None for k in mhapi.assets.keyList}
 
         self.loadedFile = ['','']
-
 
 
 # Define LeftWidget content here:
@@ -214,9 +262,11 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.TabWidget = QTabWidget()
         MainPanelLayout.addWidget(self.TabWidget)
 
+# The InfoPanel
+
     # The InfoPanel
         self.InfoPanel = QWidget()
-        self.TabWidget.addTab(self.InfoPanel, 'General Info')
+        tabInfoIndex = self.TabWidget.addTab(self.InfoPanel, 'General Info')
         InfoPanelLayout = QVBoxLayout(self.InfoPanel)
 
     # The AssetInfoBox
@@ -253,7 +303,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     #The EditPanel
         self.EditPanel = QWidget()
-        self.TabWidget.addTab(self.EditPanel,'Edit Common Data')
+        tabEditIndex = self.TabWidget.addTab(self.EditPanel,'Edit Common Data')
 
         EditPanelLayout = QVBoxLayout(self.EditPanel)
         self.EditPanel.setLayout(EditPanelLayout)
@@ -380,66 +430,120 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
 
     # Advanced Panel
-        self.AdvancedPanel = QWidget()
+
+        #self.AdvancedPanel = QWidget()
+        #AdvancedPanelLayout = QVBoxLayout()
+        #self.AdvancedPanel.setLayout(AdvancedPanelLayout)
+
+
+        self.AdvancedPanel = QFrame()
         AdvancedPanelLayout = QVBoxLayout()
         self.AdvancedPanel.setLayout(AdvancedPanelLayout)
-        self.TabWidget.addTab(self.AdvancedPanel, 'Edit Advanced Data')
 
-        self.bkPanel = QFrame()
+
+        self.subFrame1 = QFrame()
+        subFrame1Layout = QHBoxLayout()
+        self.subFrame1.setLayout(subFrame1Layout)
+        AdvancedPanelLayout.addWidget(self.subFrame1)
+
+        self.bkPanel = QGroupBox()
         bkPanelLayout = QGridLayout()
         self.bkPanel.setLayout(bkPanelLayout)
-
-        AdvancedPanelLayout.addWidget(self.bkPanel)
+        self.bkPanel.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
         #for i in range(3):
         #    bkPanelLayout.addWidget(QLabel(' Y   |   N  '), 0, i*2 + 1, 1, 1)
-
         i =  0
         for key in self.booleankeys:
             bkLabel = {i : [QLabel(key.capitalize()), QFrame(), QHBoxLayout()] }
             bkLabel[i][1].setLayout(bkLabel[i][2])
-            self.baseDict[key] = [QRadioButton('Y:'), QRadioButton('N:')]
+            self.baseDict[key] = [QRadioButton(': Y'), QRadioButton(': N')]
             bkLabel[i][2].addWidget(self.baseDict[key][0])
             bkLabel[i][2].addWidget(self.baseDict[key][1])
             bkLabel[i][2].addStretch(1)
-            bkPanelLayout.addWidget(bkLabel[i][1], (i // 3) + 1, (i % 3) * 2 + 1, 1, 1)
-            bkPanelLayout.addWidget(bkLabel[i][0], (i // 3) + 1, (i % 3) * 2, 1, 1)
+            #bkPanelLayout.addWidget(bkLabel[i][1], (i // 3) + 1, (i % 3) * 2 + 1, 1, 1)
+            #bkPanelLayout.addWidget(bkLabel[i][0], (i // 3) + 1, (i % 3) * 2, 1, 1)
+            bkPanelLayout.addWidget(bkLabel[i][0], i, 0, 1, 1)
+            bkPanelLayout.addWidget(bkLabel[i][1], i, 1, 1, 1)
             i += 1
 
-        self.TexturesPanel = QFrame()
+        self.TexturesPanel = QGroupBox()
         TexturesPanelLayout = QGridLayout()
         self.TexturesPanel.setLayout(TexturesPanelLayout)
-        AdvancedPanelLayout.addWidget(self.TexturesPanel)
+        subFrame1Layout.addWidget(self.TexturesPanel)
+
+        subFrame1Layout.addWidget(self.bkPanel)
 
         i = 0
         for key in self.texturekeys:
-            texturesPLabel = {i : [QLabel(key.capitalize()), QLineEdit(), defaultButton('[ ... ]', 40, 30),
-                              defaultButton('To rel. Path...', 90, 30)] }
-            self.baseDict[key] = texturesPLabel[i][1]
-            texturesPLabel[i][2].setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            lineEdit = QLineEdit()
+            self.baseDict[key] = lineEdit
+            texturesPLabel = {i : [QLabel(key.capitalize()),QLabel(' : '), lineEdit, SelectTextureButton(lineEdit,'[ ... ]', 40, 30, self.loadedFile),
+                              RelTexturePathButton(lineEdit, 'To rel. Path...', 90, 30, self.loadedFile) ] }
             texturesPLabel[i][3].setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            texturesPLabel[i][4].setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            texturesPLabel[i][4].setDisabled(True)
             h = 0
             for widget in texturesPLabel[i]:
-                TexturesPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 4, 1, 1)
+                #TexturesPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 5, 1, 1)
+                TexturesPanelLayout.addWidget(widget, i, h, 1, 1)
                 h += 1
             i += 1
 
-          #  @texturesPLabel[i][2].mhEvent
-          #  def onClicked(event):
-          #      self.showMessage('it\'s working')
+        self.subFrame2 = QFrame()
+        subFrame2Layout = QHBoxLayout()
+        self.subFrame2.setLayout(subFrame2Layout)
+        AdvancedPanelLayout.addWidget(self.subFrame2)
+
+        self.floatsPanel = QGroupBox()
+        floatsPanelLayout = QGridLayout()
+        self.floatsPanel.setLayout(floatsPanelLayout)
+        subFrame2Layout.addWidget(self.floatsPanel)
 
 
+        i = 0
+        for key in self.floatkeys:
+            self.baseDict[key] = QLineEdit()
+            floatsPLabel = {i : [QLabel(key.capitalize()), QLabel(' : '), self.baseDict[key]]}
+            h = 0
+            for widget in floatsPLabel[i]:
+                #floatsPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 3, 1, 1)
+                floatsPanelLayout.addWidget(widget, i, h, 1, 1)
+                h +=1
+            i +=1
 
-        self.bkPanel.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.rgbPanel = QGroupBox()
+        rgbPanelLayout = QGridLayout()
+        self.rgbPanel.setLayout(rgbPanelLayout)
+        subFrame2Layout.addWidget(self.rgbPanel)
 
-        AdvancedPanelLayout.addStretch(1)
+        i = 0
+        for key in self.rgbkeys:
+            self.baseDict[key] = [QLineEdit(), QLineEdit(), QLineEdit()]
+            ed1, ed2, ed3 = self.baseDict[key]
+            rgbPLabel = {i : [QLabel(key.capitalize()), QLabel(' : '), ed1, ed2, ed3] }
+            h = 0
+            for widget in rgbPLabel[i]:
+                # rgbPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 5, 1, 1)
+                rgbPanelLayout.addWidget(widget, i, h, 1, 1)
+                h += 1
+            i += 1
 
+        self.ScrollArea2 = QScrollArea()
+        self.ScrollArea2.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.ScrollArea2.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.ScrollArea2.setWidgetResizable(True)
+        self.ScrollArea2.setWidget(self.AdvancedPanel)
+        ScrollLayout2 = QVBoxLayout()
+        ScrollLayout2.addWidget(self.AdvancedPanel)
+        self.ScrollArea2.setLayout(ScrollLayout2)
+        tabAdvancedIndex = self.TabWidget.addTab(self.ScrollArea2, 'Advanced Materials Data')
 
-
+        self.TabWidget.setTabEnabled(tabEditIndex, False)
+        self.TabWidget.setTabEnabled(tabAdvancedIndex, False)
 
 
 # Define Actions here:
-
 
         @self.RedoButton.mhEvent
         def onClicked(event):
@@ -491,9 +595,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             if not (self.selectedType == 'Models' or self.selectedType == 'Materials'):
                 for k in self.intkeys: self.asset[k] = self.getDigitStr(self.baseDict[k].text())
             if self.selectedType == 'Materials':
-                for k in self.booleankeys:
-                    self.asset[k] = 'True' if self.baseDict[k][0].isChecked() else 'False'
-
+                for k in self.booleankeys:self.asset[k] = 'True' if self.baseDict[k][0].isChecked() else 'False'
+                for k in self.texturekeys:self.asset[k]=self.baseDict[k].text()
             self.setAssetInfoText(self.asset)
 
 
@@ -538,6 +641,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.history.clear()
             self.history_ptr = {'head' : 0, 'current' : 0}
             self.setEditData()
+            self.TabWidget.setTabEnabled(tabEditIndex, True)
+            self.TabWidget.setTabEnabled(tabAdvancedIndex, False)
 
 
         @self.FileChooser2.mhEvent
@@ -558,6 +663,11 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.history_ptr = {'head': 0, 'current': 0}
             self.setAssetInfoText(self.asset)
             self.setEditData()
+            self.TabWidget.setTabEnabled(tabEditIndex, True)
+            if self.selectedType == 'Materials':
+                self.TabWidget.setTabEnabled(tabAdvancedIndex, True)
+            else:
+                self.TabWidget.setTabEnabled(tabAdvancedIndex, False)
 
 
         @self.MaterialButton.mhEvent
@@ -586,8 +696,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                     self.baseDict['material'].setText('Failure')
             else:
                 self.baseDict['material'].setText('File not found')
-
-
 
 # Asset type selection event
 
@@ -623,6 +731,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             else:
                 self.CNumberPanel.setDisabled(True)
                 self.CMaterialPanel.setDisabled(True)
+            if self.selectedType == 'Materials':
                 for key in self.booleankeys:
                     if self.asset[key] == 'True':
                         self.baseDict[key][0].setChecked(True)
@@ -630,6 +739,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                     else:
                         self.baseDict[key][0].setChecked(False)
                         self.baseDict[key][1].setChecked(True)
+                for key in self.texturekeys: self.baseDict[key].setText(self.asset[key])
+
         for k in self.linekeys + self.textkeys: self.baseDict[k].setText(self.asset[k])
 
     def onAssetTypeChange(self, item=None):
@@ -641,13 +752,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.FileChooser.setFileLoadHandler(fc.TaggedFileLoader(self))
 
-        self.assetFoler = []
+        del self.assetFolder[:]
         if assetType == "Materials":
             for type in ['clothes', 'hair','teeth', 'eyebrows', 'eyelashes']:
                 self.assetFolder += [mhapi.locations.getSystemDataPath(type), mhapi.locations.getUserDataPath(type)]
                 self.extensions = 'mhmat'
         elif assetType == "Models":
-            self.assetFolder = mhapi.locations.getUserHomePath('models')
+            self.assetFolder = [mhapi.locations.getUserHomePath('models')]
             self.extensions = "mhm"
 
         else:
@@ -815,3 +926,16 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             return val
         else:
             return '0'
+
+    def getFloatStr(self, string=''):
+        val = ''
+        for i in string:
+            if i in '.,0123456789':
+                if i == ',':
+                    val += '.'
+                else:
+                    val += i
+        if val == '.' or len(val) == 0:
+            return '0'
+        else:
+            return val
