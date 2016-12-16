@@ -62,50 +62,6 @@ class defaultButton(gui.Button):
     def sizeHint(self):
         return QSize(self.size_X, self.size_Y)
 
-class SelectTextureButton(defaultButton, QLineEdit):
-
-    def __init__(self, lineEdit, label='', size_X=100, size_Y=40, Path=[]):
-        super(SelectTextureButton, self).__init__(label, size_X, size_Y)
-
-        self.lineEdit = lineEdit
-        self.path = Path[0]
-
-    def onClicked(self, mhEvent):
-        selectedFile = None
-        FDialog = QFileDialog(None, '', self.path)
-        FDialog.setFileMode(QFileDialog.ExistingFiles)
-        FDialog.setFilter('MakeHuman Material ( *.mhmat );; All files ( *.* )')
-        if FDialog.exec_():
-            selectedFile = FDialog.selectedFiles()[0]
-        if selectedFile:
-            textureFile = os.path.split(selectedFile)
-            if textureFile[0] == self.path:
-                self.lineEdit.setText(textureFile)
-            else:
-                self.lineEdit.setText(selectedFile)
-
-
-class RelTexturePathButton(defaultButton):
-
-
-    def __init__(self, lineEdit, label='', size_X=100, size_Y=40, Path=[]):
-        super(RelTexturePathButton, self).__init__(label, size_X, size_Y)
-
-        self.lineEdit = lineEdit
-        self.path = Path[0]
-
-    def onClicked(self, mhEvent):
-        filepath, filename = os.path.split(self.lineEdit.text())
-        if os.path.isfile(filepath + '/' + filename) and self.path !='':
-            rel_path = makeRelPath(filepath, self.path)
-            if rel_path:
-                self.lineEdit.setText(rel_path + filename)
-            else:
-                self.lineEdit.setText('Failure')
-        else:
-            self.lineEdit.setText('File not found')
-
-
 # The AssetEditor task:
 
 class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
@@ -477,10 +433,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         for key in self.texturekeys:
             lineEdit = QLineEdit()
             self.baseDict[key] = lineEdit
-            #texturesPLabel = {i : [QLabel(key.capitalize()),QLabel(' : '), lineEdit, defaultButton('[ ... ]', 40, 30),
-            #                  defaultButton('To rel. Path...', 90, 30) ] }
-            texturesPLabel = {i: [QLabel(key.capitalize()), QLabel(' : '), lineEdit, QPushButton('[ ... ]'),
-                                                    QPushButton('To rel. Path...') ] }
+            texturesPLabel = {i: [QLabel(key.capitalize()), QLabel(' : '), lineEdit, defaultButton('[ ... ]', 40, 30),
+                              defaultButton('To rel. Path...', 90, 30) ] }
             texturesPLabel[i][3].setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             texturesPLabel[i][3].setObjectName(key)
             texturesPLabel[i][3].clicked.connect(self.onLoadTexture)
