@@ -28,6 +28,7 @@ import os
 import filecache
 import copy
 from pathfunctions import *
+from core import G
 
 # currently unused imports:
 
@@ -36,8 +37,8 @@ import re
 import mh
 from PyQt4 import *
 from progress import Progress
-from core import G
 import qtgui
+
 # delete ?
 
 from PyQt4.QtCore import *
@@ -319,6 +320,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
     # The LineEditGroupBox with
         self.LineEditGroupBox = QFrame()
         LineEditGroupLayout = QGridLayout()
+        self.LineEditGroupBox.sizeHint = lambda : QSize(450, 325)
+        self.LineEditGroupBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         AuthorLabel = LineEditGroupLayout.addWidget(QLabel('Author :'), 0, 0, 1, 1)
         NameLabel = LineEditGroupLayout.addWidget(QLabel('Name :'), 1, 0, 1, 1)
@@ -356,7 +359,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         LineEditGroupLayout.addWidget(self.baseDict['uuid'], 4, 1, 1, 1)
 
     # The TextEditGroupBox
-        self.TextEditGroupBox = QWidget()
+        self.TextEditGroupBox = QFrame()
         TextEditGroupLayout = QGridLayout()
 
         DescriptionLabel = TextEditGroupLayout.addWidget(QLabel('Description :'), 0, 0, 1, 1)
@@ -474,11 +477,18 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         for key in self.texturekeys:
             lineEdit = QLineEdit()
             self.baseDict[key] = lineEdit
-            texturesPLabel = {i : [QLabel(key.capitalize()),QLabel(' : '), lineEdit, SelectTextureButton(lineEdit,'[ ... ]', 40, 30, self.loadedFile),
-                              RelTexturePathButton(lineEdit, 'To rel. Path...', 90, 30, self.loadedFile) ] }
+            #texturesPLabel = {i : [QLabel(key.capitalize()),QLabel(' : '), lineEdit, defaultButton('[ ... ]', 40, 30),
+            #                  defaultButton('To rel. Path...', 90, 30) ] }
+            texturesPLabel = {i: [QLabel(key.capitalize()), QLabel(' : '), lineEdit, QPushButton('[ ... ]'),
+                                                    QPushButton('To rel. Path...') ] }
             texturesPLabel[i][3].setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+            texturesPLabel[i][3].setObjectName(key)
+            texturesPLabel[i][3].clicked.connect(self.onLoadTexture)
             texturesPLabel[i][4].setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            texturesPLabel[i][4].setDisabled(True)
+            texturesPLabel[i][4].setObjectName(key)
+            texturesPLabel[i][4].clicked.connect(self.onRelTexturePathClicked)
+
+            # texturesPLabel[i][4].setDisabled(True)
             h = 0
             for widget in texturesPLabel[i]:
                 #TexturesPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 5, 1, 1)
@@ -791,6 +801,36 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
     def onzDepthSelect(self, item=None):
         if item:
             self.baseDict['z_depth'].setText(str(zDepth[item]))
+
+    def onLoadTexture(self, event):
+        selectedFile = None
+        sender = G.app.sender()
+        key = sender.objectName()
+        FDialog = QFileDialog(None, '', self.loadedFile[0])
+        FDialog.setFileMode(QFileDialog.ExistingFiles)
+        FDialog.setFilter('MakeHuman Material ( *.mhmat );; All files ( *.* )')
+        if FDialog.exec_():
+            selectedFile = FDialog.selectedFiles()[0]
+        if selectedFile:
+            filepath, filename = os.path.split(selectedFile)
+            if filepath == self.loadedFile[0]:
+                self.baseDict[key].setText(filename)
+            else:
+                self.baseDict[key].setText(selectedFile)
+
+    def onRelTexturePathClicked(self, event):
+        sender = G.app.sender()
+        key = sender.objectName()
+        filepath, filename = os.path.split(self.baseDict[key].text())
+        if os.path.isfile(filepath + '/' + filename):
+            rel_path = makeRelPath(filepath, self.loadedFile[0])
+            if rel_path:
+                self.baseDict[key].setText(rel_path + filename)
+            else:
+                self.baseDict[key].setText('Failure')
+        else:
+            self.baseDict[key].setText('File not found')
+
 
 # MessageBox
 
