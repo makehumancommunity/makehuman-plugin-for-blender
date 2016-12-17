@@ -61,9 +61,15 @@ class AssetDownloadTaskView(gui3d.TaskView):
             "Target",
             "Clothes",
             "Hair",
+            "Teeth",
+            "Eyebrows",
+            "Eyelashes",
             "Skin",
             "Proxy",
-            "Pose"
+            "Pose",
+            "Material",
+            "Model",
+            "Rig"
         ]
 
         self.typeList = mhapi.ui.createComboBox(types,self.onTypeChange)
@@ -93,9 +99,13 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.assetList.selectionModel().selectionChanged.connect(self.onAssetChange)
 
         self.selectBox.addWidget(gui.TextView(" "))
+
         self.downloadButton = self.selectBox.addWidget(gui.Button('Download'))
         self.downloadButton.setDisabled(True)
 
+        self.downloadLabel = self.selectBox.addWidget(gui.TextView(" "))
+        self.downloadLabel.setWordWrap(True)
+        
         @self.downloadButton.mhEvent
         def onClicked(event):
             self.downloadButtonClick()
@@ -176,7 +186,19 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 assets = self.skinNames
             if assetType == "Pose":
                 assets = self.poseNames
-
+            if assetType == "Material":
+                assets = self.materialNames
+            if assetType == "Rig":
+                assets = self.rigNames
+            if assetType == "Model":
+                assets = self.modelNames
+            if assetType == "Teeth":
+                assets = self.teethNames
+            if assetType == "Eyebrows":
+                assets = self.eyebrowsNames
+            if assetType == "Eyelashes":
+                assets = self.eyelashesNames
+                
             self.assetList.setData(sorted(assets))
 
         self.categoryList.setCurrentItem("All")
@@ -256,7 +278,19 @@ class AssetDownloadTaskView(gui3d.TaskView):
             self.onSelectPose()
         if assetType == "Proxy":
             self.onSelectProxy()
-
+        if assetType == "Material":
+            self.onSelectMaterial()
+        if assetType == "Rig":
+            self.onSelectRig()
+        if assetType == "Model":
+            self.onSelectModel()
+        if assetType == "Teeth":
+            self.onSelectTeeth()
+        if assetType == "Eyebrows":
+            self.onSelectEyebrows()
+        if assetType == "Eyelashes":
+            self.onSelectEyelashes()
+            
     def showButtonClick(self):
         self.showMessage("message","title")
 
@@ -277,7 +311,19 @@ class AssetDownloadTaskView(gui3d.TaskView):
             self.downloadPose()
         if assetType == "Proxy":
             self.downloadProxy()
-
+        if assetType == "Material":
+            self.downloadMaterial()
+        if assetType == "Rig":
+            self.downloadRig()
+        if assetType == "Model":
+            self.downloadModel()
+        if assetType == "Teeth":
+            self.downloadTeeth()
+        if assetType == "Eyebrows":
+            self.downloadEyebrows()
+        if assetType == "Eyelashes":
+            self.downloadEyelashes()
+            
     def refreshButtonClick(self):
 
         self.progress = Progress()
@@ -325,7 +371,13 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.targetAssets = []
         self.proxyAssets = []
         self.poseAssets = []
-
+        self.materialAssets = []
+        self.rigAssets = []
+        self.modelAssets = []
+        self.teethAssets = []
+        self.eyebrowsAssets = []
+        self.eyelashesAssets = []
+        
         self.clothesNames = dict()
         self.clothesNames["All"] = [];
 
@@ -334,7 +386,13 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.targetNames = []
         self.proxyNames = []
         self.poseNames = []
-
+        self.materialNames = []
+        self.rigNames = []
+        self.modelNames = []
+        self.teethNames = []
+        self.eyebrowsNames = []
+        self.eyelashesNames = []
+        
         for key in assetJson.keys():
             asset = assetJson[key]
             aType = asset["type"]
@@ -346,41 +404,79 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 aCat = asset["category"]
 
                 if aCat == "Hair":
-                    self.hairAssets.append(asset)
-                    self.hairNames.append(asset["title"])
-                    found = True
+                    if self.checkAssetDir(asset,"hair"):
+                        self.hairAssets.append(asset)
+                        self.hairNames.append(asset["title"])
+                        found = True
+                elif aCat == "Teeth":
+                    if self.checkAssetDir(asset,"teeth"):
+                        self.teethAssets.append(asset)
+                        self.teethNames.append(asset["title"])
+                        found = True
+                elif aCat == "Eyebrows":
+                    if self.checkAssetDir(asset,"eyebrows"):
+                        self.eyebrowsAssets.append(asset)
+                        self.eyebrowsNames.append(asset["title"])
+                        found = True
+                elif aCat == "Eyelashes":
+                    if self.checkAssetDir(asset,"eyelashes"):
+                        self.eyelashesAssets.append(asset)
+                        self.eyelashesNames.append(asset["title"])
+                        found = True
                 else:
-                    self.clothesAssets["All"].append(asset)
-                    self.clothesNames["All"].append(asset["title"])
-                    if not aCat in self.clothesAssets.keys():
-                        self.clothesAssets[aCat] = []
-                    if not aCat in self.clothesNames.keys():
-                        self.clothesNames[aCat] = []
-                    self.clothesAssets[aCat].append(asset)
-                    self.clothesNames[aCat].append(asset["title"])
-                    found = True
+                    if self.checkAssetDir(asset):
+                        self.clothesAssets["All"].append(asset)
+                        self.clothesNames["All"].append(asset["title"])
+                        if not aCat in self.clothesAssets.keys():
+                            self.clothesAssets[aCat] = []
+                        if not aCat in self.clothesNames.keys():
+                            self.clothesNames[aCat] = []
+                        self.clothesAssets[aCat].append(asset)
+                        self.clothesNames[aCat].append(asset["title"])
+                        found = True
 
             if aType == "target":
-                self.targetAssets.append(asset)
-                self.targetNames.append(asset["title"])
-                found = True
+                if self.checkAssetDir(asset,"custom"):
+                    self.targetAssets.append(asset)
+                    self.targetNames.append(asset["title"])
+                    found = True
 
             if aType == "skin":
-                self.skinAssets.append(asset)
-                self.skinNames.append(asset["title"])
-                found = True
+                if self.checkAssetDir(asset,"skins"):
+                    self.skinAssets.append(asset)
+                    self.skinNames.append(asset["title"])
+                    found = True
 
             if aType == "proxy":
-                self.proxyAssets.append(asset)
-                self.proxyNames.append(asset["title"])
-                found = True
+                if self.checkAssetDir(asset,"proxymeshes"):
+                    self.proxyAssets.append(asset)
+                    self.proxyNames.append(asset["title"])
+                    found = True
 
             if aType == "pose":
-                self.poseAssets.append(asset)
-                self.poseNames.append(asset["title"])
-                found = True
-
-
+                if self.checkAssetDir(asset,"poses"):
+                    self.poseAssets.append(asset)
+                    self.poseNames.append(asset["title"])
+                    found = True
+                    
+            if aType == "material":
+                if self.checkAssetDir(asset,"material"):
+                    self.materialAssets.append(asset)
+                    self.materialNames.append(asset["title"])
+                    found = True
+                    
+            if aType == "rig":
+                if self.checkAssetDir(asset,"rig"):
+                    self.rigAssets.append(asset)
+                    self.rigNames.append(asset["title"])
+                    found = True
+                    
+            if aType == "model":
+                if self.checkAssetDir(asset,"model"):
+                    self.modelAssets.append(asset)
+                    self.modelNames.append(asset["title"])
+                    found = True
+                    
             if not found:
                 log.debug("Unmatched asset type. " + str(asset["nid"]) + " (" + asset["type"] + "): " + asset["title"])
 
@@ -427,7 +523,38 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 jsonstring = f.read()
                 assetJson = json.loads(jsonstring)
                 self.loadAssetsFromJson(assetJson)
+                
+    def checkAssetDir(self,asset, typeHint= None):
 
+        if typeHint:
+            assetTypeDir = mhapi.locations.getUserDataPath(typeHint)        
+        else:
+            assetTypeDir = mhapi.locations.getUserDataPath(asset["type"])        
+
+        name = asset["title"]
+        name = re.sub(r"\s","_",name)
+        name = re.sub(r"\W","",name)
+
+        if typeHint == "custom":
+            head, tail = os.path.split(asset["files"]["file"])
+            assetDir = assetTypeDir + "\\" + tail
+            """assetDir = assetTypeDir"""
+        else:
+            assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(assetTypeDir,name))
+
+        log.debug("Checking : " + assetDir)
+
+        if os.path.exists(assetDir):
+            return False
+        else:
+             return True
+            
+    """This may cause an error if the file dont have a .ext"""
+    
+    def get_extension(self,filename):
+        output = filename.split(".")
+        return output[-1] if len(output)>1 else ''
+    
     def setThumbScreenshot(self,asset):
         assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(self.root,str(asset["nid"])))
         screenshot = self.getScreenshotPath(asset)
@@ -461,10 +588,27 @@ class AssetDownloadTaskView(gui3d.TaskView):
             key = "mhclo"
         if asset["type"] == "hair":
             key = "mhclo"
+        if asset["type"] == "teeth":
+            key = "mhmat"
+        if asset["type"] == "eyebrows":
+            key = "mhmat"
+        if asset["type"] == "eyelashes":
+            key = "mhmat"
         if asset["type"] == "skin":
             key = "mhmat"
         if asset["type"] == "target":
             key = "file"
+        if asset["type"] == "proxy":
+            key = "file"
+        if asset["type"] == "target":
+            key = "file"
+        if asset["type"] == "material":
+            key = "mhmat"
+        if asset["type"] == "rig":
+            key = "file"
+        if asset["type"] == "model":
+            key = "file"
+
 
         if key:
             url = asset["files"][key]
@@ -475,8 +619,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         self.assetInfoText.setText(desc)
         self.assetDescription.setText(asset["description"])
-
-        #desc = desc + asset["description"]
+        #debug.log(desc + asset["description"])
 
     def onSelectTarget(self):
         foundAsset = None
@@ -499,11 +642,66 @@ class AssetDownloadTaskView(gui3d.TaskView):
         if foundAsset:
             self.setDescription(foundAsset)
             self.setThumbScreenshot(foundAsset)
+            
+    def onSelectMaterial(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.materialAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
 
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+            
+    def onSelectRig(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.rigAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+
+    def onSelectModel(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.modelAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+            
     def onSelectProxy(self):
         foundAsset = None
         name = str(self.assetList.currentItem().text)
         for asset in self.proxyAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+
+    def onSelectEyebrows(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.eyebrowsAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+
+    def onSelectEyelashes(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.eyelashesAssets:
             if str(asset["title"]) == name:
                 foundAsset = asset
 
@@ -538,6 +736,17 @@ class AssetDownloadTaskView(gui3d.TaskView):
         foundAsset = None
         name = str(self.assetList.currentItem().text)
         for asset in self.hairAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.setDescription(foundAsset)
+            self.setThumbScreenshot(foundAsset)
+            
+    def onSelectTeeth(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.teethAssets:
             if str(asset["title"]) == name:
                 foundAsset = asset
 
@@ -579,22 +788,30 @@ class AssetDownloadTaskView(gui3d.TaskView):
             key = "mhclo"
         if asset["type"] == "hair":
             key = "mhclo"
+        if asset["type"] == "teeth":
+            key = "mhmat"
+        if asset["type"] == "eyebrows":
+            key = "mhmat"
+        if asset["type"] == "eyelashes":
+            key = "mhmat"
         if asset["type"] == "skin":
             key = "mhmat"
-        if asset["type"] == "target":
-            key = "file"
+        if asset["type"] == "material":
+            key = "mhmat"
         if asset["type"] == "pose":
             key = "bvh"
         if asset["type"] == "proxy":
             key = "file"
-
+        if asset["type"] == "rig":
+            key = "file"
+            
         ext = key
 
         if asset["type"] == "target":
             ext = "target"
         if asset["type"] == "proxy":
             ext = "proxy"
-
+            
         msg = "Asset was downloaded"
         base = ""
 
@@ -618,11 +835,129 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 log.debug("Downloading " + url)
                 self.downloadUrl(url,saveAs)
                 self.progress(current, current + increment)
-
+                
+                try:
+                  if self.get_extension(fn) == "mhmat":
+                     lines = []
+                     output = []
+                   
+                     with open(saveAs,'r') as fileObject:
+                          lines = fileObject.read().splitlines()
+                        
+                     log.debug(lines)
+                     for line in lines:
+                       if("name" in line):
+                            filename = os.path.basename(saveAs)
+                            name = os.path.splitext(filename)[0]
+                            line = "name " + name
+                            log.debug(line)
+                       if "diffuseTexture" in line:
+                           dn = asset["files"]["diffuse"].rsplit('/', 1)[-1]
+                           line = "diffuseTexture " + dn
+                           log.debug(line)
+                       if "normalmapTexture " in line:
+                           if "normals" in asset["files"]:
+                              nn = asset["files"]["normals"].rsplit('/', 1)[-1]
+                              line = "normalmapTexture " + nn
+                              log.debug(line)
+                           else:
+                               msg = msg + "Fix the Normals Map"
+                       if "specularTexture" in line:
+                           if "glossy" in asset["files"]:
+                               sn = asset["files"]["glossy"].rsplit('/', 1)[-1]
+                               line = "specularTexture " + sn
+                               log.debug(line)
+                           else:
+                               msg = msg + "Fix the Specular Map"
+                       if "displacementTexture " in line:
+                           if "displacement" in asset["files"]:
+                               dtn = asset["files"]["displacement"].rsplit('/', 1)[-1]
+                               line = "displacementTexture  " + dtn
+                               log.debug(line)
+                           else:
+                               msg = msg + "Fix the Displacement Map"
+                       if "bumpTexture " in line:
+                           if "bump" in asset["files"]:
+                               bn = asset["files"]["bump"].rsplit('/', 1)[-1]
+                               line = "bumpTexture  " + bn
+                               log.debug(line)
+                           else:
+                               msg = msg + "Fix the Bump Map"
+                              
+                       """ need to add aomapTexture to asset.json 
+                       if "aomapTexture " in line:
+                           if "aomap" in asset["files"]:
+                               bn = asset["files"]["aomap"].rsplit('/', 1)[-1]
+                               line = "aomapTexture  " + bn
+                               log.debug(line)
+                           else:
+                               msg = msg + "Fix the A O Map"
+                       """
+                       output.append(line)
+                        
+                     log.debug(output)
+                     with open(saveAs,'w') as fileObject:
+                          for item in output:
+                             fileObject.write("%s\n" % item)
+                except Exception:
+                    continue
+                try: 
+                 if self.get_extension(fn) == "mhclo":
+                   lines = []
+                   output = []
+                   with open(saveAs,'r+') as fileObject:
+                       lines = fileObject.read().splitlines()
+                   
+                   for line in lines:
+                        if("material" in line):
+                            dn = asset["files"]["mhmat"].rsplit('/', 1)[-1]
+                            line = "material " + dn
+                            log.debug(line)
+                        if("name" in line):
+                            filename = os.path.basename(saveAs)
+                            name = os.path.splitext(filename)[0]
+                            line = "name " + name
+                            log.debug(line)
+                        if("obj_file" in line):
+                            dn = asset["files"]["obj"].rsplit('/', 1)[-1]
+                            line = "obj_file  " + dn
+                            log.debug(line)
+                        output.append(line)
+                        
+                   with open(saveAs,'w') as fileObject:
+                         for item in output:
+                            fileObject.write("%s\n" % item)
+                except Exception:
+                    continue
+                try: 
+                 if self.get_extension(fn) == "proxy":
+                   lines = []
+                   output = []
+                   with open(saveAs,'r+') as fileObject:
+                       lines = fileObject.read().splitlines()
+                   
+                   for line in lines:
+                        if("name" in line):
+                            filename = os.path.basename(saveAs)
+                            name = os.path.splitext(filename)[0]
+                            line = "name " + name
+                            log.debug(line)
+                        if("obj_file" in line):
+                            dn = asset["files"]["obj_file"].rsplit('/', 1)[-1]
+                            line = "obj_file  " + dn
+                            log.debug(line)
+                        output.append(line)
+                        
+                   with open(saveAs,'w') as fileObject:
+                         for item in output:
+                            fileObject.write("%s\n" % item)
+                except Exception:
+                    continue
+                         
         self.progress(1.0)
-
-        self.showMessage(msg)
-
+        self.downloadLabel.setText(msg)
+        """self.showMessage(msg)"""
+        
     def downloadClothes(self):
         foundAsset = None
         category = str(self.categoryList.getCurrentItem())
@@ -633,6 +968,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         if foundAsset:
             self.downloadAsset(foundAsset)
+            self.assetList.takeItem(self.assetList.currentRow())
 
     def downloadHair(self):
         foundAsset = None
@@ -643,7 +979,52 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         if foundAsset:
             self.downloadAsset(foundAsset,"hair")
+            self.assetList.takeItem(self.assetList.currentRow())
 
+    def downloadEyebrows(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.eyebrowsAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"eyebrows")
+            self.assetList.takeItem(self.assetList.currentRow())
+
+    def downloadEyelashes(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.eyelashesAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"eyelashes")
+            self.assetList.takeItem(self.assetList.currentRow())
+            
+    def downloadTeeth(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.teethAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"teeth")
+            self.assetList.takeItem(self.assetList.currentRow())
+            
+    def downloadModel(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.modelAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
+
+        if foundAsset:
+            self.downloadAsset(foundAsset,"model")
+            self.assetList.takeItem(self.assetList.currentRow())
+            
     def downloadTarget(self):
         foundAsset = None
         name = str(self.assetList.currentItem().text)
@@ -653,6 +1034,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         if foundAsset:
             self.downloadAsset(foundAsset,"custom")
+            self.assetList.takeItem(self.assetList.currentRow())
 
     def downloadSkin(self):
         foundAsset = None
@@ -663,6 +1045,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         if foundAsset:
             self.downloadAsset(foundAsset,"skins")
+            self.assetList.takeItem(self.assetList.currentRow())
 
     def downloadPose(self):
         foundAsset = None
@@ -673,15 +1056,42 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         if foundAsset:
             self.downloadAsset(foundAsset,"poses")
+            self.assetList.takeItem(self.assetList.currentRow())
+            
+    def downloadMaterial(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        for asset in self.materialAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
 
+        if foundAsset:
+            self.downloadAsset(foundAsset,"material")
+            self.assetList.takeItem(self.assetList.currentRow())
+            
     def downloadProxy(self):
         foundAsset = None
         name = str(self.assetList.currentItem().text)
         for asset in self.proxyAssets:
             if str(asset["title"]) == name:
                 foundAsset = asset
+            self.assetList.takeItem(self.assetList.currentRow())
 
         if foundAsset:
             self.downloadAsset(foundAsset,"proxymeshes")
+            self.assetList.takeItem(self.assetList.currentRow())
+            
+            self.assetList.takeItem(self.assetList.currentRow())
+            self.assetList.takeItem(self.assetList.currentRow())
+    def downloadRig(self):
+        foundAsset = None
+        name = str(self.assetList.currentItem().text)
+        self.assetList.takeItem(self.assetList.currentRow())
+        for asset in self.rigAssets:
+            if str(asset["title"]) == name:
+                foundAsset = asset
 
-
+        if foundAsset:
+            self.downloadAsset(foundAsset,"rig")
+            self.assetList.takeItem(self.assetList.currentRow())
+            
