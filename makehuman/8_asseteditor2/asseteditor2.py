@@ -30,15 +30,16 @@ import copy
 from pathfunctions import *
 from core import G
 
+
 # currently unused imports:
 
-import log
-import re
-import mh
-from PyQt4 import *
-from progress import Progress
-import qtgui
-
+# import log
+# import re
+# import mh
+# from PyQt4 import *
+# from progress import Progress
+# import qtgui
+#
 # delete ?
 
 from PyQt4.QtCore import *
@@ -162,7 +163,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         filecache.MetadataCacher.__init__(self, self.getFileExtension(), 'plugin_filecache.mhc')
 
-        self.FileChooser = self.addRightWidget(fc.IconListFileChooser(self.assetFolder, self.extensions, 'thumb', self.notfound, None, name='File Chooser', noneItem=False))
+        self.FileChooser = self.addRightWidget(fc.IconListFileChooser(self.assetFolder, self.extensions, 'thumb',
+                           self.notfound, None, name='File Chooser', noneItem=False))
         self.FileChooser.setIconSize(50, 50)
         self.FileChooser.enableAutoRefresh(True)
         self.FileChooser.setFileLoadHandler(fc.TaggedFileLoader(self))
@@ -445,7 +447,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             # texturesPLabel[i][4].setDisabled(True)
             h = 0
             for widget in texturesPLabel[i]:
-                #TexturesPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 5, 1, 1)
+                # TexturesPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 5, 1, 1)
                 TexturesPanelLayout.addWidget(widget, i, h, 1, 1)
                 h += 1
             i += 1
@@ -466,7 +468,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             floatsPLabel = {i : [QLabel(key.capitalize()), QLabel(' : '), self.baseDict[key]]}
             h = 0
             for widget in floatsPLabel[i]:
-                #floatsPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 3, 1, 1)
+                # floatsPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 3, 1, 1)
                 floatsPanelLayout.addWidget(widget, i, h, 1, 1)
                 h +=1
             i +=1
@@ -795,16 +797,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.msg.setWindowTitle(title)
         self.msg.setStandardButtons(QMessageBox.Ok)
         self.msg.show()
-
-    def showMessageYN(self,message,title="Information"):
-        self.msg = QMessageBox()
-        self.msg.setIcon(QMessageBox.Information)
-        self.msg.setText(message)
-        self.msg.setWindowTitle(title)
-        self.msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        self.msg.show()
-        return self.msg.exec_()
-
 
 # The asset info text:
 
