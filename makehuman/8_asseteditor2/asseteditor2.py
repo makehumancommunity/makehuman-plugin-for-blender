@@ -685,7 +685,13 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         if not self.selectedType in ['Materials','ProxyMeshes','Models']:
             fileList = list(self.asset['material'])
             self.baseDict['material'].setText(fileList[0])
-            for k in self.intkeys: self.baseDict[k].setText(self.asset[k])
+            for k in self.intkeys:
+                if k in self.intkeys:
+                    if not self.asset[k] is None:
+                        self.baseDict[k].setText(self.asset[k])
+                    else:
+                        self.baseDict[k].setText("")
+
             self.CMaterialPanel.setDisabled(False)
             self.CNumberPanel.setDisabled(False)
         else:
