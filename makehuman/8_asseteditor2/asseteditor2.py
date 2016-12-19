@@ -686,7 +686,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         if not self.selectedType in ['Materials','ProxyMeshes','Models']:
             fileList = list(self.asset['material'])
-            self.baseDict['material'].setText(fileList[0])
+            if fileList[0]:
+                self.baseDict['material'].setText(fileList[0])
             for k in self.intkeys:
                 if k in self.intkeys:
                     if not self.asset[k] is None:
