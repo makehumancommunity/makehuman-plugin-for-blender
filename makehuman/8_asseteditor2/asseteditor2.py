@@ -96,7 +96,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.strip = None
         self.resetAsset = None
 
-        self.assetFolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes')]
+       # self.assetFolder = [mhapi.locations.getSystemDataPath('clothes'), mhapi.locations.getUserDataPath('clothes')]
+        self.assetFolder = [mhapi.locations.getUserDataPath('clothes')]
         self.extensions = "mhclo"
 
         self.history_ptr = {'current' : 0,
@@ -736,14 +737,16 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         del self.assetFolder[:]
         if assetType == "Materials":
             for type in ['clothes', 'hair','teeth', 'eyebrows', 'eyelashes']:
-                self.assetFolder += [mhapi.locations.getSystemDataPath(type), mhapi.locations.getUserDataPath(type)]
+               # self.assetFolder += [mhapi.locations.getSystemDataPath(type), mhapi.locations.getUserDataPath(type)]
+                self.assetFolder += [mhapi.locations.getUserDataPath(type)]
                 self.extensions = 'mhmat'
         elif assetType == "Models":
             self.assetFolder = [mhapi.locations.getUserHomePath('models')]
             self.extensions = "mhm"
 
         else:
-            self.assetFolder = [mhapi.locations.getSystemDataPath(assetType.lower()), mhapi.locations.getUserDataPath(assetType.lower())]
+           # self.assetFolder = [mhapi.locations.getSystemDataPath(assetType.lower()), mhapi.locations.getUserDataPath(assetType.lower())]
+            self.assetFolder = [mhapi.locations.getUserDataPath(assetType.lower())]
             self.extensions = mhapi.assets.typeToExtension[assetType.lower()]
 
         self.selectedType = assetType
