@@ -323,9 +323,9 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         DescriptionLabel = TextEditGroupLayout.addWidget(QLabel('Description :'), 0, 0, 1, 1)
         LicenseLabel = TextEditGroupLayout.addWidget(QLabel('License :'), 1, 0, 1, 1)
-        self.baseDict['description'] = QTextEdit('Description')
+        self.baseDict['description'] = QTextEdit()
         TextEditGroupLayout.addWidget(self.baseDict['description'], 0, 1, 1, 1)
-        self.baseDict['license'] = QTextEdit('License')
+        self.baseDict['license'] = QTextEdit()
         TextEditGroupLayout.addWidget(self.baseDict['license'], 1, 1, 1, 1)
         self.baseDict['description'].setLineWrapMode(QTextEdit.NoWrap)
         self.baseDict['license'].setLineWrapMode(QTextEdit.NoWrap)
@@ -445,7 +445,6 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             texturesPLabel[i][4].setObjectName(key)
             texturesPLabel[i][4].clicked.connect(self.onRelTexturePathClicked)
 
-            # texturesPLabel[i][4].setDisabled(True)
             h = 0
             for widget in texturesPLabel[i]:
                 # TexturesPanelLayout.addWidget(widget, i // 2, h + (i % 2) * 5, 1, 1)
@@ -511,8 +510,9 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         def onClicked(event):
             if self.history_ptr['current'] < self.history_ptr['head']:
                 self.history[self.history_ptr['current']] = {k : self.asset[k] for k in self.asset.keys()}
+                self.asset.clear()
                 self.history_ptr['current'] += 1
-                self.asset = {k : self.history[self.history_ptr['current']][k] for k in self.history[self.history_ptr['current']]}
+                self.asset = {k : self.history[self.history_ptr['current']][k] for k in self.history[self.history_ptr['current']].keys()}
                 self.setAssetInfoText(self.asset)
                 self.UndoButton.setDisabled(False)
             if self.history_ptr['current'] == self.history_ptr['head']:
@@ -523,6 +523,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         def onClicked(event):
             if self.history_ptr['current'] > 0:
                 self.history[self.history_ptr['current']] = {k : self.asset[k] for k in self.asset.keys()}
+                self.asset.clear()
                 self.history_ptr['current'] -= 1
                 self.asset = {k : self.history[self.history_ptr['current']][k] for k in self.history[self.history_ptr['current']].keys()}
                 self.setAssetInfoText(self.asset)
@@ -577,6 +578,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.UndoButton.setDisabled(True)
             self.RedoButton.setDisabled(True)
             self.SaveButton.setDisabled(True)
+            self.setEditData()
 
 
         @self.SaveButton.mhEvent
@@ -722,7 +724,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                         for i in range(3):
                             self.baseDict[key][i].setText(val[i])
         for key in self.linekeys + self.textkeys:
-            if self.asset[key]:
+            if self.asset[key] is not None:
                 self.baseDict[key].setText(self.asset[key])
 
     def onAssetTypeChange(self, item=None):
