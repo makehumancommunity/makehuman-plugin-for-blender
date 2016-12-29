@@ -108,7 +108,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.linekeys = ['author', 'name', 'uuid', 'homepage']
         self.textkeys = ['license', 'description']
-        self.intkeys  = ['z_depth', 'max_pole']
+        self.intkeys  = ['z_depth', 'max_pole', ]
         self.booleankeys = ["shadeless", "wireframe","transparent", "alphaToCoverage", "backfaceCull", "depthless",
                             "castShadows", "receiveShadows"]
         self.texturekeys = ["diffuseTexture", "bumpmapTexture", "normalmapTexture", "displacementmapTexture",
@@ -349,10 +349,14 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.CNumberPanel = QFrame()
         CNumberPanelLayout = QHBoxLayout()
         self.CNumberPanel.setLayout(CNumberPanelLayout)
+
+        self.objPanel = QFrame()
+        objPanelLayout = QHBoxLayout()
+        self.objPanel.setLayout(objPanelLayout)
         
         self.CMaterialPanel = QFrame()
-        CMaterialPanleLayout = QHBoxLayout()
-        self.CMaterialPanel.setLayout(CMaterialPanleLayout)
+        CMaterialPanelLayout = QHBoxLayout()
+        self.CMaterialPanel.setLayout(CMaterialPanelLayout)
         
         zdepthLabel = QLabel('Z-Depth :')
         self.baseDict['z_depth'] = QLineEdit()
@@ -364,6 +368,14 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.baseDict['max_pole'] = QLineEdit()
         self.baseDict['max_pole'].sizeHint = lambda : QSize(40, 30)
         self.baseDict['max_pole'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        objLabel = QLabel('Set Object File :')
+        self.baseDict['obj_file'] = QLineEdit()
+        self.objButton = gui.Button('[ ... ]')
+        self.objButton.sizeHint = lambda: QSize(40, 30)
+        self.objButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.objRelPathButton = gui.Button('To rel. Path...')
+        self.objRelPathButton.sizeHint = lambda: QSize(90, 30)
+        self.objRelPathButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         materialLabel = QLabel('Set Default Material :')
         self.baseDict['material'] = QLineEdit()
         self.MaterialButton = gui.Button('[ ... ]')
@@ -379,13 +391,19 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         CNumberPanelLayout.addWidget(maxpoleLabel)
         CNumberPanelLayout.addWidget(self.baseDict['max_pole'])
         CNumberPanelLayout.addStretch(1)
+
+        objPanelLayout.addWidget(objLabel)
+        objPanelLayout.addWidget(self.baseDict['obj_file'])
+        objPanelLayout.addWidget(self.objButton)
+        objPanelLayout.addWidget(self.objRelPathButton)
         
-        CMaterialPanleLayout.addWidget(materialLabel)
-        CMaterialPanleLayout.addWidget(self.baseDict['material'])
-        CMaterialPanleLayout.addWidget(self.MaterialButton)
-        CMaterialPanleLayout.addWidget(self.RelPathButton)
+        CMaterialPanelLayout.addWidget(materialLabel)
+        CMaterialPanelLayout.addWidget(self.baseDict['material'])
+        CMaterialPanelLayout.addWidget(self.MaterialButton)
+        CMaterialPanelLayout.addWidget(self.RelPathButton)
 
         ClothesLayout.addWidget(self.CNumberPanel)
+        ClothesLayout.addWidget(self.objPanel)
         ClothesLayout.addWidget(self.CMaterialPanel)
 
         EditPanelLayout.addWidget(self.ClothesPanel)
@@ -551,7 +569,9 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                         taglist.append(lineEdit.text().strip())
                 self.asset['tag'] = set(taglist)
 
-            self.asset['material'] = set([self.baseDict['material'].text()])
+            if not self.selectedType == 'Materials':
+                self.asset['obj_file'] = self.baseDict['obj_file'].text()
+                self.asset['material'] = set([self.baseDict['material'].text()])
 
             for key in self.linekeys: self.asset[key] = self.baseDict[key].text()
             for key in self.textkeys: self.asset[key] = self.baseDict[key].toPlainText()
@@ -666,6 +686,33 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             else:
                 self.baseDict['material'].setText('File not found')
 
+        @self.objButton.mhEvent
+        def onClicked(event):
+            selectedFile = None
+            FDialog = QFileDialog(None, '', self.loadedFile[0])
+            FDialog.setFileMode(QFileDialog.ExistingFiles)
+            FDialog.setFilter('Object Files ( *.obj );; All files ( *.* )')
+            if FDialog.exec_():
+                selectedFile = FDialog.selectedFiles()[0]
+            if selectedFile:
+                materialFile = os.path.split(selectedFile)
+                if materialFile[0] == self.loadedFile[0]:
+                    self.baseDict['obj_file'].setText(materialFile[1])
+                else:
+                    self.baseDict['obj_file'].setText(selectedFile)
+
+        @self.objRelPathButton.mhEvent
+        def onClicked(event):
+            filepath, filename = os.path.split(self.baseDict['obj_file'].text())
+            if os.path.isfile(filepath + '/' + filename):
+                rel_path = makeRelPath(filepath, self.loadedFile[0])
+                if rel_path:
+                    self.baseDict['obj_file'].setText(rel_path + filename)
+                else:
+                    self.baseDict['obj_file'].setText('Failure')
+            else:
+                self.baseDict['obj_file'].setText('File not found')
+
 # Asset type selection event
 
 
@@ -686,6 +733,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         else:
             self.TagWarn.hide()
             self.TagGroupBox.show()
+
+        if not self.selectedType == 'Materials':
+            self.baseDict['obj_file'].setText(self.asset['obj_file'])
+            self.objPanel.setDisabled(False)
 
         if not self.selectedType in ['Materials','ProxyMeshes','Models']:
             fileList = list(self.asset['material'])
@@ -708,6 +759,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 self.CNumberPanel.setDisabled(True)
                 self.CMaterialPanel.setDisabled(True)
             if self.selectedType == 'Materials':
+                self.objPanel.setDisabled(True)
                 for key in self.booleankeys:
                     if self.asset[key] == 'True':
                         self.baseDict[key][0].setChecked(True)
@@ -726,6 +778,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         for key in self.linekeys + self.textkeys:
             if self.asset[key] is not None:
                 self.baseDict[key].setText(self.asset[key])
+            else: self.baseDict[key].setText('')
 
     def onAssetTypeChange(self, item=None):
 
