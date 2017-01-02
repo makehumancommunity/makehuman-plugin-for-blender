@@ -29,6 +29,9 @@ import json
 import urllib2
 import os
 import re
+import platform
+import calendar, datetime
+
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -350,15 +353,16 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         self.progress(1.0)
 
-    def downloadUrl(self,url,saveAs):
-        try:            
-            web = urllib2.urlopen(url)
-            data = web.read()
+    def downloadUrl(self, url, saveAs=None, asset=None, fileName=None):
+        try:
+            url = re.sub(r"\s","%20",url)
+            data = urllib2.urlopen(url).read()
+            newData = self.normalizeFiles(data,asset,saveAs,fileName)
             with open(saveAs,"wb") as f:
-                f.write(data)                
+                f.write(newData)                
         except:
-            return False
-
+            log.debug("failed to write file")
+            return False    
         return True
 
     def loadAssetsFromJson(self, assetJson):
@@ -399,7 +403,9 @@ class AssetDownloadTaskView(gui3d.TaskView):
             aCat = "All"
 
             found = False
-
+            
+            """To incresse load times there may be a way to turn on or off the checkAssetDir onload,
+            This will cause the items a user has downlaoded to appair in the selection lists.."""
             if aType == "clothes":
                 aCat = asset["category"]
 
@@ -466,7 +472,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
                     found = True
                     
             if aType == "rig":
-                if self.checkAssetDir(asset,"rig"):
+                if self.checkAssetDir(asset,"rigs"):
                     self.rigAssets.append(asset)
                     self.rigNames.append(asset["title"])
                     found = True
@@ -483,8 +489,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
         self.assetList.setData(sorted(self.hairNames))
         self.typeList.setCurrentItem("Hair")
         self.categoryList.setCurrentItem("All")
-
-
+        
     def setupOneAsset(self, jsonHash):
 
         assetDir = os.path.join(self.root,str(jsonHash["nid"]))
@@ -496,7 +501,7 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 #fn = os.path.join(assetDir,"screenshot.png")
                 fn = self.getScreenshotPath(jsonHash)
                 if not os.path.exists(fn):                    
-                    log.debug("Downloading " + files["render"])
+                    #log.debug("Downloading " + files["render"])
                     self.downloadUrl(files["render"],fn)
                 else:
                     log.debug("Screenshot already existed")
@@ -537,15 +542,57 @@ class AssetDownloadTaskView(gui3d.TaskView):
 
         if typeHint == "custom":
             head, tail = os.path.split(asset["files"]["file"])
-            assetDir = assetTypeDir + "\\" + tail
+            assetDir = os.path.join(assetTypeDir, tail)
             """assetDir = assetTypeDir"""
         else:
             assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(assetTypeDir,name))
 
+        if typeHint == "material":
+           if "belongs_to" in asset:
+              if "belonging_is_assigned" in asset["belongs_to"]:
+                 if asset["belongs_to"]["belonging_is_assigned"] == True:
+                      #log.debug("material belongs to " + asset["belongs_to"]["belongs_to_title"]) 
+                      name = asset["belongs_to"]["belongs_to_title"]
+                      name = re.sub(r"\s","_",name)
+                      name = re.sub(r"\W","",name)
+                      tempPath = asset["belongs_to"]["belongs_to_type"]
+                      #log.debug(tempPath)
+                      assetTypeDir = mhapi.locations.getUserDataPath(tempPath)
+                      assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(os.path.join(assetTypeDir,name),"material"))
+                 else:
+                      log.debug("material has no belongs to")
+              else:
+                  log.debug("material belongs_to_assigned not found")
+           else:
+                log.debug("material belongs_to not found")
+                
         log.debug("Checking : " + assetDir)
-
+        
         if os.path.exists(assetDir):
-            return False
+            from datetime import datetime as dt
+            for files in asset["files"]:
+                assetFile = asset["files"][files] 
+                log.debug(assetFile)
+                head, tail = os.path.split(assetFile)
+                assetFile = os.path.join(assetDir, tail)
+                if os.path.exists(assetFile):
+                    if typeHint == "custom":
+                       assetFile = assetDir
+                    changed = asset.get("changed",None)
+                    if changed:
+                       remoteDate = dt.strptime(asset["changed"], '%Y-%m-%d')
+                       #log.debug(remoteDate)
+                       #log.debug("Checking : " + assetFile)
+                       localDate = dt.strptime(self.get_modified_date(assetFile), '%Y-%m-%d')
+                       #log.debug(localDate)
+                       if localDate > remoteDate:
+                           return False
+                       else:
+                           return True
+                    else:
+                        return False
+                else:
+                    return False
         else:
              return True
             
@@ -555,6 +602,9 @@ class AssetDownloadTaskView(gui3d.TaskView):
         output = filename.split(".")
         return output[-1] if len(output)>1 else ''
     
+    def get_modified_date(self,path_to_file):
+        return datetime.datetime.utcfromtimestamp(os.path.getmtime(path_to_file)).strftime('%Y-%m-%d')
+
     def setThumbScreenshot(self,asset):
         assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(self.root,str(asset["nid"])))
         screenshot = self.getScreenshotPath(asset)
@@ -771,6 +821,26 @@ class AssetDownloadTaskView(gui3d.TaskView):
         else:
             assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(assetTypeDir,name))
 
+        if typeHint == "material":
+           if "belongs_to" in asset:
+              if "belonging_is_assigned" in asset["belongs_to"]:
+                 if asset["belongs_to"]["belonging_is_assigned"] == True:
+                      #log.debug("material belongs to " + asset["belongs_to"]["belongs_to_title"]) 
+                      name = asset["belongs_to"]["belongs_to_title"]
+                      name = re.sub(r"\s","_",name)
+                      name = re.sub(r"\W","",name)
+                      tempPath = asset["belongs_to"]["belongs_to_type"]
+                      #log.debug(tempPath)
+                      assetTypeDir = mhapi.locations.getUserDataPath(tempPath)
+                      assetDir = mhapi.locations.getUnicodeAbsPath(os.path.join(os.path.join(assetTypeDir,name),"material"))
+                 else:
+                      msg = "Asset was not downloaded. Please visit http://www.makehumancommunity.org/materials.html to download this asset."
+                      self.downloadLabel.setText(msg)
+                      return
+              else:
+                  log.debug("material belongs_to_assigned not found")
+           else:
+                log.debug("material belongs_to not found") 
         log.debug("Downloading to: " + assetDir)
 
         if not os.path.exists(assetDir):
@@ -798,19 +868,24 @@ class AssetDownloadTaskView(gui3d.TaskView):
             key = "mhmat"
         if asset["type"] == "material":
             key = "mhmat"
+        if asset["type"] == "rig":
+            key = "mhskel"
         if asset["type"] == "pose":
             key = "bvh"
         if asset["type"] == "proxy":
             key = "file"
-        if asset["type"] == "rig":
+        if asset["type"] == "target":
             key = "file"
-            
+        if asset["type"] == "model":
+            key = "file"
         ext = key
 
         if asset["type"] == "target":
             ext = "target"
         if asset["type"] == "proxy":
             ext = "proxy"
+        if asset["type"] == "model":
+            ext = "mhm"
             
         msg = "Asset was downloaded"
         base = ""
@@ -832,132 +907,118 @@ class AssetDownloadTaskView(gui3d.TaskView):
                 else:
                     fn = url.rsplit('/', 1)[-1]
                 saveAs = os.path.join(assetDir,fn)
+                
                 log.debug("Downloading " + url)
-                self.downloadUrl(url,saveAs)
+                self.downloadUrl(url,saveAs, asset, fn)
                 self.progress(current, current + increment)
                 
-                try:
-                  if self.get_extension(fn) == "mhmat":
-                     lines = []
-                     output = []
-                   
-                     with open(saveAs,'r') as fileObject:
-                          lines = fileObject.read().splitlines()
-                        
-                     log.debug(lines)
-                     for line in lines:
-                       if("name" in line):
-                            filename = os.path.basename(saveAs)
-                            name = os.path.splitext(filename)[0]
-                            line = "name " + name
-                            log.debug(line)
-                       if "diffuseTexture" in line:
-                           dn = asset["files"]["diffuse"].rsplit('/', 1)[-1]
-                           line = "diffuseTexture " + dn
-                           log.debug(line)
-                       if "normalmapTexture " in line:
-                           if "normals" in asset["files"]:
-                              nn = asset["files"]["normals"].rsplit('/', 1)[-1]
-                              line = "normalmapTexture " + nn
-                              log.debug(line)
-                           else:
-                               msg = msg + "Fix the Normals Map"
-                       if "specularTexture" in line:
-                           if "glossy" in asset["files"]:
-                               sn = asset["files"]["glossy"].rsplit('/', 1)[-1]
-                               line = "specularTexture " + sn
-                               log.debug(line)
-                           else:
-                               msg = msg + "Fix the Specular Map"
-                       if "displacementTexture " in line:
-                           if "displacement" in asset["files"]:
-                               dtn = asset["files"]["displacement"].rsplit('/', 1)[-1]
-                               line = "displacementTexture  " + dtn
-                               log.debug(line)
-                           else:
-                               msg = msg + "Fix the Displacement Map"
-                       if "bumpTexture " in line:
-                           if "bump" in asset["files"]:
-                               bn = asset["files"]["bump"].rsplit('/', 1)[-1]
-                               line = "bumpTexture  " + bn
-                               log.debug(line)
-                           else:
-                               msg = msg + "Fix the Bump Map"
-                              
-                       """ need to add aomapTexture to asset.json 
-                       if "aomapTexture " in line:
-                           if "aomap" in asset["files"]:
-                               bn = asset["files"]["aomap"].rsplit('/', 1)[-1]
-                               line = "aomapTexture  " + bn
-                               log.debug(line)
-                           else:
-                               msg = msg + "Fix the A O Map"
-                       """
-                       output.append(line)
-                        
-                     log.debug(output)
-                     with open(saveAs,'w') as fileObject:
-                          for item in output:
-                             fileObject.write("%s\n" % item)
-                except Exception:
-                    continue
-                try: 
-                 if self.get_extension(fn) == "mhclo":
-                   lines = []
-                   output = []
-                   with open(saveAs,'r+') as fileObject:
-                       lines = fileObject.read().splitlines()
-                   
-                   for line in lines:
-                        if("material" in line):
-                            dn = asset["files"]["mhmat"].rsplit('/', 1)[-1]
-                            line = "material " + dn
-                            log.debug(line)
-                        if("name" in line):
-                            filename = os.path.basename(saveAs)
-                            name = os.path.splitext(filename)[0]
-                            line = "name " + name
-                            log.debug(line)
-                        if("obj_file" in line):
-                            dn = asset["files"]["obj"].rsplit('/', 1)[-1]
-                            line = "obj_file  " + dn
-                            log.debug(line)
-                        output.append(line)
-                        
-                   with open(saveAs,'w') as fileObject:
-                         for item in output:
-                            fileObject.write("%s\n" % item)
-                except Exception:
-                    continue
-                try: 
-                 if self.get_extension(fn) == "proxy":
-                   lines = []
-                   output = []
-                   with open(saveAs,'r+') as fileObject:
-                       lines = fileObject.read().splitlines()
-                   
-                   for line in lines:
-                        if("name" in line):
-                            filename = os.path.basename(saveAs)
-                            name = os.path.splitext(filename)[0]
-                            line = "name " + name
-                            log.debug(line)
-                        if("obj_file" in line):
-                            dn = asset["files"]["obj_file"].rsplit('/', 1)[-1]
-                            line = "obj_file  " + dn
-                            log.debug(line)
-                        output.append(line)
-                        
-                   with open(saveAs,'w') as fileObject:
-                         for item in output:
-                            fileObject.write("%s\n" % item)
-                except Exception:
-                    continue
-                         
+                
         self.progress(1.0)
         self.downloadLabel.setText(msg)
         """self.showMessage(msg)"""
-        
+
+    def normalizeFiles(self, data, asset, saveAs, fileName):
+        if not fileName == None:
+            if self.get_extension(fileName) == "mhmat":
+                lines = data.split("\n")
+                output = []
+                for line in lines:
+                    if "name" in line:
+                         filename = os.path.basename(saveAs)
+                         name = os.path.splitext(filename)[0]
+                         line = "name " + name
+                         log.debug(line)
+                    if "obj_file" in line:
+                        if "obj" in asset["files"]:
+                            of = asset["files"]["obj"].rsplit('/', 1)[-1]
+                            line = "obj_file  " + of
+                        else:
+                            msg = msg + "Fix the Obj File"
+                    if "diffuseTexture" in line:
+                        if "diffuse" in asset["files"]:
+                            dn = asset["files"]["diffuse"].rsplit('/', 1)[-1]
+                            line = "diffuseTexture " + dn
+                            log.debug(line)
+                        else:
+                            msg = msg + "Fix the Diffuse Texture"
+                    if "normalmapTexture " in line:
+                        if "normals" in asset["files"]:
+                           nn = asset["files"]["normals"].rsplit('/', 1)[-1]
+                           line = "normalmapTexture " + nn
+                           log.debug(line)
+                        else:
+                            msg = msg + "Fix the Normals Map"
+                    if "specularTexture" in line:
+                        if "glossy" in asset["files"]:
+                            sn = asset["files"]["glossy"].rsplit('/', 1)[-1]
+                            line = "specularTexture " + sn
+                            log.debug(line)
+                        else:
+                            msg = msg + "Fix the Specular Map"
+                    if "displacementTexture " in line:
+                        if "displacement" in asset["files"]:
+                            dtn = asset["files"]["displacement"].rsplit('/', 1)[-1]
+                            line = "displacementTexture  " + dtn
+                            log.debug(line)
+                        else:
+                            msg = msg + "Fix the Displacement Map"
+                    if "bumpTexture " in line:
+                        if "bump" in asset["files"]:
+                            bn = asset["files"]["bump"].rsplit('/', 1)[-1]
+                            line = "bumpTexture  " + bn
+                            log.debug(line)
+                        else:
+                            msg = msg + "Fix the Bump Map"
+                           
+                    if "aomapTexture " in line:
+                        if "aomap" in asset["files"]:
+                            bn = asset["files"]["aomap"].rsplit('/', 1)[-1]
+                            line = "aomapTexture  " + bn
+                            log.debug(line)
+                        else:
+                            msg = msg + "Fix the A O Map"
+                    output.append(line)
+
+                return '\n'.join(output)
+
+            if self.get_extension(fileName) == "mhclo":
+                lines = data.split("\n")
+                output = []
+                for line in lines:
+                    if "material" in line:
+                        dn = asset["files"]["mhmat"].rsplit('/', 1)[-1]
+                        line = "material " + dn
+                    if "name" in line:
+                        filename = os.path.basename(saveAs)
+                        name = os.path.splitext(filename)[0]
+                        line = "name " + name
+                    if "obj_file" in line:
+                        of = asset["files"]["obj"].rsplit('/', 1)[-1]
+                        line = "obj_file  " + of
+                    output.append(line)
+                    
+                return '\n'.join(output)
+
+
+            if self.get_extension(fileName) == "proxy":
+                lines = data.split("\n")
+                output = []
+                for line in lines:
+                    if "name" in line:
+                       filename = os.path.basename(saveAs)
+                       name = os.path.splitext(filename)[0]
+                       line = "name " + name
+                       log.debug(line)
+                    if "obj_file" in line:
+                       of = asset["files"]["obj_file"].rsplit('/', 1)[-1]
+                       line = "obj_file  " + of
+                       log.debug(line)
+                    output.append(line)
+
+                return '\n'.join(output)
+            
+        return data
+    
     def downloadClothes(self):
         foundAsset = None
         category = str(self.categoryList.getCurrentItem())
@@ -1075,23 +1136,19 @@ class AssetDownloadTaskView(gui3d.TaskView):
         for asset in self.proxyAssets:
             if str(asset["title"]) == name:
                 foundAsset = asset
-            self.assetList.takeItem(self.assetList.currentRow())
-
+                
         if foundAsset:
             self.downloadAsset(foundAsset,"proxymeshes")
             self.assetList.takeItem(self.assetList.currentRow())
             
-            self.assetList.takeItem(self.assetList.currentRow())
-            self.assetList.takeItem(self.assetList.currentRow())
     def downloadRig(self):
         foundAsset = None
         name = str(self.assetList.currentItem().text)
-        self.assetList.takeItem(self.assetList.currentRow())
         for asset in self.rigAssets:
             if str(asset["title"]) == name:
                 foundAsset = asset
 
         if foundAsset:
-            self.downloadAsset(foundAsset,"rig")
+            self.downloadAsset(foundAsset,"rigs")
             self.assetList.takeItem(self.assetList.currentRow())
             
