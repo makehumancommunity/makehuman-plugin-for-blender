@@ -70,6 +70,7 @@ class SocketTaskView(gui3d.TaskView):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
+            self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
             self.socket.bind(('127.0.0.1', 12345))
         except socket.error , msg:
             self.scriptText.addText('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1] + "\n")
@@ -116,7 +117,7 @@ class SocketTaskView(gui3d.TaskView):
 
     def closeSocket(self):
         self.addMessage("Closing socket.")
-        self.socket.shutdown()
+        self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
 
 
@@ -131,4 +132,3 @@ def load(app):
 def unload(app):
     if taskview:
         taskview.closeSocket()
-
