@@ -44,13 +44,12 @@ class Assets(NameSpace):
             "basemesh",
             "obj_file",
             "max_pole",
+            "material",
             "z_depth",
             "x_scale",
             "y_scale",
             "z_scale"
         ]
-
-        self.proxyExtraKeys = ["material"]
 
         self.materialKeys = [
             "diffuseColor",
@@ -86,7 +85,7 @@ class Assets(NameSpace):
         ] # There are also SSS settings, but I don't know if those actually works
 
         self.keyList = self.genericExtraKeys + self.genericCommentKeys + self.genericKeys +self.materialKeys + \
-                       self.proxyExtraKeys + self.proxyKeys
+                       self.proxyKeys
 
         self.zDepth = {"Body": 31,
                        "Underwear and lingerie": 39,
@@ -165,14 +164,6 @@ class Assets(NameSpace):
                 if key == pk:
                     assetInfo[pk] = value
 
-        for genericExtraKeyName in self.proxyExtraKeys:
-            assetInfo[genericExtraKeyName] = set()
-            for rawkey in assetInfo["rawkeys"]:
-                rawKeyName = rawkey[0]
-                rawKeyValue = rawkey[1]
-                if rawKeyName == genericExtraKeyName:
-                    assetInfo[genericExtraKeyName].add(rawKeyValue)
-
     def _parseMaterialKeys(self,assetInfo):
         for pk in self.materialKeys:
             assetInfo[pk] = None
@@ -190,7 +181,6 @@ class Assets(NameSpace):
 
         if assetInfo["type"] == "proxy":
             pertinentKeys.extend(self.proxyKeys)
-            pertinentExtraKeys.extend(self.proxyExtraKeys)
 
         if assetInfo["type"] == "material":
             pertinentKeys.extend(self.materialKeys)
@@ -251,9 +241,9 @@ class Assets(NameSpace):
             writtenCommentKeys = []
             writtenExtraKeys = []
 
-            remainingKeys = list(assetInfo["pertinentKeys"]);
-            remainingCommentKeys = list(assetInfo["pertinentCommentKeys"]);
-            remainingExtraKeys = list(assetInfo["pertinentExtraKeys"]);
+            remainingKeys = list(assetInfo["pertinentKeys"])
+            remainingCommentKeys = list(assetInfo["pertinentCommentKeys"])
+            remainingExtraKeys = list(assetInfo["pertinentExtraKeys"])
 
             for line in assetInfo["rawlines"]:
                 allowWrite = True

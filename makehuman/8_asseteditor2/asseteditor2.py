@@ -29,19 +29,6 @@ import filecache
 import copy
 from pathfunctions import *
 from core import G
-
-
-# currently unused imports:
-
-# import log
-# import re
-# import mh
-# from PyQt4 import *
-# from progress import Progress
-# import qtgui
-#
-# delete ?
-
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -88,7 +75,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         saveMsg = "When you click the save button, the asset will be written back to the original file, " \
                   "but a .bak file will be created with the original data."
 
-        tagWarnMsg = 'Your asset has to many Tags. The Asset Editor does not support more than 5 tags. ' \
+        tagWarnMsg = 'Your asset has to many tags. The Asset Editor does not support more than 5 tags. ' \
                      'Edit the asset in a Texteditor.'
 
         self.selectedType = None
@@ -109,14 +96,15 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.linekeys = ['author', 'name', 'uuid', 'homepage']
         self.textkeys = ['license', 'description']
         self.intkeys  = ['z_depth', 'max_pole', ]
-        self.booleankeys = ["shadeless", "wireframe","transparent", "alphaToCoverage", "backfaceCull", "depthless",
-                            "castShadows", "receiveShadows"]
-        self.texturekeys = ["diffuseTexture", "bumpmapTexture", "normalmapTexture", "displacementmapTexture",
-                            "specularmapTexture", "transparencymapTexture", "aomapTexture"]
-        self.floatkeys = ["diffuseIntensity", "bumpMapIntensity", "normalMapIntensity", "displacementMapIntensity",
-                          "specularMapIntensity", "transparencyMapIntensity", "aoMapIntensity",  "shininess",
-                          "opacity", "translucency"]
-        self.rgbkeys = ["diffuseColor", "specularColor", "emissiveColor", "ambientColor"]
+        self.booleankeys = ['shadeless', 'wireframe','transparent', 'alphaToCoverage', 'backfaceCull', 'depthless',
+                            'castShadows', 'receiveShadows']
+        self.texturekeys = ['diffuseTexture', 'bumpmapTexture', 'normalmapTexture', 'displacementmapTexture',
+                            'specularmapTexture', 'transparencymapTexture', 'aomapTexture']
+        self.floatkeys = ['diffuseIntensity', 'bumpMapIntensity', 'normalMapIntensity', 'displacementMapIntensity',
+                          'specularMapIntensity', 'transparencyMapIntensity', 'aoMapIntensity',  'shininess',
+                          'opacity', 'translucency']
+        self.rgbkeys = ['diffuseColor', 'specularColor', 'emissiveColor', 'ambientColor']
+        self.num3keys = ['x_scale', 'y_scale', 'z_scale']
 
         self.baseDict = {k : None for k in mhapi.assets.keyList}
 
@@ -172,7 +160,8 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.TagFilter = self.FileChooser.createTagFilter()
         self.addLeftWidget(self.TagFilter)
         fc2Path = mhapi.locations.getUserHomePath("models")
-        self.FileChooser2 = self.addRightWidget(fc.IconListFileChooser(fc2Path, 'mhm', 'thumb', self.notfound, None, name='File Chooser', noneItem=False))
+        self.FileChooser2 = self.addRightWidget(fc.IconListFileChooser(fc2Path, 'mhm', 'thumb', self.notfound,
+                                                None, name='File Chooser', noneItem=False))
         self.FileChooser2.setIconSize(50, 50)
         self.FileChooser2.enableAutoRefresh(True)
         self.FileChooser2.hide()
@@ -350,6 +339,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         CNumberPanelLayout = QHBoxLayout()
         self.CNumberPanel.setLayout(CNumberPanelLayout)
 
+        self.scalePanel = QFrame()
+        scalePanelLayout = QGridLayout()
+        self.scalePanel.setLayout(scalePanelLayout)
+
         self.objPanel = QFrame()
         objPanelLayout = QHBoxLayout()
         self.objPanel.setLayout(objPanelLayout)
@@ -368,6 +361,12 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.baseDict['max_pole'] = QLineEdit()
         self.baseDict['max_pole'].sizeHint = lambda : QSize(40, 30)
         self.baseDict['max_pole'].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        x_scaleLabel = QLabel('x_scale:')
+        self.baseDict['x_scale'] = [QLineEdit(), QLineEdit(), QLineEdit()]
+        y_scaleLabel = QLabel('y_scale:')
+        self.baseDict['y_scale'] = [QLineEdit(), QLineEdit(), QLineEdit()]
+        z_scaleLabel = QLabel('z_scale:')
+        self.baseDict['z_scale'] = [QLineEdit(), QLineEdit(), QLineEdit()]
         objLabel = QLabel('Set Object File :')
         self.baseDict['obj_file'] = QLineEdit()
         self.objButton = gui.Button('[ ... ]')
@@ -392,6 +391,20 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         CNumberPanelLayout.addWidget(self.baseDict['max_pole'])
         CNumberPanelLayout.addStretch(1)
 
+        scalePanelLayout.addWidget(x_scaleLabel, 0, 0, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['x_scale'][0], 0, 1, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['x_scale'][1], 0, 2, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['x_scale'][2], 0, 3, 1, 1)
+        scalePanelLayout.addWidget(y_scaleLabel, 1, 0, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['y_scale'][0], 1, 1, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['y_scale'][1], 1, 2, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['y_scale'][2], 1, 3, 1, 1)
+        scalePanelLayout.addWidget(z_scaleLabel, 2, 0, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['z_scale'][0], 2, 1, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['z_scale'][1], 2, 2, 1, 1)
+        scalePanelLayout.addWidget(self.baseDict['z_scale'][2], 2, 3, 1, 1)
+        scalePanelLayout.setColumnStretch(4, 75)
+
         objPanelLayout.addWidget(objLabel)
         objPanelLayout.addWidget(self.baseDict['obj_file'])
         objPanelLayout.addWidget(self.objButton)
@@ -403,6 +416,7 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
         CMaterialPanelLayout.addWidget(self.RelPathButton)
 
         ClothesLayout.addWidget(self.CNumberPanel)
+        ClothesLayout.addWidget(self.scalePanel)
         ClothesLayout.addWidget(self.objPanel)
         ClothesLayout.addWidget(self.CMaterialPanel)
 
@@ -569,9 +583,14 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                         taglist.append(lineEdit.text().strip())
                 self.asset['tag'] = set(taglist)
 
-            if not self.selectedType == 'Materials':
+            if not self.selectedType in ['Materials', 'Models']:
                 self.asset['obj_file'] = self.baseDict['obj_file'].text()
-                self.asset['material'] = set([self.baseDict['material'].text()])
+                self.asset['material'] = self.baseDict['material'].text()
+                for key in ['x_scale', 'y_scale', 'z_scale']:
+                    self.asset[key] = self.getDigitStr(self.baseDict[key][0].text()) + ' ' + \
+                                      self.getDigitStr(self.baseDict[key][1].text()) + ' ' + \
+                                      self.getFloatStr(self.baseDict[key][2].text())
+                    if self.asset[key].strip() =='': self.asset[key] = None
 
             for key in self.linekeys: self.asset[key] = self.baseDict[key].text()
             for key in self.textkeys: self.asset[key] = self.baseDict[key].toPlainText()
@@ -582,8 +601,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 for key in self.texturekeys: self.asset[key] = self.baseDict[key].text()
                 for key in self.floatkeys: self.asset[key] = self.getFloatStr(self.baseDict[key].text())
                 for key in self.rgbkeys:
-                    self.asset[key] = ' '.join( [self.getFloatStr( self.baseDict[key][0].text() ), self.getFloatStr( self.baseDict[key][1].text() ),
-                                       self.getFloatStr( self.baseDict[key][2].text() ) ] )
+                    self.asset[key] = self.getDigitStr(self.baseDict[key][0].text()) + ' ' + \
+                                      self.getDigitStr(self.baseDict[key][1].text()) + ' ' + \
+                                      self.getFloatStr(self.baseDict[key][2].text())
+                    if self.asset[key].strip() == '': self.asset[key] = None
 
             self.setAssetInfoText(self.asset)
 
@@ -630,6 +651,9 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.history.clear()
             self.history_ptr = {'head' : 0, 'current' : 0}
             self.setEditData()
+            self.UndoButton.setDisabled(True)
+            self.RedoButton.setDisabled(True)
+            self.ResetButton.setDisabled(True)
             self.TabWidget.setTabEnabled(self.tabEditIndex, True)
             self.TabWidget.setTabEnabled(self.tabAdvancedIndex, False)
 
@@ -652,6 +676,9 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.history_ptr = {'head': 0, 'current': 0}
             self.setAssetInfoText(self.asset)
             self.setEditData()
+            self.UndoButton.setDisabled(True)
+            self.RedoButton.setDisabled(True)
+            self.ResetButton.setDisabled(True)
             self.TabWidget.setTabEnabled(self.tabEditIndex, True)
             if self.selectedType == 'Materials':
                 self.TabWidget.setTabEnabled(self.tabAdvancedIndex, True)
@@ -695,9 +722,9 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             if FDialog.exec_():
                 selectedFile = FDialog.selectedFiles()[0]
             if selectedFile:
-                materialFile = os.path.split(selectedFile)
-                if materialFile[0] == self.loadedFile[0]:
-                    self.baseDict['obj_file'].setText(materialFile[1])
+                objFile = os.path.split(selectedFile)
+                if objFile[0] == self.loadedFile[0]:
+                    self.baseDict['obj_file'].setText(objFile[1])
                 else:
                     self.baseDict['obj_file'].setText(selectedFile)
 
@@ -734,32 +761,47 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.TagWarn.hide()
             self.TagGroupBox.show()
 
-        if not self.selectedType == 'Materials':
+        if not self.selectedType in ['Materials', 'Models']:
             self.baseDict['obj_file'].setText(self.asset['obj_file'])
             self.objPanel.setDisabled(False)
+            for key in ['x_scale', 'y_scale', 'z_scale']:
+                if self.asset[key]:
+                    val = self.asset[key].split()
+                else:
+                    val = ['', '', '']
+                i = 0
+                for lEdit in self.baseDict[key]:
+                    lEdit.setText(val[i])
+                    i+= 1
 
         if not self.selectedType in ['Materials','ProxyMeshes','Models']:
-            fileList = list(self.asset['material'])
-            if fileList[0]:
-                self.baseDict['material'].setText(fileList[0])
+            if self.asset['material'] is not None:
+                self.baseDict['material'].setText(self.asset['material'])
+            else: self.baseDict['material'].setText('')
             for k in self.intkeys:
                 if k in self.intkeys:
-                    if not self.asset[k] is None:
+                    if self.asset[k] is not None:
                         self.baseDict[k].setText(self.asset[k])
                     else:
-                        self.baseDict[k].setText("")
-
+                        self.baseDict[k].setText('')
             self.CMaterialPanel.setDisabled(False)
             self.CNumberPanel.setDisabled(False)
+            self.objPanel.setDisabled(False)
+            self.scalePanel.setDisabled(False)
         else:
             if self.selectedType =='ProxyMeshes':
                 self.CNumberPanel.setDisabled(False)
+                self.objPanel.setDisabled(False)
+                self.scalePanel.setDisabled(False)
                 self.CMaterialPanel.setDisabled(True)
             else:
                 self.CNumberPanel.setDisabled(True)
+                self.objPanel.setDisabled(True)
+                self.scalePanel.setDisabled(True)
                 self.CMaterialPanel.setDisabled(True)
             if self.selectedType == 'Materials':
                 self.objPanel.setDisabled(True)
+                self.scalePanel.setDisabled(True)
                 for key in self.booleankeys:
                     if self.asset[key] == 'True':
                         self.baseDict[key][0].setChecked(True)
@@ -770,6 +812,9 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 for key in self.texturekeys + self.floatkeys:
                     if self.asset[key]:
                         self.baseDict[key].setText(self.asset[key])
+                    else:
+                        self.baseDict[key].setText('')
+
                 for key in self.rgbkeys:
                     if self.asset[key]:
                         val = self.asset[key].split()
@@ -908,10 +953,10 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
                 msg = msg + "<ul>"
 
                 for e in bp.errors:
-                    msg = msg + "<li>&nbsp;ERROR: " + e + "</li>\n"
+                    msg = msg + "<li><font color = red>&nbsp;ERROR: " + e + "</font></li>\n"
 
                 for w in bp.warnings:
-                    msg = msg + "<li>&nbsp;WARNING: " + w + "</li>\n"
+                    msg = msg + "<li><font color = orange>&nbsp;WARNING: " + w + "</font></li>\n"
 
                 for h in bp.hints:
                     msg = msg + "<li>&nbsp;HINT: " + h + "</li>\n"
@@ -978,16 +1023,27 @@ class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def getDigitStr(self, string=''):
         val = ''
-        for i in string:
-            if i.isdigit():
+        a = 0
+        if string.strip() == '' or string == '-':
+            return ''
+        if string[0] in '+-' and len(string) > 1:
+            val = string[0]
+            a = 1
+        for i in string[a:]:
+            if i in '0123456789':
                 val += i
-        if val.isdigit():
-            return val
-        else:
+        if len(val) == 0:
             return '0'
+        else:
+            return val
 
     def getFloatStr(self, string=''):
         val = ''
+        if string.strip() == '' or string == '-':
+            return ''
+        if string[0] in '+-' and len(string) > 1:
+            val = string[0]
+            a = 1
         for i in string:
             if i in '.,0123456789':
                 if i == ',':
