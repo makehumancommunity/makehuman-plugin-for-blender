@@ -26,7 +26,7 @@ import mh
 import gui
 import log
 
-from asseteditor import AssetEditorTaskView
+from asseteditor2 import AssetEditor2TaskView
 
 category = None
 
@@ -34,7 +34,7 @@ editorView = None
 
 def load(app, category=None):
     category = app.getCategory('Community')
-    editorView = category.addTask(AssetEditorTaskView(category))
+    editorView = category.addTask(AssetEditor2TaskView(category))
 
 def unload(app):
     pass

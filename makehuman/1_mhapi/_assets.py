@@ -23,23 +23,33 @@ class Assets(NameSpace):
         self.extensionToType[".proxy"] = "proxy"
         self.extensionToType[".target"] = "target"
         self.extensionToType[".mhm"] = "models"
+
+        self.typeToExtension = {'material'  :   'mhmat',
+                                'models'    :   'mhm',
+                                'clothes'   :   'mhclo',
+                                'hair'      :   'mhclo',
+                                'teeth'     :   'mhclo',
+                                'eyebrows'  :   'mhclo',
+                                'eyelashes' :   'mhclo',
+                                'tongue'    :   'mhclo',
+                                'eyes'      :   'mhclo',
+                                'proxymeshes':  'proxy'
+        }
         
         self.genericExtraKeys = ["tag"]
-        self.genericKeys = ["name","description"]
+        self.genericKeys = ["name","description", "uuid"]
         self.genericCommentKeys = ["license","homepage","author"]
 
         self.proxyKeys = [
-            "uuid",
             "basemesh",
             "obj_file",
             "max_pole",
+            "material",
             "z_depth",
             "x_scale",
             "y_scale",
             "z_scale"
         ]
-
-        self.proxyExtraKeys = ["material"]
 
         self.materialKeys = [
             "diffuseColor",
@@ -47,12 +57,12 @@ class Assets(NameSpace):
             "emissiveColor",
             "ambientColor",
             "diffuseTexture",
-            "bumpMapTexture",
-            "normalMapTexture",
-            "displacementMapTexture",
-            "specularMapTexture",
-            "transparencyMapTexture",
-            "aoMapTexture",
+            "bumpmapTexture",
+            "normalmapTexture",
+            "displacementmapTexture",
+            "specularmapTexture",
+            "transparencymapTexture",
+            "aomapTexture",
             "diffuseIntensity",
             "bumpMapIntensity",
             "normalMapIntensity",
@@ -71,9 +81,22 @@ class Assets(NameSpace):
             "depthless",
             "castShadows",
             "receiveShadows",
-            "alphaToCoverage"
+
         ] # There are also SSS settings, but I don't know if those actually works
 
+        self.keyList = self.genericExtraKeys + self.genericCommentKeys + self.genericKeys +self.materialKeys + \
+                       self.proxyKeys
+
+        self.zDepth = {"Body": 31,
+                       "Underwear and lingerie": 39,
+                       "Socks and stockings": 43,
+                       "Shirt and trousers": 47,
+                       "Sweater": 50,
+                       "Indoor jacket": 53,
+                       "Shoes and boots": 57,
+                       "Coat": 61,
+                       "Backpack": 69
+                      }
 
     def _parseGenericAssetInfo(self,fullPath):
 
@@ -141,14 +164,6 @@ class Assets(NameSpace):
                 if key == pk:
                     assetInfo[pk] = value
 
-        for genericExtraKeyName in self.proxyExtraKeys:
-            assetInfo[genericExtraKeyName] = set()
-            for rawkey in assetInfo["rawkeys"]:
-                rawKeyName = rawkey[0]
-                rawKeyValue = rawkey[1]
-                if rawKeyName == genericExtraKeyName:
-                    assetInfo[genericExtraKeyName].add(rawKeyValue)
-
     def _parseMaterialKeys(self,assetInfo):
         for pk in self.materialKeys:
             assetInfo[pk] = None
@@ -166,7 +181,6 @@ class Assets(NameSpace):
 
         if assetInfo["type"] == "proxy":
             pertinentKeys.extend(self.proxyKeys)
-            pertinentExtraKeys.extend(self.proxyExtraKeys)
 
         if assetInfo["type"] == "material":
             pertinentKeys.extend(self.materialKeys)
@@ -227,9 +241,9 @@ class Assets(NameSpace):
             writtenCommentKeys = []
             writtenExtraKeys = []
 
-            remainingKeys = list(assetInfo["pertinentKeys"]);
-            remainingCommentKeys = list(assetInfo["pertinentCommentKeys"]);
-            remainingExtraKeys = list(assetInfo["pertinentExtraKeys"]);
+            remainingKeys = list(assetInfo["pertinentKeys"])
+            remainingCommentKeys = list(assetInfo["pertinentCommentKeys"])
+            remainingExtraKeys = list(assetInfo["pertinentExtraKeys"])
 
             for line in assetInfo["rawlines"]:
                 allowWrite = True

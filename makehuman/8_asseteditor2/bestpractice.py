@@ -61,7 +61,7 @@ class _GenericBestPractice(object):
     def _dontUseAGPL(self):
         if self.testKey("license"):
             if "AGPL" in self.assetInfo["license"]:
-                self.warnings.append("License is set to AGPL. As only CC and CC-BY is allowed in the asset repos, AGPL is probably there because MakeClothes set it per default.")
+                self.warnings.append("License is set to AGPL. As only CC0 and CC-BY is allowed in the asset repos, AGPL is probably there because MakeClothes set it per default.")
 
     def testFile(self,keyName,notAnError = False):
 
@@ -82,7 +82,7 @@ class _GenericBestPractice(object):
             for f in ai:
                 files.append(f)
 
-        print files
+        # print files
 
         for f in files:
             fn = os.path.join(self.assetInfo["location"],f)
@@ -128,7 +128,7 @@ class _ProxyBestPractice(_GenericBestPractice):
 
     def _processWarnings(self):
 
-        if not self.testKey("material"):
+        if (not self.testKey("material")) and (self.assetInfo['extension'] != '.proxy'):
             self.warnings.append("No material has been assigned")
 
     def _processErrors(self):
@@ -137,7 +137,7 @@ class _ProxyBestPractice(_GenericBestPractice):
         if self.testKey("obj_file"):
             self.testFile("obj_file")
         else:
-            self.warnings.append("The obj_file field is not set. This is a required field.")
+            self.errors.append("The obj_file field is not set. This is a required field.")
 
 
 class _MaterialBestPractice(_GenericBestPractice):
