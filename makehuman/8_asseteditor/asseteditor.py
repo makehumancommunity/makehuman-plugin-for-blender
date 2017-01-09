@@ -52,9 +52,9 @@ class defaultButton(gui.Button):
 
 # The AssetEditor task:
 
-class AssetEditor2TaskView(gui3d.TaskView, filecache.MetadataCacher):
+class AssetEditorTaskView(gui3d.TaskView, filecache.MetadataCacher):
     def __init__(self, category):
-        super(AssetEditor2TaskView,self).__init__(category, 'Asset Editor 2')
+        super(AssetEditorTaskView,self).__init__(category, 'Asset Editor')
 
 # Preset Variables here:
         self.notfound = mhapi.locations.getSystemDataPath("notfound.thumb")
