@@ -118,7 +118,7 @@ class AssetEditorTaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.SaveBox = self.addLeftWidget(QGroupBox("Save asset: "))
 
         self.SaveInfo = gui.TextView(saveMsg)
-        self.SaveInfo.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        self.SaveInfo.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         self.SaveInfo.setWordWrap(True)
 
         self.SaveButton = defaultButton('Save')
@@ -334,7 +334,7 @@ class AssetEditorTaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.ClothesPanel = QGroupBox()
         ClothesLayout = QVBoxLayout()
         self.ClothesPanel.setLayout(ClothesLayout)
-        
+
         self.CNumberPanel = QFrame()
         CNumberPanelLayout = QHBoxLayout()
         self.CNumberPanel.setLayout(CNumberPanelLayout)
@@ -346,11 +346,11 @@ class AssetEditorTaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.objPanel = QFrame()
         objPanelLayout = QHBoxLayout()
         self.objPanel.setLayout(objPanelLayout)
-        
+
         self.CMaterialPanel = QFrame()
         CMaterialPanelLayout = QHBoxLayout()
         self.CMaterialPanel.setLayout(CMaterialPanelLayout)
-        
+
         zdepthLabel = QLabel('Z-Depth :')
         self.baseDict['z_depth'] = QLineEdit()
         self.baseDict['z_depth'].sizeHint = lambda: QSize(40, 30)
@@ -409,7 +409,7 @@ class AssetEditorTaskView(gui3d.TaskView, filecache.MetadataCacher):
         objPanelLayout.addWidget(self.baseDict['obj_file'])
         objPanelLayout.addWidget(self.objButton)
         objPanelLayout.addWidget(self.objRelPathButton)
-        
+
         CMaterialPanelLayout.addWidget(materialLabel)
         CMaterialPanelLayout.addWidget(self.baseDict['material'])
         CMaterialPanelLayout.addWidget(self.MaterialButton)
