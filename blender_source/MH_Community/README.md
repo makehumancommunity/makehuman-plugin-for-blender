@@ -4,11 +4,11 @@
 
 This is a blender plug-in which brings features related to MakeHuman.  It provides for post import operations specific to MakeHuman meshes, and armatures.  Sync operations require that MakeHuman be running, with server connections being accepted.
 
-# Mesh based Operations
+# Mesh based Operations#
 
-## Sync mesh
+## Sync mesh##
 
-## Separate Eyes & Center origins around mass
+## Separate Eyes & Center origins around mass##
 |Eye Mesh Before| Eye Meshes After|
 | --- | ---
 |<img src="doc-assist/eye_before.png">|<img src="doc-assist/eyes_after.png">
@@ -26,14 +26,23 @@ If managing the rotation outside of billboard mode, staying between -0.12 and 0.
 |Left|-0.50|0.35|
 |Right|-0.35|0.50|
 
-# Armature Operations
+# Armature Operations##
 
-## Sync pose
+## Sync pose##
 In addition to MakeHuman running & accepting socket connections, the current model must have the Default, or Default No Toes skeleton selected.  The skeleton running in Blender must match.  If possible, you should use the same MH model that was used to do the export.  The current pose and expression are transferred to Blender.  If feet were exported on the ground, the Model will be shifted down.  Just select the root bone ALONE & clear tranform location, Alt-G.
 
-## Convert to IK Rig
+## Convert to IK Rig##
+|Before|After
+| --- | ---
+|<img src="doc-assist/rig_before.png">|<img src="doc-assist/rig_after.png">
+This operator converts the Game Rig post export to a IK capable one.  This is done by:
+- Adding IK bones on elbows, wrists, knees, and ankles.
+- Adding IK constraints on bones to allow these IK bones to be used to pose.
+- Unlocking the pose location of the pelvis & clavicle bones.
 
-## Add Finger IK Bones
+This operation will work for models imported using MHX2 or Collada, from a bone naming stand point, but issues resulting from importing bones using Collada still remain.
+
+## Add Finger IK Bones##
 
 |Finger Rig (shown with GZM_Knuckle custom shape on Default Rig)|
 | --- 
@@ -43,7 +52,7 @@ Finger control bones are added with this operation.  This works for both the Def
 
 If there is a mesh named GZM_Knuckle in the scene, it will be assigned as the custom shape.
 
-## Remove Finger Bones
+## Remove Finger Bones##
 This operation removes all bones below the wrists.  Any bone weights which were held by the deleted bones are transferred to the wrists, based on vertex groups.  Not a major task, but saves the tedious task of weight painting manually.
 
 
