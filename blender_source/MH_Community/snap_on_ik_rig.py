@@ -36,6 +36,16 @@ class SnapOnIKKRig(bpy.types.Operator):
         pelvis.lock_location[0] = False
         pelvis.lock_location[1] = False
         pelvis.lock_location[2] = False
+        
+        lClavicle = self.armature.pose.bones[self.rigInfo.clavicle(True)]
+        lClavicle.lock_location[0] = False
+        lClavicle.lock_location[1] = False
+        lClavicle.lock_location[2] = False
+        
+        rClavicle = self.armature.pose.bones[self.rigInfo.clavicle(False)]
+        rClavicle.lock_location[0] = False
+        rClavicle.lock_location[1] = False
+        rClavicle.lock_location[2] = False
 
         self.addElbowAndHandIK(True)
         self.addElbowAndHandIK(False)

@@ -53,6 +53,7 @@ class GameRigInfo (RigInfo):
         self.elbowIKChainLength = 1
 
     # for IK rigging support
+    def clavicle(self, isLeft): return 'clavicle_' + ('l' if isLeft else 'r')
     def upperArm(self, isLeft): return 'upperarm_' + ('l' if isLeft else 'r')
     def lowerArm(self, isLeft): return 'lowerarm_' + ('l' if isLeft else 'r')
     def hand    (self, isLeft): return 'hand_'     + ('l' if isLeft else 'r')
@@ -116,6 +117,7 @@ class DefaultRigInfo (RigInfo):
         self.elbowIKChainLength = 3
 
     # for IK rigging support
+    def clavicle(self, isLeft): return 'clavicle'   + self.dot + ('L' if isLeft else 'R')
     def upperArm(self, isLeft): return 'upperarm02' + self.dot + ('L' if isLeft else 'R')
     def lowerArm(self, isLeft): return 'lowerarm02' + self.dot + ('L' if isLeft else 'R')
     def hand    (self, isLeft): return 'wrist'      + self.dot + ('L' if isLeft else 'R')
