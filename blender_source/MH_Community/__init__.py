@@ -30,6 +30,7 @@ else:
     from . import rig_info
 
 import bpy
+from bpy.props import BoolProperty
 
 class Community_Panel(bpy.types.Panel):
     bl_label = "Community"
@@ -39,6 +40,7 @@ class Community_Panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        scn = context.scene
 
         layout.label(text="Mesh Operations:", icon="MESH_DATA")
         layout.operator("mh_community.sync_mh_mesh", text="Sync with MH")
@@ -48,11 +50,14 @@ class Community_Panel(bpy.types.Panel):
 
         layout.label(text="Bone Operations:", icon="ARMATURE_DATA")
         layout.operator("mh_community.sync_pose", text="Sync with MH")
+        layout.prop(scn, "MhFeetOnGround")
+        layout.separator()
         layout.operator("mh_community.ik_rig", text="Convert to IK rig")
         layout.operator("mh_community.finger_rig", text="Add Finger IK Bones")
         layout.operator("mh_community.amputate_fingers", text="Remove Finger Bones")
 
 def register():
+    bpy.types.Scene.MhFeetOnGround = BoolProperty(name="Feet on Ground", description="Model was exported with feet on ground.  Checking this causes\nroot bone location translation to be cleared.", default=False)
     bpy.utils.register_module(__name__)
 
 def unregister():

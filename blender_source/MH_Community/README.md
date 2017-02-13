@@ -29,7 +29,7 @@ If managing the rotation outside of billboard mode, staying between -0.12 and 0.
 # Armature Operations##
 
 ## Sync pose##
-In addition to MakeHuman running & accepting socket connections, the current model must have the Default, or Default No Toes skeleton selected.  The skeleton running in Blender must match.  If possible, you should use the same MH model that was used to do the export.  The current pose and expression are transferred to Blender.  If feet were exported on the ground, the Model will be shifted down.  Just select the root bone ALONE & clear tranform location, Alt-G.
+In addition to MakeHuman running & accepting socket connections, the current model must have the Default, or Default No Toes skeleton selected.  The skeleton running in Blender must match.  If possible, you should use the same MH model that was used to do the export.  The current pose and expression are transferred to Blender.  If feet were exported on the ground, check the `Feet on Ground` check just below.  This will clear the location on the `root` bone.  Many of the poses have location changes to root, so either way some pose adjustment will be required.  Expression transfers will all work fine, though.
 
 ## Convert to IK Rig##
 |Before|After

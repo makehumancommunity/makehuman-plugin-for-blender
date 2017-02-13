@@ -34,9 +34,15 @@ class SyncPoseOperator(SyncOperator):
         bpy.ops.pose.transforms_clear()
         self.haveDots = self.bonesHaveDots()
             
-        #appy as passed back
+        #apply as passed back
         for bone in self.bones:
             self.apply(bone, json_obj)
+            
+        #feet on Ground processing
+        if bpy.context.scene.MhFeetOnGround:
+            bpy.ops.pose.select_all(action='DESELECT')
+            self.skeleton.data.bones["root"].select = True
+            bpy.ops.pose.loc_clear()
 
         self.report({"INFO"},"Done")
 
@@ -76,7 +82,7 @@ class SyncPoseOperator(SyncOperator):
                 ret = editBone.matrix.to_translation()
                 bpy.ops.object.mode_set(mode='POSE')
                 return ret
-     
+
     @classmethod
     def poll(cls, context):
         ob = context.object
