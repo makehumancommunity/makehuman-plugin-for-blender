@@ -32,6 +32,7 @@ If managing the rotation outside of billboard mode, staying between -0.12 and 0.
 In addition to MakeHuman running & accepting socket connections, the current model must have the Default, or Default No Toes skeleton selected.  The skeleton running in Blender must match.  If possible, you should use the same MH model that was used to do the export.  The current pose and expression are transferred to Blender.  If feet were exported on the ground, check the `Feet on Ground` check just below.  This will clear the location on the `root` bone.  Many of the poses have location changes to root, so either way some pose adjustment will be required.  Expression transfers will all work fine, though.
 
 Some expressions, e.g. Anger01, have location translation on bones which are locked.  By default, this translation is not transferred.  To allow this translation to occur un-check the `No Location Translation` checkbox.  Allowing translation will result in poses which more closely resemble those in MakeHuman.  There is one side effect, though.  Clearing locations for these bones, Alt-G, will not work.  Syncing armature again is one way to restore Alt-G.
+
 |Make Human| With Trans| Without Trans |
 | --- | --- | --- |
 |<img src="doc-assist/mh_anger.png">|<img src="doc-assist/blender_anger_trans.png">|<img src="doc-assist/blender_anger_no_trans.png">  
