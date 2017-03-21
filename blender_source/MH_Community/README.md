@@ -1,14 +1,14 @@
-# MH Community Plug-in for Blender
+# MH Community Plug-in for Blender #
 
 <img src="doc-assist/MH_server_socket.png">
 
 This is a blender plug-in which brings features related to MakeHuman.  It provides for post import operations specific to MakeHuman meshes, and armatures.  Sync operations require that MakeHuman be running, with server connections being accepted.
 
-# Mesh based Operations#
+# Mesh based Operations #
 
-## Sync mesh##
+## Sync mesh ##
 
-## Separate Eyes & Center origins around mass##
+## Separate Eyes & Center origins around mass ##
 |Eye Mesh Before| Eye Meshes After|
 | --- | ---
 |<img src="doc-assist/eye_before.png">|<img src="doc-assist/eyes_after.png">
@@ -26,12 +26,17 @@ If managing the rotation outside of billboard mode, staying between -0.12 and 0.
 |Left|-0.50|0.35|
 |Right|-0.35|0.50|
 
-# Armature Operations##
+# Armature Operations #
 
-## Sync pose##
+## Sync pose ##
 In addition to MakeHuman running & accepting socket connections, the current model must have the Default, or Default No Toes skeleton selected.  The skeleton running in Blender must match.  If possible, you should use the same MH model that was used to do the export.  The current pose and expression are transferred to Blender.  If feet were exported on the ground, check the `Feet on Ground` check just below.  This will clear the location on the `root` bone.  Many of the poses have location changes to root, so either way some pose adjustment will be required.  Expression transfers will all work fine, though.
 
-## Convert to IK Rig##
+Some expressions, e.g. Anger01, have location translation on bones which are locked.  By default, this translation is not transferred.  To allow this translation to occur un-check the `No Location Translation` checkbox.  Allowing translation will result in poses which more closely resemble those in MakeHuman.  There is one side effect, though.  Clearing locations for these bones, Alt-G, will not work.  Syncing armature again is one way to restore Alt-G.
+|Make Human| With Trans| Without Trans |
+| --- | --- | --- |
+|<img src="doc-assist/mh_anger.png">|<img src="doc-assist/blender_anger_trans.png">|<img src="doc-assist/blender_anger_no_trans.png">  
+
+## Convert to IK Rig ##
 |Before|After
 | --- | ---
 |<img src="doc-assist/rig_before.png">|<img src="doc-assist/rig_after.png">
@@ -42,7 +47,7 @@ This operator converts the Game Rig post export to a IK capable one.  This is do
 
 This operation will work for models imported using MHX2 or Collada, from a bone naming stand point, but issues resulting from importing bones using Collada still remain.
 
-## Add Finger IK Bones##
+## Add Finger IK Bones ##
 
 |Finger Rig (shown with GZM_Knuckle custom shape on Default Rig)|
 | --- 
@@ -52,7 +57,7 @@ Finger control bones are added with this operation.  This works for both the Def
 
 If there is a mesh named GZM_Knuckle in the scene, it will be assigned as the custom shape.
 
-## Remove Finger Bones##
+## Remove Finger Bones ##
 This operation removes all bones below the wrists.  Any bone weights which were held by the deleted bones are transferred to the wrists, based on vertex groups.  Not a major task, but saves the tedious task of weight painting manually.
 
 

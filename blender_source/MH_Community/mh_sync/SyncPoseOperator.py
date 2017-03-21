@@ -36,22 +36,27 @@ class SyncPoseOperator(SyncOperator):
             
         #apply as passed back
         for bone in self.bones:
-            self.apply(bone, json_obj)
+            self.apply(bone, json_obj, bpy.context.scene.MhNoLocation)
             
         #feet on Ground processing
         if bpy.context.scene.MhFeetOnGround:
-            bpy.ops.pose.select_all(action='DESELECT')
-            self.skeleton.data.bones["root"].select = True
-            bpy.ops.pose.loc_clear()
+            rootBone = self.getRootBone()
+            rootBone.location[0] = 0
+            rootBone.location[1] = 0
+            rootBone.location[2] = 0
 
         self.report({"INFO"},"Done")
 
-    def apply(self, bone, json_obj):
+    def apply(self, bone, json_obj, MhNoLocation):
         # the dots in collada exported bone names are replaced with '_', check for data with that changed back
         name = bone.name.replace("_", ".") if not self.haveDots else bone.name
         
         if name in json_obj.data:
             bone.matrix = Matrix(json_obj.data[name])
+            if MhNoLocation:
+                bone.location[0] = 0
+                bone.location[1] = 0
+                bone.location[2] = 0
                 
             # this operation every bone causes all matrices to be applied in one run
             bpy.ops.pose.select_all(action='SELECT')

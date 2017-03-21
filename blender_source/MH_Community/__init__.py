@@ -51,6 +51,7 @@ class Community_Panel(bpy.types.Panel):
         layout.label(text="Bone Operations:", icon="ARMATURE_DATA")
         layout.operator("mh_community.sync_pose", text="Sync with MH")
         layout.prop(scn, "MhFeetOnGround")
+        layout.prop(scn, "MhNoLocation")
         layout.separator()
         layout.operator("mh_community.ik_rig", text="Convert to IK rig")
         layout.operator("mh_community.finger_rig", text="Add Finger IK Bones")
@@ -58,6 +59,7 @@ class Community_Panel(bpy.types.Panel):
 
 def register():
     bpy.types.Scene.MhFeetOnGround = BoolProperty(name="Feet on Ground", description="Model was exported with feet on ground.  Checking this causes\nroot bone location translation to be cleared.", default=False)
+    bpy.types.Scene.MhNoLocation = BoolProperty(name="No Location Translation", description="Some Expressions have bone translation on locked bones.\nChecking this causes it to be cleared.  When false,\nALT-G will NOT clear these.", default=True)
     bpy.utils.register_module(__name__)
 
 def unregister():
