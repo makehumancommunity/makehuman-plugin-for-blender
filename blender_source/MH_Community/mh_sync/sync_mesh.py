@@ -6,21 +6,17 @@ bl_info = {
     "category": "Mesh",
 }
 
-from .SyncOperator import *
+from .sync_ops import SyncOperator
 
 import bpy
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
 
-class SyncMHMeshOperator(SyncOperator):
-    """Synchronize the shape of a human with MH"""
-    bl_idname = "mh_community.sync_mh_mesh"
-    bl_label = "Synchronize MH Mesh"
-    bl_options = {'REGISTER', 'UNDO'}
-
+class SyncMesh(SyncOperator):
     def __init__(self):
         super().__init__('getCoord')
+        self.executeJsonCall()
 
     def callback(self,json_obj):
 
@@ -41,12 +37,3 @@ class SyncMHMeshOperator(SyncOperator):
             obj.data.vertices[i].co[1] = -data[i][2]
             obj.data.vertices[i].co[2] = data[i][1]
             i = i + 1
-
-        self.report({"INFO"},"Done")
-
-    @classmethod
-    def poll(cls, context):
-        ob = context.object
-        return ob and ob.type == 'MESH'
-
-

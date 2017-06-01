@@ -4,7 +4,7 @@
 bl_info = {
     "name": "MH Community Plug-in",
     "author": "Joel Palmius",
-    "version": (0, 2),
+    "version": (0, 3),
     "blender": (2, 77, 0),
     "location": "View3D > Properties > MH",
     "description": "Post import MakeHuman operations",
@@ -30,8 +30,23 @@ else:
     from . import rig_info
 
 import bpy
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty,StringProperty
+#===============================================================================
+def register():
+    bpy.types.Scene.MhFeetOnGround = BoolProperty(name="Feet on Ground", description="Model was exported with feet on ground.  Checking this causes\nroot bone location translation to be cleared.", default=False)
+    bpy.types.Scene.MhNoLocation = BoolProperty(name="No Location Translation", description="Some Expressions have bone translation on locked bones.\nChecking this causes it to be cleared.  When false,\nALT-G will NOT clear these.", default=False)
+    bpy.types.Scene.MhExprFilterTag = StringProperty(name="Tag:", description="", default="")
+    bpy.utils.register_module(__name__)
 
+def unregister():
+    bpy.utils.unregister_module(__name__)
+
+if __name__ == "__main__":
+    unregister()
+    register()
+
+print("MH community plug-in load complete")
+#===============================================================================
 class Community_Panel(bpy.types.Panel):
     bl_label = "Community"
     bl_space_type = "VIEW_3D"
@@ -56,17 +71,57 @@ class Community_Panel(bpy.types.Panel):
         layout.operator("mh_community.ik_rig", text="Convert to IK rig")
         layout.operator("mh_community.finger_rig", text="Add Finger IK Bones")
         layout.operator("mh_community.amputate_fingers", text="Remove Finger Bones")
+        
+        layout.separator()
+        layout.label(text="Expression Transfer:")
+        layout.prop(scn, "MhExprFilterTag")
+        layout.operator("mh_community.expressions_trans", text="To Pose Lib")
+#===============================================================================
+class MeshSyncOperator(bpy.types.Operator):
+    """Synchronize the shape of a human with MH"""
+    bl_idname = "mh_community.sync_mh_mesh"
+    bl_label = "Synchronize MH Mesh"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        from .mh_sync.sync_mesh import SyncMesh
+        SyncMesh()
+        return {'FINISHED'}
 
-def register():
-    bpy.types.Scene.MhFeetOnGround = BoolProperty(name="Feet on Ground", description="Model was exported with feet on ground.  Checking this causes\nroot bone location translation to be cleared.", default=False)
-    bpy.types.Scene.MhNoLocation = BoolProperty(name="No Location Translation", description="Some Expressions have bone translation on locked bones.\nChecking this causes it to be cleared.  When false,\nALT-G will NOT clear these.", default=True)
-    bpy.utils.register_module(__name__)
+    @classmethod
+    def poll(cls, context):
+        ob = context.object
+        return ob and ob.type == 'MESH'
+#===============================================================================
+class PoseSyncOperator(bpy.types.Operator):
+    """Synchronize the pose of the skeleton of a human with MH"""
+    bl_idname = "mh_community.sync_pose"
+    bl_label = "Synchronize MH Pose"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        from .mh_sync.sync_pose import SyncPose
+        SyncPose()
+        return {'FINISHED'}
 
-def unregister():
-    bpy.utils.unregister_module(__name__)
+    @classmethod
+    def poll(cls, context):
+        ob = context.object
+        return ob and ob.type == 'ARMATURE'
+#===============================================================================
+class ExpressionTransOperator(bpy.types.Operator):
+    """Transfer MakeHuman expressions to a pose library"""
+    bl_idname = "mh_community.expressions_trans"
+    bl_label = "Expressions to Poselib"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        from .mh_sync.expr_to_poselib import ExprToPoselib
+        ExprToPoselib()
+        return {'FINISHED'}
 
-if __name__ == "__main__":
-    unregister()
-    register()
-
-print("MH community plug-in load complete")
+    @classmethod
+    def poll(cls, context):
+        ob = context.object
+        return ob and ob.type == 'ARMATURE' and ob.pose_library
+#===============================================================================
