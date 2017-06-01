@@ -6,7 +6,8 @@ bl_info = {
     "category": "Armature",
 }
 
-from .SyncOperator import *
+from .sync_ops import SyncOperator
+from .JsonCall import JsonCall
 
 import bpy
 from mathutils import Quaternion, Matrix
@@ -14,14 +15,12 @@ import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
 
-class SyncPoseOperator(SyncOperator):
-    """Synchronize the pose of the skeleton of a human with MH"""
-    bl_idname = "mh_community.sync_pose"
-    bl_label = "Synchronize MH Pose"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def __init__(self):
+class SyncPose(SyncOperator):
+    def __init__(self, poseFilename = None):
         super().__init__('getPose')
+        if poseFilename is not None:
+            self.call.setParam("poseFilename", poseFilename)
+        self.executeJsonCall()
 
     def callback(self,json_obj):
 
@@ -44,8 +43,6 @@ class SyncPoseOperator(SyncOperator):
             rootBone.location[0] = 0
             rootBone.location[1] = 0
             rootBone.location[2] = 0
-
-        self.report({"INFO"},"Done")
 
     def apply(self, bone, json_obj, MhNoLocation):
         # the dots in collada exported bone names are replaced with '_', check for data with that changed back
@@ -87,8 +84,3 @@ class SyncPoseOperator(SyncOperator):
                 ret = editBone.matrix.to_translation()
                 bpy.ops.object.mode_set(mode='POSE')
                 return ret
-
-    @classmethod
-    def poll(cls, context):
-        ob = context.object
-        return ob and ob.type == 'ARMATURE'

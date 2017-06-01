@@ -30,6 +30,7 @@ class JsonCall():
 
     def initializeFromJson(self,jsonData):
 
+        jsonData = jsonData.replace('\\', '\\\\') # allow windows paths in data
         print("JSON:\n")
         print(jsonData)
         print("")
@@ -193,7 +194,7 @@ class JsonCall():
 
         ret = ret + "  " + self.pythonValueToJsonValue(self.data,"data") + "\n}\n"
 
-        return ret
+        return ret.replace('\\', '\\\\') # allow windows paths in data
 
 
     def send(self, host = "127.0.0.1", port = 12345):
