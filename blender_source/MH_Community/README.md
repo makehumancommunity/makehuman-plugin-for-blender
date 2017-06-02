@@ -31,7 +31,7 @@ If managing the rotation outside of billboard mode, staying between -0.12 and 0.
 ## Sync pose ##
 In addition to MakeHuman running & accepting socket connections, the current model must have the Default, or Default No Toes skeleton selected.  The skeleton running in Blender must match.  If possible, you should use the same MH model that was used to do the export.  The current pose and expression are transferred to Blender.  If feet were exported on the ground, check the `Feet on Ground` check just below.  This will clear the location on the `root` bone.  Many of the poses have location changes to root, so either way some pose adjustment will be required.  Expression transfers will all work fine, though.
 
-Some expressions, e.g. Anger01, have location translation on bones which are locked.  By default, this translation is not transferred.  To allow this translation to occur un-check the `No Location Translation` checkbox.  Allowing translation will result in poses which more closely resemble those in MakeHuman.  There is one side effect, though.  Clearing locations for these bones, Alt-G, will not work.  Syncing armature again is one way to restore Alt-G.
+Many expressions, e.g. Anger01, have location translation on locked bones.  To allow this translation to occur ensure the `No Location Translation` checkbox remains unchecked.  Allowing translation will result in poses which more closely resemble those in MakeHuman.  There is one side effect, though.  Clearing locations for these bones, Alt-G, will not work.  Syncing again when MakeHuman's expression is set to `None` is one way to restore Alt-G.
 
 |Make Human| With Trans| Without Trans |
 | --- | --- | --- |
@@ -61,4 +61,14 @@ If there is a mesh named GZM_Knuckle in the scene, it will be assigned as the cu
 ## Remove Finger Bones ##
 This operation removes all bones below the wrists.  Any bone weights which were held by the deleted bones are transferred to the wrists, based on vertex groups.  Not a major task, but saves the tedious task of weight painting manually.
 
+# Expression Transfer #
+|New Library|Active Library
+| --- | ---
+|<img src="doc-assist/newPoseLib.jpg">|<img src="doc-assist/poseLib.jpg">
+This feature lets you move expressions to Blender, both stock and your custom expressions, without them being put on the export file (actually custom expressions are never on the export).  Having the results being stored in a Pose Library also allows you to set to any of them whenever you wish, without using the MHX2 user interface, or requiring specific MHX2 overrides during import.  This is specifically tested without overriding an MHX2 import at all.  Collada format will also work assuming the skeleton imports correctly.
 
+Behind the scenes `Sync pose` is being called in a loop, so the same setup described above also applies here.  Also, an active Pose Library must be present, in addition to the skeleton being selected, to allow the `To Poselib` button to be enabled.
+
+One quirk to creating a Pose Library, if you need to, is the `Pose` element in the Outliner must be selected for the `New` button to be enabled.
+
+You can also specify an expression tag to filter by just like in MakeHuman. This has been not case sensitive.
