@@ -65,6 +65,7 @@ This operation removes all bones below the wrists.  Any bone weights which were 
 |New Library|Active Library
 | --- | ---
 |<img src="doc-assist/newPoseLib.jpg">|<img src="doc-assist/poseLib.jpg">
+
 This feature lets you move expressions to Blender, both stock and your custom expressions, without them being put on the export file (actually custom expressions are never on the export).  Having the results being stored in a Pose Library also allows you to set to any of them whenever you wish, without using the MHX2 user interface, or requiring specific MHX2 overrides during import.  This is specifically tested without overriding an MHX2 import at all.  Collada format will also work assuming the skeleton imports correctly.
 
 Behind the scenes `Sync pose` is being called in a loop, so the same setup described above also applies here.  Also, an active Pose Library must be present, in addition to the skeleton being selected, to allow the `To Poselib` button to be enabled.
