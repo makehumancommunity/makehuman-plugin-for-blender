@@ -1,17 +1,8 @@
 import bpy
 #===============================================================================
-HIPOLY_VERTS  = 1064
-LOWPOLY_VERTS = 96
 
-class SeparateEyes(bpy.types.Operator):
-    """Separate The Eye mesh into left & right meshes, and move origin to center of mass of each."""
-    bl_idname = 'mh_community.separate_eyes'
-    bl_label = 'Separate Eye'
-
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        combinedMesh = context.object
+class SeparateEyes():
+    def __init__(self, combinedMesh):
         priorName = combinedMesh.name
         nVertsHalf = len(combinedMesh.data.vertices) / 2
 
@@ -37,33 +28,11 @@ class SeparateEyes(bpy.types.Operator):
         combinedMesh.name = priorName + '_R'
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
 
-        # set base class, and also ignore skeleton for BabylonJS export
-        combinedMesh.data.baseClass = 'BEING.EyeBall'
-        combinedMesh.data.ignoreSkeleton = True # now needs to be parented to Body; do that yourself
-
         # select left side, make active, rename, move origin,
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
         left = bpy.data.objects[priorName + '.001']
         left.select = True
-        context.scene.objects.active = left
+        bpy.context.scene.objects.active = left
         left.name =  priorName + '_L'
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
-
-        # set base class, and also ignore skeleton for BabylonJS export
-        left.data.baseClass = 'BEING.EyeBall'
-        left.data.ignoreSkeleton = True  # now needs to be parented to Body; do that yourself
-
-        return {'FINISHED'}
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    @classmethod
-    def poll(cls, context):
-        ob = context.object
-
-        # must be a mesh
-        if not ob or ob.type != 'MESH':
-            return False
-
-        # vertex count must match
-        nVerts = len(ob.data.vertices)
-        return nVerts == HIPOLY_VERTS or nVerts == LOWPOLY_VERTS
