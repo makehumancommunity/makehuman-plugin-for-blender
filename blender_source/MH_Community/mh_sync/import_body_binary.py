@@ -13,11 +13,22 @@ import bmesh
 import pprint
 import struct
 
+from .material import *
+
 pp = pprint.PrettyPrinter(indent=4)
 
 class GetBodyInfo(SyncOperator):
     def __init__(self, readyFunction):
         super().__init__('getBodyMeshInfo')
+        self.readyFunction = readyFunction
+        self.executeJsonCall()
+
+    def callback(self, json_obj):
+        self.readyFunction(json_obj.data)
+
+class GetBodyMaterialInfo(SyncOperator):
+    def __init__(self, readyFunction):
+        super().__init__('getBodyMaterialInfo')
         self.readyFunction = readyFunction
         self.executeJsonCall()
 
@@ -203,10 +214,15 @@ class ImportBodyBinary():
         if self.helpers != "NOTHING":
             self.handleHelpers()
 
-        print(bpy.context.scene.handle_helper)
-
         del self.vertCache
         del self.faceCache
+
+        GetBodyMaterialInfo(self.gotBodyMaterialInfo)
+
+    def gotBodyMaterialInfo(self, data):
+        print(data)
+        mat = createMHMaterial("testa", data)
+        self.obj.data.materials.append(mat)
 
 
 
