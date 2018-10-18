@@ -56,8 +56,11 @@ class Community_Panel(bpy.types.Panel):
         if scn.mhTabs == MESH_TAB:
             importHumanBox = layout.box()
             importHumanBox.label(text="Import human", icon="MESH_DATA")
-            importHumanBox.label(text="Helper geom:")
+            importHumanBox.label(text="Helper geometry:")
             importHumanBox.prop(scn, 'handle_helper', text="")
+            importHumanBox.separator()
+            importHumanBox.label(text="Blender unit equals:")
+            importHumanBox.prop(scn, 'MhScaleMode', text="")
             importHumanBox.separator()
             importHumanBox.operator("mh_community.import_body", text="Import human")
 
@@ -695,6 +698,11 @@ handleHelperItems.append( ("MASK", "Mask", "Mask helper geometry", 1) )
 handleHelperItems.append( ("NOTHING", "Leave be", "Leave helper geometry as is", 2) )
 handleHelperItems.append( ("DELETE", "Delete", "Delete helper geometry", 3))
 
+scaleModeItems = []
+scaleModeItems.append( ("METER", "Meter", "1 BU = 1 Meter", 1) )
+scaleModeItems.append( ("DECIMETER", "Decimeter", "1 BU = 1 Decimeter", 2) )
+scaleModeItems.append( ("CENTIMETER", "Centimeter", "1 BU = 1 Centimeter", 3) )
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
@@ -722,6 +730,7 @@ def register():
     bpy.types.Scene.MhJitterMinRetracement = FloatProperty(name='Min % Retracement', default=90, description="The percent of the move to be reversed to qualify as a jerk.")
 
     bpy.types.Scene.handle_helper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="Handle helpers", default="MASK")
+    bpy.types.Scene.MhScaleMode = bpy.props.EnumProperty(items=scaleModeItems, name="Scale mode", description="Scale mode", default="METER")
 
 def unregister():
     from bpy.utils import unregister_class
@@ -742,6 +751,7 @@ def unregister():
     del bpy.types.Scene.MhJitterMinRetracement
 
     del bpy.types.Scene.handle_helper
+    del bpy.types.Scene.MhScaleMode
 
 if __name__ == "__main__":
     unregister()

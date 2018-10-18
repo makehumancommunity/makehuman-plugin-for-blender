@@ -47,6 +47,15 @@ class ImportBodyBinary():
     def __init__(self):
         print("Import body")
         self.scaleFactor = 0.1
+
+        self.scaleMode = str(bpy.context.scene.MhScaleMode)
+
+        if self.scaleMode == "DECIMETER":
+            self.scaleFactor = 1.0
+
+        if self.scaleMode == "CENTIMETER":
+            self.scaleFactor = 10.0
+
         self.minimumZ = 10000.0
         GetBodyInfo(self.gotBodyInfo)
 
