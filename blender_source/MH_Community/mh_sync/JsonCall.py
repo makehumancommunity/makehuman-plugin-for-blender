@@ -31,9 +31,9 @@ class JsonCall():
     def initializeFromJson(self,jsonData):
 
         jsonData = jsonData.replace('\\', '\\\\') # allow windows paths in data
-        #print("JSON:\n")
-        #print(jsonData)
-        #print("")
+        print("JSON:\n")
+        print(jsonData)
+        print("")
 
         j = json.loads(jsonData)
         if not j:
@@ -197,23 +197,35 @@ class JsonCall():
         return ret.replace('\\', '\\\\') # allow windows paths in data
 
 
-    def send(self, host = "127.0.0.1", port = 12345):
+    def send(self, host = "127.0.0.1", port = 12345, expectBinaryResponse = False):
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect(('127.0.0.1', 12345))
         client.send(bytes(self.serialize(), 'utf-8'))
-     
-        data = ""
-    
-        while True:
-            buf = client.recv(1024)
-            if len(buf) > 0:
-                data += buf.strip().decode('utf-8')
-            else:
-                break
-    
-        if data:
-            return JsonCall(data)
-        else:            
-            return None;
+
+        data = None
+
+        if not expectBinaryResponse:
+            data = ""
+            while True:
+                buf = client.recv(1024)
+                if len(buf) > 0:
+                    data += buf.strip().decode('utf-8')
+                else:
+                    break
+            if data:
+                data = JsonCall(data)
+        else:
+            print("Getting binary response")
+            data = bytearray()
+            while True:
+                buf = client.recv(1024)
+                #print("Got " + str(len(buf)) + " bytes.")
+                if len(buf) > 0:
+                    data += bytearray(buf)
+                else:
+                    break
+            print("Total received length: " + str(len(data)))
+
+        return data
 
 

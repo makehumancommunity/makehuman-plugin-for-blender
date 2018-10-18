@@ -11,9 +11,9 @@ class SyncOperator:
         self.call = JsonCall();
         self.call.setFunction(operator)
 
-    def executeJsonCall(self):     
+    def executeJsonCall(self, expectBinaryResponse=False):
         print("About to send json:\n\n" + self.call.serialize())
-        json_obj = self.call.send()
+        json_obj = self.call.send(expectBinaryResponse=expectBinaryResponse)
         self.callback(json_obj)
 
     def callback(self,json_obj):
