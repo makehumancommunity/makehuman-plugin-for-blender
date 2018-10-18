@@ -7,7 +7,7 @@ bl_info = {
     "version": (0, 4),
     "blender": (2, 80, 0),
     "location": "View3D > Properties > MH",
-    "description": "Post import MakeHuman operations",
+    "description": "MakeHuman interactive operations",
     "wiki_url": "https://github.com/makehumancommunity/community-plugins/tree/master/blender_source/MH_Community",
     "category": "MakeHuman"}
 
@@ -36,6 +36,8 @@ else:
 import bpy
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 
+from .body_import_operator import BodyImportOperator
+
 #===============================================================================
 #===============================================================================
 class Community_Panel(bpy.types.Panel):
@@ -53,8 +55,17 @@ class Community_Panel(bpy.types.Panel):
 
         if scn.mhTabs == MESH_TAB:
             layout.label(text="Mesh Operations:", icon="MESH_DATA")
-            layout.operator("mh_community.sync_mh_mesh", text="Sync with MH")
-            layout.operator("mh_community.separate_eyes")
+
+            importHumanBox = layout.box()
+            importHumanBox.label(text="Import human")
+            importHumanBox.operator("mh_community.import_body", text="Import human")
+
+            layout.separator()
+
+            generalSyncBox = layout.box()
+            generalSyncBox.label(text="Various")
+            generalSyncBox.operator("mh_community.sync_mh_mesh", text="Sync with MH")
+            generalSyncBox.operator("mh_community.separate_eyes")
 
         elif scn.mhTabs == BONE_TAB:
             layout.label(text="Bone Operations:", icon="ARMATURE_DATA")
@@ -656,6 +667,7 @@ bpy.types.Armature.exportedUnits = bpy.props.StringProperty(
 classes =  (
     Community_Panel,
     MeshSyncOperator,
+    BodyImportOperator,
     SeparateEyesOperator,
     PoseSyncOperator,
     ExpressionTransOperator,
@@ -689,7 +701,7 @@ def register():
              (BONE_TAB  , "Bone / IK"  , "IK & other bone operators on Make Human skeletons"),
              (KINECT_TAB, "Kinect", "Motion Capture using Kinect V2 for converted Make Human meshes"),
         ),
-    default = BONE_TAB
+    default = MESH_TAB
 )
     bpy.types.Scene.MhNoLocation = BoolProperty(name="No Location Translation", description="Some Expressions have bone translation on locked bones.\nChecking this causes it to be cleared.  When false,\nALT-G will NOT clear these.", default=True)
     bpy.types.Scene.MhExprFilterTag = StringProperty(name="Tag", description="This is the tag to search for when getting expressions.\nBlank gets all expressions.", default="")
