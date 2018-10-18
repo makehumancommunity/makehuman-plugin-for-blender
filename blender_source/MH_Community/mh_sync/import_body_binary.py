@@ -42,7 +42,6 @@ class GetBodyFaces(SyncOperator):
     def callback(self, data):
         self.readyFunction(data)
 
-
 class ImportBodyBinary():
 
     def __init__(self):
@@ -109,6 +108,7 @@ class ImportBodyBinary():
         print(self.bodyInfo)
 
         self.faceCache = []
+        self.faceVertIndexes=[]
 
         iMax = int(len(data) / 4 / 4)
         assert (iMax == int(self.bodyInfo["numFaces"]))
@@ -119,20 +119,68 @@ class ImportBodyBinary():
 
             stride = 0;
             verts = [None, None, None, None]
+            vertIdxs = [None, None, None, None]
+
             while stride < 4:
                 sliceStart = i * 4 * 4  # 4-byte floats, three vertices
                 vertbytes = data[sliceStart + stride * 4:sliceStart + stride * 4 + 4]
                 vert = self.vertCache[int(struct.unpack("I", bytes(vertbytes))[0])]
                 verts[stride] = vert
+                vertIdxs[stride] = vert.index
                 stride = stride + 1
             face = self.bm.faces.new(verts)
             face.index = i
             face.smooth = True
             self.faceCache.append(face)
+            self.faceVertIndexes.append(vertIdxs)
             i = i + 1
 
         self.afterMeshData()
 
+    def handleHelpers(self):
+
+        all_joint_verts = []
+        all_helper_verts = []
+
+        for fg in self.bodyInfo["faceGroups"]:
+            name = fg["name"]
+            first = fg["first"]
+            last = fg["last"]
+
+            verts = []
+            i = first
+            while i < last:
+                vidxs = self.faceVertIndexes[i]
+                i = i + 1
+                x = 0
+                while x < 4:
+                    vert = vidxs[x]
+                    if not vert in verts:
+                        verts.append(vert)
+                    x = x + 1
+
+            if len(verts) > 0:
+                if name.startswith("joint-"):
+                    all_joint_verts.extend(verts)
+                if name.startswith("helper-"):
+                    all_helper_verts.extend(verts)
+                if self.helpers == "MASK":
+                    vgroup = self.obj.vertex_groups.new(name=name)
+                    vgroup.add(verts, 1.0, 'ADD')
+
+        if self.helpers == "DELETE":
+            if len(all_joint_verts) > 0:
+                # TODO: delete vertices
+                pass
+            if len(all_helper_verts) > 0:
+                # TODO: delete vertices
+                pass
+
+        if self.helpers == "MASK":
+            mask = self.obj.modifiers.new("Mask", 'MASK')
+            mask.vertex_group = "body"
+            mask.show_in_editmode = True
+            mask.show_on_cage = True
 
     def afterMeshData(self):
 
@@ -141,8 +189,12 @@ class ImportBodyBinary():
         self.bm.to_mesh(self.mesh)
         self.bm.free()
 
-        vgbody = self.obj.vertex_groups.new(name="body")
-        vgbody.add([ 0, 1, 2 ], 1.0, 'ADD')
+        self.helpers = str(bpy.context.scene.handle_helper)
+
+        if self.helpers != "NOTHING":
+            self.handleHelpers()
+
+        print(bpy.context.scene.handle_helper)
 
         del self.vertCache
         del self.faceCache

@@ -54,10 +54,11 @@ class Community_Panel(bpy.types.Panel):
         layout.prop(scn, 'mhTabs', expand=True)
 
         if scn.mhTabs == MESH_TAB:
-            layout.label(text="Mesh Operations:", icon="MESH_DATA")
-
             importHumanBox = layout.box()
-            importHumanBox.label(text="Import human")
+            importHumanBox.label(text="Import human", icon="MESH_DATA")
+            importHumanBox.label(text="Helper geom:")
+            importHumanBox.prop(scn, 'handle_helper', text="")
+            importHumanBox.separator()
             importHumanBox.operator("mh_community.import_body", text="Import human")
 
             layout.separator()
@@ -689,6 +690,11 @@ classes =  (
     Animation_items
 )
 
+handleHelperItems = []
+handleHelperItems.append( ("MASK", "Mask", "Mask helper geometry", 1) )
+handleHelperItems.append( ("NOTHING", "Leave be", "Leave helper geometry as is", 2) )
+handleHelperItems.append( ("DELETE", "Delete", "Delete helper geometry", 3))
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
@@ -715,6 +721,8 @@ def register():
     bpy.types.Scene.MhJitterMaxFrames = IntProperty(name='Max Duration', default=5, description="The maximum number of frames to detect that a bone quickly reversed itself.")
     bpy.types.Scene.MhJitterMinRetracement = FloatProperty(name='Min % Retracement', default=90, description="The percent of the move to be reversed to qualify as a jerk.")
 
+    bpy.types.Scene.handle_helper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="Handle helpers", default="MASK")
+
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
@@ -732,6 +740,8 @@ def unregister():
     
     del bpy.types.Scene.MhJitterMaxFrames
     del bpy.types.Scene.MhJitterMinRetracement
+
+    del bpy.types.Scene.handle_helper
 
 if __name__ == "__main__":
     unregister()
