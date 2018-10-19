@@ -6,58 +6,25 @@ bl_info = {
     "category": "Mesh",
 }
 
-from .sync_ops import SyncOperator
-
 import bpy
 import bmesh
 import pprint
 import struct
+import time
 
 from .material import *
+from .fetch_server_data import FetchServerData
 
 pp = pprint.PrettyPrinter(indent=4)
-
-class GetBodyInfo(SyncOperator):
-    def __init__(self, readyFunction):
-        super().__init__('getBodyMeshInfo')
-        self.readyFunction = readyFunction
-        self.executeJsonCall()
-
-    def callback(self, json_obj):
-        self.readyFunction(json_obj.data)
-
-class GetBodyMaterialInfo(SyncOperator):
-    def __init__(self, readyFunction):
-        super().__init__('getBodyMaterialInfo')
-        self.readyFunction = readyFunction
-        self.executeJsonCall()
-
-    def callback(self, json_obj):
-        self.readyFunction(json_obj.data)
-
-class GetBodyVertices(SyncOperator):
-    def __init__(self, readyFunction):
-        super().__init__('getBodyVerticesBinary')
-        self.readyFunction = readyFunction
-        self.executeJsonCall(expectBinaryResponse=True)
-
-    def callback(self, data):
-        self.readyFunction(data)
-
-class GetBodyFaces(SyncOperator):
-    def __init__(self, readyFunction):
-        super().__init__('getBodyFacesBinary')
-        self.readyFunction = readyFunction
-        self.executeJsonCall(expectBinaryResponse=True)
-
-    def callback(self, data):
-        self.readyFunction(data)
 
 class ImportBodyBinary():
 
     def __init__(self):
         print("Import body")
         self.scaleFactor = 0.1
+
+        self.startMillis = int(round(time.time() * 1000))
+        self.lastMillis = self.startMillis
 
         self.scaleMode = str(bpy.context.scene.MhScaleMode)
 
@@ -68,10 +35,15 @@ class ImportBodyBinary():
             self.scaleFactor = 10.0
 
         self.minimumZ = 10000.0
-        GetBodyInfo(self.gotBodyInfo)
+        FetchServerData('getBodyMeshInfo', self.gotBodyInfo)
+
+    def _profile(self, position="timestamp"):
+        currentMillis = int(round(time.time() * 1000))
+        print(position + ": " + str(currentMillis - self.startMillis) + " / " + str(currentMillis - self.lastMillis))
+        self.lastMillis = currentMillis
 
     def gotBodyInfo(self, data):
-        print(data)
+        #print(data)
         self.bodyInfo = data
 
         self.mesh = bpy.data.meshes.new("HumanBodyMesh")
@@ -85,9 +57,10 @@ class ImportBodyBinary():
         self.mesh = bpy.context.object.data
         self.bm = bmesh.new()
 
-        GetBodyVertices(self.gotVerticesData)
+        FetchServerData('getBodyVerticesBinary',self.gotVerticesData,True)
 
     def gotVerticesData(self, data):
+        self._profile()
         print(len(data))
         print(len(data) / 4 / 3)
         print(self.bodyInfo["numVertices"])
@@ -120,9 +93,10 @@ class ImportBodyBinary():
 
             i = i + 1
 
-        GetBodyFaces(self.gotFacesData)
+        FetchServerData('getBodyFacesBinary',self.gotFacesData,True)
 
     def gotFacesData(self, data):
+        self._profile()
         print(len(data))
         print(len(data) / 4 / 4)
         print(self.bodyInfo)
@@ -164,6 +138,7 @@ class ImportBodyBinary():
 
         for fg in self.bodyInfo["faceGroups"]:
             name = fg["name"]
+            self._profile(name)
             first = fg["first"]
             last = fg["last"]
 
@@ -178,6 +153,8 @@ class ImportBodyBinary():
                     if not vert in verts:
                         verts.append(vert)
                     x = x + 1
+
+            self._profile("after verts")
 
             if len(verts) > 0:
                 if name.startswith("joint-"):
@@ -217,7 +194,7 @@ class ImportBodyBinary():
         del self.vertCache
         del self.faceCache
 
-        GetBodyMaterialInfo(self.gotBodyMaterialInfo)
+        FetchServerData('getBodyMaterialInfo',self.gotBodyMaterialInfo)
 
     def gotBodyMaterialInfo(self, data):
         print(data)
