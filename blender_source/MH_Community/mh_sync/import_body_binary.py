@@ -44,9 +44,7 @@ class ImportBodyBinary():
         self.lastMillis = currentMillis
 
     def gotBodyInfo(self, data):
-        #print(data)
         self.bodyInfo = data
-
         self.mesh = bpy.data.meshes.new("HumanBodyMesh")
         self.obj = bpy.data.objects.new("HumanBody", self.mesh)
 
@@ -62,10 +60,6 @@ class ImportBodyBinary():
 
     def gotVerticesData(self, data):
         self._profile()
-        print(len(data))
-        print(len(data) / 4 / 3)
-        print(self.bodyInfo["numVertices"])
-
         self.vertCache = []
 
         iMax = int(len(data) / 4 / 3)
@@ -98,10 +92,6 @@ class ImportBodyBinary():
 
     def gotFacesData(self, data):
         self._profile()
-        print(len(data))
-        print(len(data) / 4 / 4)
-        print(self.bodyInfo)
-
         self.faceCache = []
         self.faceVertIndexes=[]
 
@@ -110,12 +100,9 @@ class ImportBodyBinary():
 
         i = 0
         while i < iMax:
-            sliceStart = i * 4 * 4  # 4-byte unsigned ints, four verts per face
-
             stride = 0;
             verts = [None, None, None, None]
             vertIdxs = [None, None, None, None]
-
             while stride < 4:
                 sliceStart = i * 4 * 4  # 4-byte floats, three vertices
                 vertbytes = data[sliceStart + stride * 4:sliceStart + stride * 4 + 4]
@@ -142,13 +129,8 @@ class ImportBodyBinary():
             self._profile(name)
             first = fg["first"]
             last = fg["last"]
-
-            verts = []
             faceSubSet = self.faceVertIndexes[first:last]
-
             verts = list(set(itertools.chain.from_iterable(faceSubSet)))
-
-            self._profile("after verts")
 
             if len(verts) > 0:
                 if name.startswith("joint-"):
