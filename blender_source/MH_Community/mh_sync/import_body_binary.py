@@ -11,6 +11,7 @@ import bmesh
 import pprint
 import struct
 import time
+import itertools
 
 from .material import *
 from .fetch_server_data import FetchServerData
@@ -143,16 +144,9 @@ class ImportBodyBinary():
             last = fg["last"]
 
             verts = []
-            i = first
-            while i < last:
-                vidxs = self.faceVertIndexes[i]
-                i = i + 1
-                x = 0
-                while x < 4:
-                    vert = vidxs[x]
-                    if not vert in verts:
-                        verts.append(vert)
-                    x = x + 1
+            faceSubSet = self.faceVertIndexes[first:last]
+
+            verts = list(set(itertools.chain.from_iterable(faceSubSet)))
 
             self._profile("after verts")
 
