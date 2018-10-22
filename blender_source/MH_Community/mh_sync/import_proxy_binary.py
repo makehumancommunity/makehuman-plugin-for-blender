@@ -15,16 +15,23 @@ import itertools
 
 from .material import *
 from .fetch_server_data import FetchServerData
-from .import_proxy_binary import ImportProxyBinary
 
 pp = pprint.PrettyPrinter(indent=4)
 
 ENABLE_PROFILING_OUTPUT = False
 
-class ImportBodyBinary():
+class ImportProxyBinary():
 
-    def __init__(self):
-        print("Import body")
+    def __init__(self, humanObject, humanName, proxyInfo, onFinished=None):
+        print("Import proxy")
+
+        pp.pprint(proxyInfo)
+
+        self.humanObject = humanObject
+        self.humanName = humanName
+        self.proxyInfo = proxyInfo
+        self.onFinished = onFinished
+
         self.scaleFactor = 0.1
 
         self.startMillis = int(round(time.time() * 1000))
@@ -39,24 +46,9 @@ class ImportBodyBinary():
             self.scaleFactor = 10.0
 
         self.minimumZ = 10000.0
-        FetchServerData('getBodyMeshInfo', self.gotBodyInfo)
 
-    def _profile(self, position="timestamp"):
-        if not ENABLE_PROFILING_OUTPUT:
-            return
-        currentMillis = int(round(time.time() * 1000))
-        print(position + ": " + str(currentMillis - self.startMillis) + " / " + str(currentMillis - self.lastMillis))
-        self.lastMillis = currentMillis
-
-    def gotBodyInfo(self, data):
-
-        #pp.pprint(data)
-
-        self.bodyInfo = data
-        self.mesh = bpy.data.meshes.new("HumanBodyMesh")
-        self.obj = bpy.data.objects.new("HumanBody", self.mesh)
-
-        self.obj.MhHuman = True
+        self.mesh = bpy.data.meshes.new(humanName + "." + self.proxyInfo["name"] + "Mesh")
+        self.obj = bpy.data.objects.new(humanName + "." + self.proxyInfo["name"], self.mesh)
 
         # TODO: Set more info, for example name of toon
 
@@ -67,15 +59,25 @@ class ImportBodyBinary():
 
         self.mesh = bpy.context.object.data
         self.bm = bmesh.new()
+        FetchServerData('getProxyVerticesBinary', self.gotVerticesData, expectBinary=True, params={ "uuid": self.proxyInfo["uuid"] })
 
-        FetchServerData('getBodyVerticesBinary',self.gotVerticesData,True)
+    def _profile(self, position="timestamp"):
+        if not ENABLE_PROFILING_OUTPUT:
+            return
+        currentMillis = int(round(time.time() * 1000))
+        print(position + ": " + str(currentMillis - self.startMillis) + " / " + str(currentMillis - self.lastMillis))
+        self.lastMillis = currentMillis
 
     def gotVerticesData(self, data):
         self._profile()
         self.vertCache = []
 
+        print("Len data: " + str(len(data)))
         iMax = int(len(data) / 4 / 3)
-        assert(iMax == int(self.bodyInfo["numVertices"]))
+        print("iMax: " + str(iMax))
+        print("numV: " + str(self.proxyInfo["numVertices"]))
+
+        assert(iMax == int(self.proxyInfo["numVertices"]))
 
         i = 0
         while i < iMax:
@@ -100,7 +102,7 @@ class ImportBodyBinary():
 
             i = i + 1
 
-        FetchServerData('getBodyFacesBinary',self.gotFacesData,True)
+        FetchServerData('getProxyFacesBinary',self.gotFacesData, expectBinary=True, params={ "uuid": self.proxyInfo["uuid"] })
 
     def gotFacesData(self, data):
         self._profile()
@@ -108,7 +110,7 @@ class ImportBodyBinary():
         self.faceVertIndexes=[]
 
         iMax = int(len(data) / 4 / 4)
-        assert (iMax == int(self.bodyInfo["numFaces"]))
+        assert (iMax == int(self.proxyInfo["numFaces"]))
 
         i = 0
         while i < iMax:
@@ -129,11 +131,12 @@ class ImportBodyBinary():
             self.faceVertIndexes.append(vertIdxs)
             i = i + 1
 
-        FetchServerData('getBodyTextureCoordsBinary', self.gotTextureCoords, True)
+        FetchServerData('getProxyTextureCoordsBinary', self.gotTextureCoords, expectBinary=True, params={ "uuid": self.proxyInfo["uuid"] })
+
 
     def gotTextureCoords(self, data):
         iMax = int(len(data) / 4 / 2)
-        assert (iMax == int(self.bodyInfo["numTextureCoords"]))
+        assert (iMax == int(self.proxyInfo["numTextureCoords"]))
 
         print("Number of texture coordinates: " + str(iMax))
 
@@ -149,11 +152,11 @@ class ImportBodyBinary():
             self.texco.append([u, v])
             i = i + 1
 
-        FetchServerData('getBodyFaceUVMappingsBinary', self.gotFaceUVMappings, True)
+        FetchServerData('getProxyFaceUVMappingsBinary', self.gotFaceUVMappings, expectBinary=True, params={ "uuid": self.proxyInfo["uuid"] })
 
     def gotFaceUVMappings(self, data):
         iMax = int(len(data) / 4 / 4)
-        assert (iMax == int(self.bodyInfo["numFaceUVMappings"]))
+        assert (iMax == int(self.proxyInfo["numFaceUVMappings"]))
 
         print("Number of face UV mappings: " + str(iMax))
 
@@ -229,38 +232,31 @@ class ImportBodyBinary():
 
         self.helpers = str(bpy.context.scene.handle_helper)
 
-        if self.helpers != "NOTHING":
-            self.handleHelpers()
+        #if self.helpers != "NOTHING":
+        #    self.handleHelpers()
 
         del self.vertCache
         del self.faceCache
         del self.texco
 
-        FetchServerData('getBodyMaterialInfo',self.gotBodyMaterialInfo)
+        FetchServerData('getProxyMaterialInfo', self.gotProxyMaterialInfo, expectBinary=False, params={ "uuid": self.proxyInfo["uuid"] })
 
-    def gotBodyMaterialInfo(self, data):
+    def gotProxyMaterialInfo(self, data):
         #print(data)
-        mat = createMHMaterial("testa", data)
+        mat = createMHMaterial(self.proxyInfo["name"], data)
         self.obj.data.materials.append(mat)
+        if not self.onFinished is None:
+            self.onFinished(self)
 
-        FetchServerData('getProxiesInfo', self.gotProxiesInfo)
 
-    def gotProxiesInfo(self, data):
-        self.proxiesInfo = data
-        self.proxiesToImport = data
-        self.nextProxyToImport = 0
-        self.importNextProxy()
 
-    def importNextProxy(self):
-        if self.nextProxyToImport >= len(self.proxiesToImport):
-            self.afterProxiesImported()
-            return
-        ImportProxyBinary(self.obj, "human", self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded)
 
-    def proxyLoaded(self, proxy):
-        print("Proxy loaded")
-        self.nextProxyToImport = self.nextProxyToImport + 1
-        self.importNextProxy()
 
-    def afterProxiesImported(self):
-        print("DONE!")
+
+
+
+
+
+
+
+
