@@ -14,7 +14,6 @@ class SyncOperator:
     def executeJsonCall(self, expectBinaryResponse=False, params=None):
         if not params is None:
             self.call.params = params
-        print("About to send json:\n\n" + self.call.serialize())
         json_obj = self.call.send(expectBinaryResponse=expectBinaryResponse)
         self.callback(json_obj)
 

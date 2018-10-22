@@ -15,6 +15,8 @@ import socket
 # makehuman data types (the encoding routine will croak on anything
 # that isn't scalar, array or dict)
 
+DEBUG_JSON = False
+
 class JsonCall():
 
 
@@ -23,6 +25,7 @@ class JsonCall():
         self.data = None
         self.function = "generic"
         self.error = ""
+        self.debug = DEBUG_JSON
 
         if jsonData:
             self.initializeFromJson(jsonData)
@@ -31,9 +34,11 @@ class JsonCall():
     def initializeFromJson(self,jsonData):
 
         jsonData = jsonData.replace('\\', '\\\\') # allow windows paths in data
-        #print("JSON:\n")
-        #print(jsonData)
-        #print("")
+
+        if DEBUG_JSON:
+            print("JSON raw string:\n")
+            print(jsonData)
+            print("")
 
         j = json.loads(jsonData)
         if not j:
@@ -194,6 +199,9 @@ class JsonCall():
 
         ret = ret + "  " + self.pythonValueToJsonValue(self.data,"data") + "\n}\n"
 
+        if DEBUG_JSON:
+            print("END RESULT JSON:\n")
+            print(ret.replace('\\', '\\\\'))
         return ret.replace('\\', '\\\\') # allow windows paths in data
 
 
