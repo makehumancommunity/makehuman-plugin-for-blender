@@ -27,6 +27,7 @@ class ImportBodyBinary():
         print("Import body")
 
         self.armature = None
+
         self.scaleFactor = 0.1
 
         self.startMillis = int(round(time.time() * 1000))
@@ -257,6 +258,10 @@ class ImportBodyBinary():
 
     def proxyLoaded(self, proxy):
         print("Proxy loaded")
+
+        if self.armature is None:
+            proxy.obj.parent = self.obj
+
         self.nextProxyToImport = self.nextProxyToImport + 1
         self.importNextProxy()
 
