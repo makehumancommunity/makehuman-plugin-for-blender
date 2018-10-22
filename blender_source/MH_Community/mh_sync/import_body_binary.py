@@ -18,6 +18,8 @@ from .fetch_server_data import FetchServerData
 
 pp = pprint.PrettyPrinter(indent=4)
 
+ENABLE_PROFILING_OUTPUT = False
+
 class ImportBodyBinary():
 
     def __init__(self):
@@ -39,6 +41,8 @@ class ImportBodyBinary():
         FetchServerData('getBodyMeshInfo', self.gotBodyInfo)
 
     def _profile(self, position="timestamp"):
+        if not ENABLE_PROFILING_OUTPUT:
+            return
         currentMillis = int(round(time.time() * 1000))
         print(position + ": " + str(currentMillis - self.startMillis) + " / " + str(currentMillis - self.lastMillis))
         self.lastMillis = currentMillis
@@ -67,7 +71,7 @@ class ImportBodyBinary():
 
         i = 0
         while i < iMax:
-            sliceStart = i * 4 * 3 # 4-byte floats, three vertices
+            sliceStart = i * 4 * 3 # 4-byte floats, three values per vertex
 
             xbytes = data[sliceStart:sliceStart + 4]
             ybytes = data[sliceStart + 4:sliceStart + 4 + 4]
@@ -104,7 +108,7 @@ class ImportBodyBinary():
             verts = [None, None, None, None]
             vertIdxs = [None, None, None, None]
             while stride < 4:
-                sliceStart = i * 4 * 4  # 4-byte floats, three vertices
+                sliceStart = i * 4 * 4  # 4-byte ints, four vertices per face
                 vertbytes = data[sliceStart + stride * 4:sliceStart + stride * 4 + 4]
                 vert = self.vertCache[int(struct.unpack("I", bytes(vertbytes))[0])]
                 verts[stride] = vert
@@ -116,6 +120,59 @@ class ImportBodyBinary():
             self.faceCache.append(face)
             self.faceVertIndexes.append(vertIdxs)
             i = i + 1
+
+        FetchServerData('getBodyTextureCoordsBinary', self.gotTextureCoords, True)
+
+    def gotTextureCoords(self, data):
+        iMax = int(len(data) / 4 / 2)
+        assert (iMax == int(self.bodyInfo["numTextureCoords"]))
+
+        print("Number of texture coordinates: " + str(iMax))
+
+        self.texco = []
+
+        i = 0
+        while i < iMax:
+            sliceStart = i * 4 * 2  # 4-byte floats, two values per coordinate
+            ubytes = data[sliceStart:sliceStart + 4]
+            vbytes = data[sliceStart + 4:sliceStart + 4 + 4]
+            u = struct.unpack("f", bytes(ubytes))[0]
+            v = struct.unpack("f", bytes(vbytes))[0]
+            self.texco.append([u, v])
+            i = i + 1
+
+        FetchServerData('getBodyFaceUVMappingsBinary', self.gotFaceUVMappings, True)
+
+    def gotFaceUVMappings(self, data):
+        iMax = int(len(data) / 4 / 4)
+        assert (iMax == int(self.bodyInfo["numFaceUVMappings"]))
+
+        print("Number of face UV mappings: " + str(iMax))
+
+        i = 0
+        faceTexco = []
+
+        while i < iMax:
+            stride = 0;
+            ftex = [None, None, None, None]
+            while stride < 4:
+                sliceStart = i * 4 * 4  # 4-byte ints, four mappings per face
+                mapbytes = data[sliceStart + stride * 4:sliceStart + stride * 4 + 4]
+                idx = struct.unpack("I", bytes(mapbytes))[0]
+                ftex[stride] = self.texco[int(idx)]
+                stride = stride + 1
+            faceTexco.append(ftex)
+            i = i + 1
+
+        uv_layer = self.bm.loops.layers.uv.verify()
+        self.bm.faces.layers.tex.verify()
+
+        for face in self.bm.faces:
+            for i, loop in enumerate(face.loops):
+                uv = loop[uv_layer].uv
+                texco = faceTexco[face.index][i]
+                uv[0] = texco[0]
+                uv[1] = texco[1]
 
         self.afterMeshData()
 
@@ -169,11 +226,12 @@ class ImportBodyBinary():
 
         del self.vertCache
         del self.faceCache
+        del self.texco
 
         FetchServerData('getBodyMaterialInfo',self.gotBodyMaterialInfo)
 
     def gotBodyMaterialInfo(self, data):
-        print(data)
+        #print(data)
         mat = createMHMaterial("testa", data)
         self.obj.data.materials.append(mat)
 
