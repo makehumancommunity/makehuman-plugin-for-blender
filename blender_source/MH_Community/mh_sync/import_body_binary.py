@@ -25,6 +25,8 @@ class ImportBodyBinary():
 
     def __init__(self):
         print("Import body")
+
+        self.armature = None
         self.scaleFactor = 0.1
 
         self.startMillis = int(round(time.time() * 1000))
@@ -259,4 +261,11 @@ class ImportBodyBinary():
         self.importNextProxy()
 
     def afterProxiesImported(self):
+
+        for ob in bpy.context.selected_objects:
+            ob.select = False
+
+        self.obj.select = True
+
         print("DONE!")
+
