@@ -223,7 +223,8 @@ class JsonCall():
             if data:
                 data = JsonCall(data)
         else:
-            print("Getting binary response")
+            if DEBUG_JSON:
+                print("Getting binary response")
             data = bytearray()
             while True:
                 buf = client.recv(1024)
@@ -232,7 +233,8 @@ class JsonCall():
                     data += bytearray(buf)
                 else:
                     break
-            print("Total received length: " + str(len(data)))
+            if DEBUG_JSON:
+                print("Total received length: " + str(len(data)))
 
         return data
 

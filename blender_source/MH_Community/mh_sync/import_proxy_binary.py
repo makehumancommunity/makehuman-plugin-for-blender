@@ -25,7 +25,7 @@ class ImportProxyBinary():
     def __init__(self, humanObject, humanName, proxyInfo, onFinished=None):
         print("Import proxy")
 
-        pp.pprint(proxyInfo)
+        #pp.pprint(proxyInfo)
 
         self.humanObject = humanObject
         self.humanName = humanName
@@ -72,10 +72,7 @@ class ImportProxyBinary():
         self._profile()
         self.vertCache = []
 
-        print("Len data: " + str(len(data)))
         iMax = int(len(data) / 4 / 3)
-        print("iMax: " + str(iMax))
-        print("numV: " + str(self.proxyInfo["numVertices"]))
 
         assert(iMax == int(self.proxyInfo["numVertices"]))
 
@@ -138,8 +135,6 @@ class ImportProxyBinary():
         iMax = int(len(data) / 4 / 2)
         assert (iMax == int(self.proxyInfo["numTextureCoords"]))
 
-        print("Number of texture coordinates: " + str(iMax))
-
         self.texco = []
 
         i = 0
@@ -157,8 +152,6 @@ class ImportProxyBinary():
     def gotFaceUVMappings(self, data):
         iMax = int(len(data) / 4 / 4)
         assert (iMax == int(self.proxyInfo["numFaceUVMappings"]))
-
-        print("Number of face UV mappings: " + str(iMax))
 
         i = 0
         faceTexco = []

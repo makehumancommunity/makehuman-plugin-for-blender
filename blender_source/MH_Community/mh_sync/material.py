@@ -6,13 +6,13 @@ import os
 
 def _createMHImageTextureNode(nodes, imagePathAbsolute):
     fn = os.path.basename(imagePathAbsolute)
-    print(bpy.data.images)
+    #print(bpy.data.images)
     if fn in bpy.data.images:
         print("image existed")
         image = bpy.data.images[fn]
     else:
         image = bpy.data.images.load(imagePathAbsolute)
-    print(image)
+    #print(image)
 
     texnode = nodes.new("ShaderNodeTexImage")
     texnode.image = image
@@ -46,15 +46,15 @@ def createMHMaterial(name, materialSettingsHash, ifExists="create new"):
     principled = nodes.new("ShaderNodeBsdfPrincipled")
     principled.inputs['Roughness'].default_value = 1.0 - materialSettingsHash["shininess"]
 
-    print(principled)
-    for i in principled.inputs:
-        print(i)
+    #print(principled)
+    #for i in principled.inputs:
+    #    print(i)
 
     diffuse = materialSettingsHash["diffuseTexture"]
     if not diffuse is None and diffuse != "":
         diffuseTexture = _createMHImageTextureNode(nodes, diffuse)
         diffuseTexture.location = (x-500, y+100)
-        print(diffuseTexture)
+
         diffuseAlphaMix = nodes.new("ShaderNodeMixShader")
         diffuseAlphaMix.location = (x+100, y+50)
         principled.location = (x-200, y-50)

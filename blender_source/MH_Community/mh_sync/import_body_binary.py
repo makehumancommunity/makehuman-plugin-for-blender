@@ -135,8 +135,6 @@ class ImportBodyBinary():
         iMax = int(len(data) / 4 / 2)
         assert (iMax == int(self.bodyInfo["numTextureCoords"]))
 
-        print("Number of texture coordinates: " + str(iMax))
-
         self.texco = []
 
         i = 0
@@ -154,8 +152,6 @@ class ImportBodyBinary():
     def gotFaceUVMappings(self, data):
         iMax = int(len(data) / 4 / 4)
         assert (iMax == int(self.bodyInfo["numFaceUVMappings"]))
-
-        print("Number of face UV mappings: " + str(iMax))
 
         i = 0
         faceTexco = []
