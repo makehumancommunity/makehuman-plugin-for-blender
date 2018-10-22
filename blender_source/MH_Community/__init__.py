@@ -732,6 +732,8 @@ def register():
     bpy.types.Scene.handle_helper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="Handle helpers", default="MASK")
     bpy.types.Scene.MhScaleMode = bpy.props.EnumProperty(items=scaleModeItems, name="Scale mode", description="Scale mode", default="METER")
 
+    bpy.types.Object.MhHuman = BoolProperty(default=False)
+
 def unregister():
     from bpy.utils import unregister_class
     for cls in reversed(classes):
