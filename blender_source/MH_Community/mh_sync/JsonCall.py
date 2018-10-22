@@ -31,9 +31,9 @@ class JsonCall():
     def initializeFromJson(self,jsonData):
 
         jsonData = jsonData.replace('\\', '\\\\') # allow windows paths in data
-        print("JSON:\n")
-        print(jsonData)
-        print("")
+        #print("JSON:\n")
+        #print(jsonData)
+        #print("")
 
         j = json.loads(jsonData)
         if not j:
