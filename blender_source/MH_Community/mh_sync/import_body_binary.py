@@ -13,6 +13,7 @@ import struct
 import time
 import itertools
 
+from mathutils import Matrix, Vector
 from .material import *
 from .fetch_server_data import FetchServerData
 from .import_proxy_binary import ImportProxyBinary
@@ -26,7 +27,7 @@ class ImportBodyBinary():
     def __init__(self):
         print("Import body")
 
-        self.armature = None
+        self.armatureObject = None
 
         self.scaleFactor = 0.1
 
@@ -84,19 +85,19 @@ class ImportBodyBinary():
         while i < iMax:
             sliceStart = i * 4 * 3 # 4-byte floats, three values per vertex
 
+            # Coordinate order from MH is XZY
             xbytes = data[sliceStart:sliceStart + 4]
-            ybytes = data[sliceStart + 4:sliceStart + 4 + 4]
-            zbytes = data[sliceStart + 4 + 4:sliceStart + 4 + 4 +4]
+            zbytes = data[sliceStart + 4:sliceStart + 4 + 4]
+            ybytes = data[sliceStart + 4 + 4:sliceStart + 4 + 4 +4]
 
             x = struct.unpack("f", bytes(xbytes))[0] * self.scaleFactor
-            y = struct.unpack("f", bytes(ybytes))[0] * self.scaleFactor
             z = struct.unpack("f", bytes(zbytes))[0] * self.scaleFactor
+            y = struct.unpack("f", bytes(ybytes))[0] * self.scaleFactor
 
             if z < self.minimumZ:
                 self.minimumZ = z
 
-            # Coordinate order from MH is XZY
-            vert = self.bm.verts.new( (x, z, y) )
+            vert = self.bm.verts.new( (x, -y, z) )
             vert.index = i
 
             self.vertCache.append(vert)
@@ -242,7 +243,7 @@ class ImportBodyBinary():
         mat = createMHMaterial("testa", data)
         self.obj.data.materials.append(mat)
 
-        FetchServerData('getProxiesInfo', self.gotProxiesInfo)
+        FetchServerData('getSkeleton', self.gotSkeleton)
 
     def gotProxiesInfo(self, data):
         self.proxiesInfo = data
@@ -259,18 +260,90 @@ class ImportBodyBinary():
     def proxyLoaded(self, proxy):
         print("Proxy loaded")
 
-        if self.armature is None:
+        if self.armatureObject is None:
             proxy.obj.parent = self.obj
+        else:
+            proxy.obj.parent = self.armatureObject
 
         self.nextProxyToImport = self.nextProxyToImport + 1
         self.importNextProxy()
 
     def afterProxiesImported(self):
+        print("Proxies imported")
+        self.finalize()
 
+    def _deselectAll(self):
         for ob in bpy.context.selected_objects:
             ob.select = False
 
-        self.obj.select = True
+    def _addBone(self, boneInfo, parentBone=None):
+        bone = self.armature.edit_bones.new(boneInfo["name"])
+
+        head = boneInfo["headPos"]
+        tail = boneInfo["tailPos"]
+
+        scale = self.scaleFactor
+
+        # Z up
+        vHead = Vector( (head[0] * scale, -head[2] * scale, head[1] * scale) )
+        vTail = Vector( (tail[0] * scale, -tail[2] * scale, tail[1] * scale) )
+
+        #offset = Vector(self.skeletonOffset) * scale
+        #bone.head = vHead + offset
+        #bone.tail = vTail + offset
+
+        bone.head = vHead
+        bone.tail = vTail
+
+        if not parentBone is None:
+            bone.parent = parentBone
+
+        if "matrix" in boneInfo.keys():
+            # from MHX2 exporter:
+            mat = Matrix(boneInfo["matrix"])
+            nmat = Matrix((mat[0], -mat[2], mat[1])).to_3x3().to_4x4()
+            nmat.col[3] = bone.matrix.col[3]
+            bone.matrix = nmat
+        else:
+            if "roll" in boneInfo.keys():
+                bone.roll = boneInfo["roll"]
+
+        for child in boneInfo["children"]:
+            self._addBone(child, bone)
+
+    def gotSkeleton(self, data):
+
+        if data["name"] != "none" and len(data["bones"]) > 0:
+            self._deselectAll()
+
+            self.armature = bpy.data.armatures.new("human.armature")
+            self.armatureObject = bpy.data.objects.new("human.armature", self.armature)
+
+            scene = bpy.context.scene
+            scene.objects.link(self.armatureObject)
+            scene.objects.active = self.armatureObject
+
+            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+
+            self.skeletonOffset = data["offset"]
+
+            for boneInfo in data["bones"]:
+                self._addBone(boneInfo)
+
+            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+            self.obj.parent = self.armatureObject
+
+        FetchServerData('getProxiesInfo', self.gotProxiesInfo)
+
+    def finalize(self):
+
+        self._deselectAll()
+
+        if self.armatureObject is None:
+            self.obj.select = True
+        else:
+            self.armatureObject.select = True
 
         print("DONE!")
 

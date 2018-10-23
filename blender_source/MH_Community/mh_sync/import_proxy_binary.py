@@ -80,9 +80,10 @@ class ImportProxyBinary():
         while i < iMax:
             sliceStart = i * 4 * 3 # 4-byte floats, three values per vertex
 
+            # Coordinate order from MH is XZY
             xbytes = data[sliceStart:sliceStart + 4]
-            ybytes = data[sliceStart + 4:sliceStart + 4 + 4]
-            zbytes = data[sliceStart + 4 + 4:sliceStart + 4 + 4 +4]
+            zbytes = data[sliceStart + 4:sliceStart + 4 + 4]
+            ybytes = data[sliceStart + 4 + 4:sliceStart + 4 + 4 +4]
 
             x = struct.unpack("f", bytes(xbytes))[0] * self.scaleFactor
             y = struct.unpack("f", bytes(ybytes))[0] * self.scaleFactor
@@ -91,8 +92,8 @@ class ImportProxyBinary():
             if z < self.minimumZ:
                 self.minimumZ = z
 
-            # Coordinate order from MH is XZY
-            vert = self.bm.verts.new( (x, z, y) )
+
+            vert = self.bm.verts.new( (x, -y, z) )
             vert.index = i
 
             self.vertCache.append(vert)
