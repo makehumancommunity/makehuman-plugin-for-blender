@@ -18,18 +18,23 @@ def _createMHImageTextureNode(nodes, imagePathAbsolute):
     texnode.image = image
     return texnode
 
-def createMHMaterial(name, materialSettingsHash, ifExists="create new"):
+def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
 
     x = 0
     y = 400
 
     mat = None
-    if ifExists == "update existing" or ifExists == "use existing":
+    if ifExists == "OVERWRITE" or ifExists == "REUSE":
         mat = bpy.data.materials.get(name)
-        if not mat is None and ifExists == "use existing":
+        if not mat is None and ifExists == "REUSE":
+            print("Resuing existing material " + name)
             return mat
+        else:
+            if not mat is None:
+                print("Overwriting existing material " + name)
 
     if mat is None:
+        print("Creating new material " + name)
         mat = bpy.data.materials.new(name)
 
     mat.use_nodes = True

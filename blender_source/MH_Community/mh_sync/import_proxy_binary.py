@@ -32,6 +32,9 @@ class ImportProxyBinary():
         self.proxyInfo = proxyInfo
         self.onFinished = onFinished
 
+        self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
+        self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
+
         self.scaleFactor = 0.1
 
         self.startMillis = int(round(time.time() * 1000))
@@ -224,11 +227,6 @@ class ImportProxyBinary():
         self.bm.to_mesh(self.mesh)
         self.bm.free()
 
-        self.helpers = str(bpy.context.scene.handle_helper)
-
-        #if self.helpers != "NOTHING":
-        #    self.handleHelpers()
-
         del self.vertCache
         del self.faceCache
         del self.texco
@@ -236,8 +234,11 @@ class ImportProxyBinary():
         FetchServerData('getProxyMaterialInfo', self.gotProxyMaterialInfo, expectBinary=False, params={ "uuid": self.proxyInfo["uuid"] })
 
     def gotProxyMaterialInfo(self, data):
-        #print(data)
-        mat = createMHMaterial(self.proxyInfo["name"], data)
+        matname = data["name"]
+        if self.prefixMaterial:
+            matname = self.humanName + "." + matname
+
+        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
         self.obj.data.materials.append(mat)
         if not self.onFinished is None:
             self.onFinished(self)

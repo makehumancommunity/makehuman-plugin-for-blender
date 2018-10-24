@@ -27,6 +27,8 @@ class ImportBodyBinary():
     def __init__(self):
         print("Import body")
 
+        self.name = "human"
+
         self.armatureObject = None
 
         self.scaleFactor = 0.1
@@ -35,6 +37,8 @@ class ImportBodyBinary():
         self.lastMillis = self.startMillis
 
         self.scaleMode = str(bpy.context.scene.MhScaleMode)
+        self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
+        self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
 
         if self.scaleMode == "DECIMETER":
             self.scaleFactor = 1.0
@@ -57,8 +61,14 @@ class ImportBodyBinary():
         #pp.pprint(data)
 
         self.bodyInfo = data
-        self.mesh = bpy.data.meshes.new("HumanBodyMesh")
-        self.obj = bpy.data.objects.new("HumanBody", self.mesh)
+
+        if "name" in data:
+            name = data["name"]
+            if not name is None and name != "untitled" and name != "":
+                self.name = name
+
+        self.mesh = bpy.data.meshes.new(self.name + "BodyMesh")
+        self.obj = bpy.data.objects.new(self.name + "Body", self.mesh)
 
         self.obj.MhHuman = True
 
@@ -229,7 +239,7 @@ class ImportBodyBinary():
         self.bm.to_mesh(self.mesh)
         self.bm.free()
 
-        self.helpers = str(bpy.context.scene.handle_helper)
+        self.helpers = str(bpy.context.scene.MhHandleHelper)
 
         if self.helpers != "NOTHING":
             self.handleHelpers()
@@ -241,8 +251,11 @@ class ImportBodyBinary():
         FetchServerData('getBodyMaterialInfo',self.gotBodyMaterialInfo)
 
     def gotBodyMaterialInfo(self, data):
-        #print(data)
-        mat = createMHMaterial("testa", data)
+        matname = data["name"]
+        if self.prefixMaterial:
+            matname = self.name + "." + matname
+
+        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
         self.obj.data.materials.append(mat)
 
         FetchServerData('getSkeleton', self.gotSkeleton)
@@ -257,7 +270,7 @@ class ImportBodyBinary():
         if self.nextProxyToImport >= len(self.proxiesToImport):
             self.afterProxiesImported()
             return
-        ImportProxyBinary(self.obj, "human", self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded)
+        ImportProxyBinary(self.obj, self.name, self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded)
 
     def proxyLoaded(self, proxy):
         print("Proxy loaded")
@@ -318,8 +331,8 @@ class ImportBodyBinary():
         if data["name"] != "none" and len(data["bones"]) > 0:
             self._deselectAll()
 
-            self.armature = bpy.data.armatures.new("human.armature")
-            self.armatureObject = bpy.data.objects.new("human.armature", self.armature)
+            self.armature = bpy.data.armatures.new(self.name + "Armature")
+            self.armatureObject = bpy.data.objects.new(self.name, self.armature)
 
             scene = bpy.context.scene
             scene.objects.link(self.armatureObject)
