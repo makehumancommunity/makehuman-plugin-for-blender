@@ -40,6 +40,8 @@ class ImportBodyBinary():
         self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
         self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
 
+        self.importWhat = str(bpy.context.scene.MhImportWhat)
+
         if self.scaleMode == "DECIMETER":
             self.scaleFactor = 1.0
 
@@ -270,7 +272,24 @@ class ImportBodyBinary():
         if self.nextProxyToImport >= len(self.proxiesToImport):
             self.afterProxiesImported()
             return
-        ImportProxyBinary(self.obj, self.name, self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded)
+
+        if self.importWhat == "EVERYTHING":
+            ImportProxyBinary(self.obj, self.name, self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded)
+
+        if self.importWhat == "BODYPARTS":
+            info = self.proxiesInfo[self.nextProxyToImport]
+            type = info["type"]
+            if type == "Clothes":
+                print("Skipping proxy " + info["name"] + " because it is of type clothes, and only bodyparts are requested for load")
+                self.nextProxyToImport = self.nextProxyToImport + 1
+                self.importNextProxy()
+                return
+            else:
+                ImportProxyBinary(self.obj, self.name, info, self.proxyLoaded)
+
+        if self.importWhat == "BODY":
+            self.afterProxiesImported()
+
 
     def proxyLoaded(self, proxy):
         print("Proxy loaded")
