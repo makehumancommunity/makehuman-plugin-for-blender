@@ -298,6 +298,8 @@ class ImportBodyBinary():
             proxy.obj.parent = self.obj
         else:
             proxy.obj.parent = self.armatureObject
+            modifier = proxy.obj.modifiers.new("Armature", 'ARMATURE')
+            modifier.object = self.armatureObject
 
         self.nextProxyToImport = self.nextProxyToImport + 1
         self.importNextProxy()
@@ -367,6 +369,12 @@ class ImportBodyBinary():
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
             self.obj.parent = self.armatureObject
+
+            modifier = self.obj.modifiers.new("Armature", 'ARMATURE')
+            modifier.object = self.armatureObject
+
+            scene.objects.active = self.obj
+            bpy.ops.object.modifier_move_up(modifier="Armature")
 
         FetchServerData('getProxiesInfo', self.gotProxiesInfo)
 
