@@ -192,10 +192,12 @@ class ImportBodyBinary():
         for fg in self.bodyInfo["faceGroups"]:
             name = fg["name"]
             self._profile(name)
-            first = fg["first"]
-            last = fg["last"]
-            faceSubSet = self.faceVertIndexes[first:last]
-            verts = list(set(itertools.chain.from_iterable(faceSubSet)))
+            verts = []
+            for startStop in fg["fgStartStops"]:
+                first = startStop[0]
+                last = startStop[1] + 1
+                faceSubSet = self.faceVertIndexes[first:last]
+                verts.extend(list(set(itertools.chain.from_iterable(faceSubSet))))
 
             if len(verts) > 0:
                 if name.startswith("joint-"):
