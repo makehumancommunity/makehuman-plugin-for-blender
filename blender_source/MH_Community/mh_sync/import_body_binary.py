@@ -373,8 +373,9 @@ class ImportBodyBinary():
             modifier = self.obj.modifiers.new("Armature", 'ARMATURE')
             modifier.object = self.armatureObject
 
-            scene.objects.active = self.obj
-            bpy.ops.object.modifier_move_up(modifier="Armature")
+            if self.helpers == "MASK":
+                scene.objects.active = self.obj
+                bpy.ops.object.modifier_move_up(modifier="Armature")
 
         FetchServerData('getProxiesInfo', self.gotProxiesInfo)
 
