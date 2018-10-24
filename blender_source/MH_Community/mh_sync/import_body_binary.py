@@ -73,6 +73,7 @@ class ImportBodyBinary():
         self.obj = bpy.data.objects.new(self.name + "Body", self.mesh)
 
         self.obj.MhHuman = True
+        self.obj.MhObjectType = "Basemesh"
 
         # TODO: Set more info, for example name of toon
 
@@ -354,6 +355,7 @@ class ImportBodyBinary():
 
             self.armature = bpy.data.armatures.new(self.name + "Armature")
             self.armatureObject = bpy.data.objects.new(self.name, self.armature)
+            self.armatureObject.MhObjectType = "Skeleton"
 
             scene = bpy.context.scene
             scene.objects.link(self.armatureObject)

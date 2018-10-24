@@ -775,6 +775,7 @@ def register():
 
     bpy.types.Object.MhProxyName = StringProperty(name="Proxy name", description="This is what the proxy is called in MakeHuman", default="")
     bpy.types.Object.MhProxyUUID = StringProperty(name="Proxy UUID", description="This is the UUID of the proxy in MakeHuman", default="")
+    bpy.types.Object.MhObjectType = StringProperty(name="Object type", description="This is what type of MakeHuman object this is (such as Clothes, Eyes...)", default="")
 
     # In case MHX2 isn't loaded
     bpy.types.Object.MhHuman = BoolProperty(default=False)

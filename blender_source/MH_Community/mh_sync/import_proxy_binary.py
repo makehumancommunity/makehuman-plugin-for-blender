@@ -53,6 +53,11 @@ class ImportProxyBinary():
         self.mesh = bpy.data.meshes.new(humanName + "." + self.proxyInfo["name"] + "Mesh")
         self.obj = bpy.data.objects.new(humanName + "." + self.proxyInfo["name"], self.mesh)
 
+        self.obj.MhHuman = False
+        self.obj.MhObjectType = proxyInfo["type"]
+        self.obj.MhProxyUUID = proxyInfo["uuid"]
+        self.obj.MhProxyName = proxyInfo["name"]
+
         # TODO: Set more info, for example name of toon
 
         scene = bpy.context.scene
