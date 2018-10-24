@@ -57,10 +57,29 @@ class Community_Panel(bpy.types.Panel):
             importHumanBox = layout.box()
             importHumanBox.label(text="Import human", icon="MESH_DATA")
             importHumanBox.label(text="Helper geometry:")
-            importHumanBox.prop(scn, 'handle_helper', text="")
+            importHumanBox.prop(scn, 'MhHandleHelper', text="")
+
             importHumanBox.separator()
             importHumanBox.label(text="Blender unit equals:")
             importHumanBox.prop(scn, 'MhScaleMode', text="")
+
+            importHumanBox.separator()
+            importHumanBox.label(text="Body parts / clothes:")
+            importHumanBox.prop(scn, 'MhImportWhat', text="")
+            importHumanBox.prop(scn, 'MhPrefixProxy', text="Prefix with toon")
+
+            importHumanBox.separator()
+            importHumanBox.label(text="Materials:")
+            importHumanBox.prop(scn, 'MhHandleMaterials', text="")
+            importHumanBox.prop(scn, 'MhPrefixMaterial', text="Prefix with toon")
+
+            importHumanBox.separator()
+            importHumanBox.label(text="Rig / posing:")
+            importHumanBox.prop(scn, 'MhImportRig', text="Import rig")
+            importHumanBox.prop(scn, 'MhHandIK', text="Hand IK")
+            importHumanBox.prop(scn, 'MhFootIK', text="Foot IK")
+            importHumanBox.prop(scn, 'MhHideFK', text="Hide FK")
+
             importHumanBox.separator()
             importHumanBox.operator("mh_community.import_body", text="Import human")
 
@@ -703,6 +722,16 @@ scaleModeItems.append( ("METER", "Meter", "1 BU = 1 Meter", 1) )
 scaleModeItems.append( ("DECIMETER", "Decimeter", "1 BU = 1 Decimeter", 2) )
 scaleModeItems.append( ("CENTIMETER", "Centimeter", "1 BU = 1 Centimeter", 3) )
 
+importProxyItems = []
+importProxyItems.append( ("BODY", "Only import body", "Only import the base mesh body", 1) )
+importProxyItems.append( ("BODYPARTS", "Body + bodyparts", "Only import the body and body parts such as eyes and hair", 2) )
+importProxyItems.append( ("EVERYTHING", "Body, parts, clothes", "Import everything", 3) )
+
+handleMaterialsItems = []
+handleMaterialsItems.append( ("CREATENEW", "Create new", "Create a new material with a different name", 1) )
+handleMaterialsItems.append( ("REUSE", "Use existing", "Use the existing material as it is", 2) )
+handleMaterialsItems.append( ("OVERWRITE", "Overwrite", "Overwrite the existing material", 3) )
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
@@ -729,9 +758,25 @@ def register():
     bpy.types.Scene.MhJitterMaxFrames = IntProperty(name='Max Duration', default=5, description="The maximum number of frames to detect that a bone quickly reversed itself.")
     bpy.types.Scene.MhJitterMinRetracement = FloatProperty(name='Min % Retracement', default=90, description="The percent of the move to be reversed to qualify as a jerk.")
 
-    bpy.types.Scene.handle_helper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="Handle helpers", default="MASK")
-    bpy.types.Scene.MhScaleMode = bpy.props.EnumProperty(items=scaleModeItems, name="Scale mode", description="Scale mode", default="METER")
+    # Properties for human importer
+    bpy.types.Scene.MhHandleHelper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="How to handle helpers (such as clothes helper geometry and joint cubes)", default="MASK")
+    bpy.types.Scene.MhScaleMode = bpy.props.EnumProperty(items=scaleModeItems, name="Scale mode", description="How long in real world terms is a blender unit?", default="METER")
 
+    bpy.types.Scene.MhImportWhat = bpy.props.EnumProperty(items=importProxyItems, name="Import what", description="What to import", default="EVERYTHING")
+    bpy.types.Scene.MhPrefixProxy = BoolProperty(name="Prefix proxy names", description="Give all extra meshes (such as hair, clothes..) names that start with the name of the imported toon", default=True)
+
+    bpy.types.Scene.MhHandleMaterials = bpy.props.EnumProperty(items=handleMaterialsItems, name="When material exists", description="What to do if a material with the same name already exists", default="REUSE")
+    bpy.types.Scene.MhPrefixMaterial = BoolProperty(name="Prefix material names", description="Give all materials a name that starts with the name of the imported toon?", default=False)
+
+    bpy.types.Scene.MhImportRig = BoolProperty(name="Import rig", description="Import the rig if it is set in MH", default=True)
+    bpy.types.Scene.MhHandIK = BoolProperty(name="Hand IK", description="Create hand IK controls", default=False)
+    bpy.types.Scene.MhFootIK = BoolProperty(name="Foot IK", description="Create foot IK controls", default=False)
+    bpy.types.Scene.MhHideFK = BoolProperty(name="Hide FK", description="Hide FK bones that are part of an IK chain", default=True)
+
+    bpy.types.Object.MhProxyName = StringProperty(name="Proxy name", description="This is what the proxy is called in MakeHuman", default="")
+    bpy.types.Object.MhProxyUUID = StringProperty(name="Proxy UUID", description="This is the UUID of the proxy in MakeHuman", default="")
+
+    # In case MHX2 isn't loaded
     bpy.types.Object.MhHuman = BoolProperty(default=False)
 
 def unregister():
