@@ -195,7 +195,7 @@ class ImportBodyBinary():
             verts = []
             for startStop in fg["fgStartStops"]:
                 first = startStop[0]
-                last = startStop[1] + 1
+                last = startStop[1]
                 faceSubSet = self.faceVertIndexes[first:last]
                 verts.extend(list(set(itertools.chain.from_iterable(faceSubSet))))
 
