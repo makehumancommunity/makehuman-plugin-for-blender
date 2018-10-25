@@ -23,7 +23,7 @@ ENABLE_PROFILING_OUTPUT = False
 class ImportProxyBinary():
 
     def __init__(self, humanObject, humanName, proxyInfo, onFinished=None):
-        print("Import proxy")
+        print("Importing proxy: " + proxyInfo["name"])
 
         #pp.pprint(proxyInfo)
 

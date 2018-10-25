@@ -26,22 +26,24 @@ class ImportWeighting():
 
     def __init__(self, objectToWorkWith, skeletonObject=None, onFinished=None):
 
-        print("Import weighting")
+        print("Import weighting for: " + objectToWorkWith.name)
         self.myObject = objectToWorkWith
         self.skeletonObj = skeletonObject
         self.onFinished = onFinished
         self.processedVertices = 0
-        self.debug = True
+        self.debug = False
 
         self.isBaseMesh = (self.myObject.MhObjectType == "Basemesh")
-        print("Mesh name: " + self.myObject.name)
-        print("isBaseMesh: " + str(self.isBaseMesh))
+
+        if self.debug:
+            print("isBaseMesh: " + str(self.isBaseMesh))
 
         if self.isBaseMesh:
             FetchServerData('getBodyWeightInfo', self.gotWeightInfo)
         else:
             self.uuid = self.myObject.MhProxyUUID
-            print("Mesh uuid: " + self.uuid)
+            if self.debug:
+                print("Mesh uuid: " + self.uuid)
             FetchServerData('getProxyWeightInfo', self.gotWeightInfo, params={ "uuid": self.uuid })
 
     def _profile(self, position="timestamp"):

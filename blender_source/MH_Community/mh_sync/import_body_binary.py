@@ -369,7 +369,6 @@ class ImportBodyBinary():
             self.afterProxiesImported()
 
     def proxyLoaded(self, proxy):
-        print("Proxy loaded")
 
         if proxy.obj.MhObjectType == "Proxymeshes":
             self.hasProxy = True
@@ -387,7 +386,7 @@ class ImportBodyBinary():
         self.importNextProxy()
 
     def afterProxiesImported(self):
-        print("Proxies imported")
+        print("All proxies imported")
         self.nextProxyToWeight = 0
         ImportWeighting(self.obj, onFinished=self.weightNextProxy)
 
@@ -408,9 +407,6 @@ class ImportBodyBinary():
     def finalize(self):
 
         self._deselectAll()
-
-        print(self.hasProxy)
-        print(bpy.context.scene.MhMaskBase)
 
         if self.hasProxy and bpy.context.scene.MhMaskBase:
             mask = self.obj.modifiers.new("Hide base mesh", 'MASK')
