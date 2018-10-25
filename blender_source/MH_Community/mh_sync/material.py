@@ -3,6 +3,9 @@
 
 import bpy
 import os
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 def _createMHImageTextureNode(nodes, imagePathAbsolute):
     fn = os.path.basename(imagePathAbsolute)
@@ -20,6 +23,7 @@ def _createMHImageTextureNode(nodes, imagePathAbsolute):
 
 def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
 
+    #pp.pprint(materialSettingsHash)
     x = 0
     y = 400
 
