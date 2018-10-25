@@ -384,10 +384,22 @@ class ImportBodyBinary():
 
     def afterProxiesImported(self):
         print("Proxies imported")
-        ImportWeighting(self.obj, onFinished=self.afterBodyWeighted)
+        self.nextProxyToWeight = 0
+        ImportWeighting(self.obj, onFinished=self.weightNextProxy)
 
-    def afterBodyWeighted(self):
-        self.finalize()
+    def weightNextProxy(self):
+
+        if len(self.importedProxies) < 1:
+            self.finalize()
+            return;
+
+        if self.nextProxyToWeight < len(self.importedProxies):
+            proxy = self.importedProxies[self.nextProxyToWeight]
+            self.nextProxyToWeight = self.nextProxyToWeight + 1
+            ImportWeighting(proxy.obj, onFinished=self.weightNextProxy)
+        else:
+            self.finalize()
+
 
     def finalize(self):
 

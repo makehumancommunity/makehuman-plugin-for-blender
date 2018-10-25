@@ -32,7 +32,17 @@ class ImportWeighting():
         self.onFinished = onFinished
         self.processedVertices = 0
         self.debug = True
-        FetchServerData('getBodyWeightInfo', self.gotWeightInfo)
+
+        self.isBaseMesh = (self.myObject.MhObjectType == "Basemesh")
+        print("Mesh name: " + self.myObject.name)
+        print("isBaseMesh: " + str(self.isBaseMesh))
+
+        if self.isBaseMesh:
+            FetchServerData('getBodyWeightInfo', self.gotWeightInfo)
+        else:
+            self.uuid = self.myObject.MhProxyUUID
+            print("Mesh uuid: " + self.uuid)
+            FetchServerData('getProxyWeightInfo', self.gotWeightInfo, params={ "uuid": self.uuid })
 
     def _profile(self, position="timestamp"):
         if not ENABLE_PROFILING_OUTPUT:
@@ -48,13 +58,19 @@ class ImportWeighting():
         self.sumVertListBytes = data["sumVertListBytes"]
         self.sumWeightsBytes = data["sumWeightsBytes"]
         self.weights = data["weights"]
-        FetchServerData('getBodyWeightsVertList', self.gotVertListData, expectBinary=True)
+        if self.isBaseMesh:
+            FetchServerData('getBodyWeightsVertList', self.gotVertListData, expectBinary=True)
+        else:
+            FetchServerData('getProxyWeightsVertList', self.gotVertListData, expectBinary=True, params={ "uuid": self.uuid })
 
     def gotVertListData(self, data):
         if self.debug:
             print("vert list: " + str(len(data)) + " bytes")
         self.vertListBytes = bytearray(data)
-        FetchServerData('getBodyWeights', self.gotWeightsData, expectBinary=True)
+        if self.isBaseMesh:
+            FetchServerData('getBodyWeights', self.gotWeightsData, expectBinary=True)
+        else:
+            FetchServerData('getProxyWeights', self.gotWeightsData, expectBinary=True, params={ "uuid": self.uuid })
 
     def gotWeightsData(self, data):
         if self.debug:
@@ -67,7 +83,7 @@ class ImportWeighting():
     def handleWeight(self, info):
         boneName = info["bone"]
         numVerts = info["numVertices"]
-        
+
         if self.debug:
             print("Handling weights for bone " + boneName + " (" + str(numVerts) + " vertices)")
 
