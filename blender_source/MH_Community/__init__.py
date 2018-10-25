@@ -67,6 +67,7 @@ class Community_Panel(bpy.types.Panel):
             importHumanBox.label(text="Body parts / clothes:")
             importHumanBox.prop(scn, 'MhImportWhat', text="")
             importHumanBox.prop(scn, 'MhPrefixProxy', text="Prefix with toon")
+            importHumanBox.prop(scn, 'MhMaskBase', text="When proxy, mask base mesh")
 
             importHumanBox.separator()
             importHumanBox.label(text="Materials:")
@@ -764,6 +765,7 @@ def register():
 
     bpy.types.Scene.MhImportWhat = bpy.props.EnumProperty(items=importProxyItems, name="Import what", description="What to import", default="EVERYTHING")
     bpy.types.Scene.MhPrefixProxy = BoolProperty(name="Prefix proxy names", description="Give all extra meshes (such as hair, clothes..) names that start with the name of the imported toon", default=True)
+    bpy.types.Scene.MhMaskBase = BoolProperty(name="Mask base mesh if proxy available", description="If both the base mesh and a body proxy have been imported, then mask the base mesh.", default=True)
 
     bpy.types.Scene.MhHandleMaterials = bpy.props.EnumProperty(items=handleMaterialsItems, name="When material exists", description="What to do if a material with the same name already exists", default="REUSE")
     bpy.types.Scene.MhPrefixMaterial = BoolProperty(name="Prefix material names", description="Give all materials a name that starts with the name of the imported toon?", default=False)

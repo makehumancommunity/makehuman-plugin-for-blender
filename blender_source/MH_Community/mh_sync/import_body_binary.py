@@ -31,7 +31,7 @@ class ImportBodyBinary():
         self.name = "human"
 
         self.armatureObject = None
-
+        self.hasProxy = False
         self.scaleFactor = 0.1
 
         self.startMillis = int(round(time.time() * 1000))
@@ -258,6 +258,7 @@ class ImportBodyBinary():
 
     def gotBodyMaterialInfo(self, data):
         matname = data["name"]
+
         if self.prefixMaterial:
             matname = self.name + "." + matname
 
@@ -370,6 +371,9 @@ class ImportBodyBinary():
     def proxyLoaded(self, proxy):
         print("Proxy loaded")
 
+        if proxy.obj.MhObjectType == "Proxymeshes":
+            self.hasProxy = True
+
         self.importedProxies.append(proxy)
 
         if self.armatureObject is None:
@@ -404,6 +408,16 @@ class ImportBodyBinary():
     def finalize(self):
 
         self._deselectAll()
+
+        print(self.hasProxy)
+        print(bpy.context.scene.MhMaskBase)
+
+        if self.hasProxy and bpy.context.scene.MhMaskBase:
+            mask = self.obj.modifiers.new("Hide base mesh", 'MASK')
+            mask.vertex_group = "body"
+            mask.show_in_editmode = True
+            mask.show_on_cage = True
+            mask.invert_vertex_group = True
 
         if self.armatureObject is None:
             self.obj.select = True
