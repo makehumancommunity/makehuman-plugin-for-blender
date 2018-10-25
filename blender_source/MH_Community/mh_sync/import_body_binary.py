@@ -17,6 +17,7 @@ from mathutils import Matrix, Vector
 from .material import *
 from .fetch_server_data import FetchServerData
 from .import_proxy_binary import ImportProxyBinary
+from .import_weighting import ImportWeighting
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -47,6 +48,8 @@ class ImportBodyBinary():
 
         if self.scaleMode == "CENTIMETER":
             self.scaleFactor = 10.0
+
+        self.importedProxies = []
 
         self.minimumZ = 10000.0
         FetchServerData('getBodyMeshInfo', self.gotBodyInfo)
@@ -263,52 +266,6 @@ class ImportBodyBinary():
 
         FetchServerData('getSkeleton', self.gotSkeleton)
 
-    def gotProxiesInfo(self, data):
-        self.proxiesInfo = data
-        self.proxiesToImport = data
-        self.nextProxyToImport = 0
-        self.importNextProxy()
-
-    def importNextProxy(self):
-        if self.nextProxyToImport >= len(self.proxiesToImport):
-            self.afterProxiesImported()
-            return
-
-        if self.importWhat == "EVERYTHING":
-            ImportProxyBinary(self.obj, self.name, self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded)
-
-        if self.importWhat == "BODYPARTS":
-            info = self.proxiesInfo[self.nextProxyToImport]
-            type = info["type"]
-            if type == "Clothes":
-                print("Skipping proxy " + info["name"] + " because it is of type clothes, and only bodyparts are requested for load")
-                self.nextProxyToImport = self.nextProxyToImport + 1
-                self.importNextProxy()
-                return
-            else:
-                ImportProxyBinary(self.obj, self.name, info, self.proxyLoaded)
-
-        if self.importWhat == "BODY":
-            self.afterProxiesImported()
-
-
-    def proxyLoaded(self, proxy):
-        print("Proxy loaded")
-
-        if self.armatureObject is None:
-            proxy.obj.parent = self.obj
-        else:
-            proxy.obj.parent = self.armatureObject
-            modifier = proxy.obj.modifiers.new("Armature", 'ARMATURE')
-            modifier.object = self.armatureObject
-
-        self.nextProxyToImport = self.nextProxyToImport + 1
-        self.importNextProxy()
-
-    def afterProxiesImported(self):
-        print("Proxies imported")
-        self.finalize()
-
     def _deselectAll(self):
         for ob in bpy.context.selected_objects:
             ob.select = False
@@ -380,6 +337,57 @@ class ImportBodyBinary():
                 bpy.ops.object.modifier_move_up(modifier="Armature")
 
         FetchServerData('getProxiesInfo', self.gotProxiesInfo)
+
+    def gotProxiesInfo(self, data):
+        self.proxiesInfo = data
+        self.proxiesToImport = data
+        self.nextProxyToImport = 0
+        self.importNextProxy()
+
+    def importNextProxy(self):
+        if self.nextProxyToImport >= len(self.proxiesToImport):
+            self.afterProxiesImported()
+            return
+
+        if self.importWhat == "EVERYTHING":
+            ImportProxyBinary(self.obj, self.name, self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded)
+
+        if self.importWhat == "BODYPARTS":
+            info = self.proxiesInfo[self.nextProxyToImport]
+            type = info["type"]
+            if type == "Clothes":
+                print("Skipping proxy " + info[
+                    "name"] + " because it is of type clothes, and only bodyparts are requested for load")
+                self.nextProxyToImport = self.nextProxyToImport + 1
+                self.importNextProxy()
+                return
+            else:
+                ImportProxyBinary(self.obj, self.name, info, self.proxyLoaded)
+
+        if self.importWhat == "BODY":
+            self.afterProxiesImported()
+
+    def proxyLoaded(self, proxy):
+        print("Proxy loaded")
+
+        self.importedProxies.append(proxy)
+
+        if self.armatureObject is None:
+            proxy.obj.parent = self.obj
+        else:
+            proxy.obj.parent = self.armatureObject
+            modifier = proxy.obj.modifiers.new("Armature", 'ARMATURE')
+            modifier.object = self.armatureObject
+
+        self.nextProxyToImport = self.nextProxyToImport + 1
+        self.importNextProxy()
+
+    def afterProxiesImported(self):
+        print("Proxies imported")
+        ImportWeighting(self.obj, onFinished=self.afterBodyWeighted)
+
+    def afterBodyWeighted(self):
+        self.finalize()
 
     def finalize(self):
 
