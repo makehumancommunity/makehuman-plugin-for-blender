@@ -240,6 +240,10 @@ class ImportProxyBinary():
 
     def gotProxyMaterialInfo(self, data):
         matname = data["name"]
+
+        if matname in ["material", "materialMaterial", "bodyMaterial", "", "none"]:
+            matname = self.proxyInfo["name"] + "Material"
+        
         if self.prefixMaterial:
             matname = self.humanName + "." + matname
 
