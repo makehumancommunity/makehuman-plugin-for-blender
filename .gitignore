@@ -9,5 +9,3 @@ __pycache__
 /package.json
 /scripts/
 /nbproject/
-/blender_source/MH_Community/kinect_sensor/KinectToJSON_x64.dll
-/blender_source/MH_Community/kinect_sensor/KinectToJSON_x86.dll
