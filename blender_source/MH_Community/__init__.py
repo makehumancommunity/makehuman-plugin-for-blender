@@ -5,7 +5,7 @@ bl_info = {
     "name": "MH Community Plug-in",
     "author": "Joel Palmius",
     "version": (0, 4),
-    "blender": (2, 80, 0),
+    "blender": (2, 79, 0),
     "location": "View3D > Properties > MH",
     "description": "MakeHuman interactive operations",
     "wiki_url": "https://github.com/makehumancommunity/community-plugins/tree/master/blender_source/MH_Community",
