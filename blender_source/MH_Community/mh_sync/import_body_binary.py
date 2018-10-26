@@ -43,6 +43,11 @@ class ImportBodyBinary():
 
         self.importWhat = str(bpy.context.scene.MhImportWhat)
 
+        self.all_joint_verts = []
+        self.all_helper_verts = []
+
+        self.all_meta_faces = []
+
         if self.scaleMode == "DECIMETER":
             self.scaleFactor = 1.0
 
@@ -62,8 +67,6 @@ class ImportBodyBinary():
         self.lastMillis = currentMillis
 
     def gotBodyInfo(self, data):
-
-        #pp.pprint(data)
 
         self.bodyInfo = data
 
@@ -202,9 +205,6 @@ class ImportBodyBinary():
 
     def handleHelpers(self):
 
-        all_joint_verts = []
-        all_helper_verts = []
-
         for fg in self.bodyInfo["faceGroups"]:
             name = fg["name"]
             self._profile(name)
@@ -212,23 +212,25 @@ class ImportBodyBinary():
             for startStop in fg["fgStartStops"]:
                 first = startStop[0]
                 last = startStop[1]
+                if not fg["name"] == "body":
+                    self.all_meta_faces.extend( list(range(first, last+1)) )
                 faceSubSet = self.faceVertIndexes[first:last]
                 verts.extend(list(set(itertools.chain.from_iterable(faceSubSet))))
 
             if len(verts) > 0:
                 if name.startswith("joint-"):
-                    all_joint_verts.extend(verts)
+                    self.all_joint_verts.extend(verts)
                 if name.startswith("helper-"):
-                    all_helper_verts.extend(verts)
+                    self.all_helper_verts.extend(verts)
                 if self.helpers == "MASK":
                     vgroup = self.obj.vertex_groups.new(name=name)
                     vgroup.add(verts, 1.0, 'ADD')
 
         if self.helpers == "DELETE":
-            if len(all_joint_verts) > 0:
+            if len(self.all_joint_verts) > 0:
                 # TODO: delete vertices
                 pass
-            if len(all_helper_verts) > 0:
+            if len(self.all_helper_verts) > 0:
                 # TODO: delete vertices
                 pass
 
@@ -237,6 +239,45 @@ class ImportBodyBinary():
             mask.vertex_group = "body"
             mask.show_in_editmode = True
             mask.show_on_cage = True
+
+    def _faceListToVertSet(self, faceList):
+        vertList = []
+        for faceIdx in list(faceList):
+            if faceIdx >= len(self.faceVertIndexes):
+                print("WARNING: face index " + str(faceIdx) + " > " + str(len(self.faceVertIndexes)))
+            else:
+                vertList.extend( self.faceVertIndexes[faceIdx] )
+        return set(vertList)
+
+    def maskBody(self):
+
+        allVisibleFaces = []
+
+        for facelist in self.bodyInfo["faceMask"]:
+            first = facelist[0]
+            last = facelist[1]
+            allVisibleFaces.extend( list(range(first,last+1)) )
+
+        allVisibleFaces = set(allVisibleFaces)
+        allMetaFaces = set(self.all_meta_faces)
+
+        allVisibleVerts = list(self._faceListToVertSet(allVisibleFaces))
+        allMetaVerts = list(self._faceListToVertSet(allMetaFaces))
+
+        allVerts = set( range(0, len(self.vertCache)) )
+
+        # TODO:   This approach may cause single vertex outliers. At some point it might make sense
+        # TODO:   to find and exclude these
+        allInvisibleVerts = list(allVerts - set(allVisibleVerts) - set(allMetaVerts))
+
+        vgroupInvis = self.obj.vertex_groups.new(name="delete")
+        vgroupInvis.add(allInvisibleVerts, 1.0, 'ADD')
+
+        mask = self.obj.modifiers.new("Hide faces", 'MASK')
+        mask.vertex_group = "delete"
+        mask.show_in_editmode = True
+        mask.show_on_cage = True
+        mask.invert_vertex_group = True
 
     def afterMeshData(self):
 
@@ -249,6 +290,8 @@ class ImportBodyBinary():
 
         if self.helpers != "NOTHING":
             self.handleHelpers()
+
+        self.maskBody()
 
         del self.vertCache
         del self.faceCache
@@ -283,10 +326,6 @@ class ImportBodyBinary():
         vHead = Vector( (head[0] * scale, -head[2] * scale, head[1] * scale) )
         vTail = Vector( (tail[0] * scale, -tail[2] * scale, tail[1] * scale) )
 
-        #offset = Vector(self.skeletonOffset) * scale
-        #bone.head = vHead + offset
-        #bone.tail = vTail + offset
-
         bone.head = vHead
         bone.tail = vTail
 
@@ -294,11 +333,10 @@ class ImportBodyBinary():
             bone.parent = parentBone
 
         if "matrix" in boneInfo.keys():
-            # from MHX2 exporter:
-            mat = Matrix(boneInfo["matrix"])
-            nmat = Matrix((mat[0], -mat[2], mat[1])).to_3x3().to_4x4()
-            nmat.col[3] = bone.matrix.col[3]
-            bone.matrix = nmat
+            boneMatrix = Matrix(boneInfo["matrix"])
+            normalizedMatrix = Matrix((boneMatrix[0], -boneMatrix[2], boneMatrix[1])).to_3x3().to_4x4()
+            normalizedMatrix.col[3] = bone.matrix.col[3]
+            bone.matrix = normalizedMatrix
         else:
             if "roll" in boneInfo.keys():
                 bone.roll = boneInfo["roll"]

@@ -189,41 +189,43 @@ class ImportProxyBinary():
 
         self.afterMeshData()
 
-    def handleHelpers(self):
+    def _faceListToVertSet(self, faceList):
+        vertList = []
+        for faceIdx in list(faceList):
+            if faceIdx >= len(self.faceVertIndexes):
+                print("WARNING: face index " + str(faceIdx) + " > " + str(len(self.faceVertIndexes)))
+            else:
+                vertList.extend( self.faceVertIndexes[faceIdx] )
+        return set(vertList)
 
-        all_joint_verts = []
-        all_helper_verts = []
+    def maskFaces(self):
 
-        for fg in self.bodyInfo["faceGroups"]:
-            name = fg["name"]
-            self._profile(name)
-            first = fg["first"]
-            last = fg["last"]
-            faceSubSet = self.faceVertIndexes[first:last]
-            verts = list(set(itertools.chain.from_iterable(faceSubSet)))
+        if len(self.proxyInfo["faceMask"]) < 1:
+            return
 
-            if len(verts) > 0:
-                if name.startswith("joint-"):
-                    all_joint_verts.extend(verts)
-                if name.startswith("helper-"):
-                    all_helper_verts.extend(verts)
-                if self.helpers == "MASK":
-                    vgroup = self.obj.vertex_groups.new(name=name)
-                    vgroup.add(verts, 1.0, 'ADD')
+        allVisibleFaces = []
 
-        if self.helpers == "DELETE":
-            if len(all_joint_verts) > 0:
-                # TODO: delete vertices
-                pass
-            if len(all_helper_verts) > 0:
-                # TODO: delete vertices
-                pass
+        for facelist in self.proxyInfo["faceMask"]:
+            first = facelist[0]
+            last = facelist[1]
+            allVisibleFaces.extend(list(range(first, last + 1)))
 
-        if self.helpers == "MASK":
-            mask = self.obj.modifiers.new("Mask", 'MASK')
-            mask.vertex_group = "body"
-            mask.show_in_editmode = True
-            mask.show_on_cage = True
+        allVisibleFaces = set(allVisibleFaces)
+        allVisibleVerts = list(self._faceListToVertSet(allVisibleFaces))
+        allVerts = set(range(0, len(self.vertCache)))
+
+        # TODO:   This approach may cause single vertex outliers. At some point it might make sense
+        # TODO:   to find and exclude these
+        allInvisibleVerts = list(allVerts - set(allVisibleVerts))
+
+        vgroupInvis = self.obj.vertex_groups.new(name="delete")
+        vgroupInvis.add(allInvisibleVerts, 1.0, 'ADD')
+
+        mask = self.obj.modifiers.new("Hide faces", 'MASK')
+        mask.vertex_group = "delete"
+        mask.show_in_editmode = True
+        mask.show_on_cage = True
+        mask.invert_vertex_group = True
 
     def afterMeshData(self):
 
@@ -231,6 +233,8 @@ class ImportProxyBinary():
 
         self.bm.to_mesh(self.mesh)
         self.bm.free()
+
+        self.maskFaces()
 
         del self.vertCache
         del self.faceCache
