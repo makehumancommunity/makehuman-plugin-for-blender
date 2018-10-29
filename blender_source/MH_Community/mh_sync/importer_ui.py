@@ -65,7 +65,6 @@ def registerImporterConstantsAndSettings():
     bpy.types.Object.MhHuman = BoolProperty(default=False)
 
     # TODO: hidden faces                MhHiddenFaces
-    # TODO: Name after object           MhMaterialObjectName
     # TODO: Rig body and parts          MhRigBody
     # TODO: Rig clothes                 MhRigClothes
     # TODO: Use rig as parent           MhRigIsParent
@@ -86,9 +85,9 @@ def addImporterUIToTab(layout, scn):
     importHumanBox.prop(scn, 'MhHandleHelper', text="")
     importHumanBox.prop(scn, 'MhDetailedHelpers', text="Detailed helper groups")
 
-    importHumanBox.separator()
-    importHumanBox.label(text="Body hidden faces:")
-    importHumanBox.prop(scn, 'MhHiddenFaces', text="")
+    #importHumanBox.separator()
+    #importHumanBox.label(text="Body hidden faces:")
+    #importHumanBox.prop(scn, 'MhHiddenFaces', text="")
 
     importHumanBox.separator()
     importHumanBox.label(text="Blender unit equals:")
@@ -104,9 +103,9 @@ def addImporterUIToTab(layout, scn):
     importHumanBox.separator()
     importHumanBox.label(text="Rig / posing:")
     importHumanBox.prop(scn, 'MhImportRig', text="Import rig")
-    importHumanBox.prop(scn, 'MhRigBody', text="Rig body + parts")
-    importHumanBox.prop(scn, 'MhRigClothes', text="Rig clothes")
-    importHumanBox.prop(scn, 'MhRigIsParent', text="Use rig as parent")
+    #importHumanBox.prop(scn, 'MhRigBody', text="Rig body + parts")
+    #importHumanBox.prop(scn, 'MhRigClothes', text="Rig clothes")
+    #importHumanBox.prop(scn, 'MhRigIsParent', text="Use rig as parent")
 
     # importHumanBox.prop(scn, 'MhHandIK', text="Hand IK")
     # importHumanBox.prop(scn, 'MhFootIK', text="Foot IK")
