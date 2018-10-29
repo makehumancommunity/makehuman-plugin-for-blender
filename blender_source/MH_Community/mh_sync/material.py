@@ -27,6 +27,8 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
     x = 0
     y = 400
 
+    fixrough = bpy.context.scene.MhFixRoughness
+
     mat = None
     if ifExists == "OVERWRITE" or ifExists == "REUSE":
         mat = bpy.data.materials.get(name)
@@ -53,7 +55,10 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
     output.location = (x+400, y+10)
 
     principled = nodes.new("ShaderNodeBsdfPrincipled")
-    principled.inputs['Roughness'].default_value = 1.0 - materialSettingsHash["shininess"]
+    roughness = 1.0 - materialSettingsHash["shininess"]
+    if fixrough and roughness < 0.1 and not "eye" in name.lower():
+        roughness = 0.5
+    principled.inputs['Roughness'].default_value = roughness
 
     #print(principled)
     #for i in principled.inputs:

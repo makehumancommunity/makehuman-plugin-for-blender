@@ -34,6 +34,7 @@ class ImportProxyBinary():
 
         self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
         self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
+        self.matobjname = bpy.context.scene.MhMaterialObjectName
 
         self.scaleFactor = 0.1
 
@@ -245,8 +246,8 @@ class ImportProxyBinary():
     def gotProxyMaterialInfo(self, data):
         matname = data["name"]
 
-        if matname in ["material", "materialMaterial", "bodyMaterial", "", "none"]:
-            matname = self.proxyInfo["name"] + "Material"
+        if self.matobjname or matname in ["material", "materialMaterial", "bodyMaterial", "", "none"]:
+            matname = self.proxyInfo["name"]
 
         if self.prefixMaterial:
             matname = self.humanName + "." + matname

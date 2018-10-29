@@ -64,11 +64,8 @@ def registerImporterConstantsAndSettings():
     # In case MHX2 isn't loaded
     bpy.types.Object.MhHuman = BoolProperty(default=False)
 
-    # TODO: Detailed helper groups      MhDetailedHelpers
-    # TODO: add subdiv modifiers        MhAddSubdiv
     # TODO: hidden faces                MhHiddenFaces
     # TODO: Name after object           MhMaterialObjectName
-    # TODO: Autofix roughness           MhFixRoughness
     # TODO: Rig body and parts          MhRigBody
     # TODO: Rig clothes                 MhRigClothes
     # TODO: Use rig as parent           MhRigIsParent

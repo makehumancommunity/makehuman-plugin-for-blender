@@ -44,6 +44,7 @@ class ImportBodyBinary():
         self.importWhat = str(bpy.context.scene.MhImportWhat)
         self.helpers = str(bpy.context.scene.MhHandleHelper)
         self.subdiv = str(bpy.context.scene.MhAddSubdiv)
+        self.matobjname = bpy.context.scene.MhMaterialObjectName
 
         self.all_joint_verts = []
         self.all_helper_verts = []
@@ -304,6 +305,9 @@ class ImportBodyBinary():
 
     def gotBodyMaterialInfo(self, data):
         matname = data["name"]
+
+        if self.matobjname:
+            matname = "body"
 
         if self.prefixMaterial:
             matname = self.name + "." + matname
