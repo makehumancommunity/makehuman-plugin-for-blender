@@ -45,6 +45,7 @@ class ImportBodyBinary():
         self.helpers = str(bpy.context.scene.MhHandleHelper)
         self.subdiv = str(bpy.context.scene.MhAddSubdiv)
         self.matobjname = bpy.context.scene.MhMaterialObjectName
+        self.rigisparent = bpy.context.scene.MhRigIsParent
 
         self.all_joint_verts = []
         self.all_helper_verts = []
@@ -373,7 +374,10 @@ class ImportBodyBinary():
 
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
-            self.obj.parent = self.armatureObject
+            if self.rigisparent:
+                self.obj.parent = self.armatureObject
+            else:
+                self.armatureObject.parent = self.obj
 
             modifier = self.obj.modifiers.new("Armature", 'ARMATURE')
             modifier.object = self.armatureObject
@@ -423,7 +427,10 @@ class ImportBodyBinary():
         if self.armatureObject is None:
             proxy.obj.parent = self.obj
         else:
-            proxy.obj.parent = self.armatureObject
+            if self.rigisparent:
+                proxy.obj.parent = self.armatureObject
+            else:
+                proxy.obj.parent = self.obj
             modifier = proxy.obj.modifiers.new("Armature", 'ARMATURE')
             modifier.object = self.armatureObject
 

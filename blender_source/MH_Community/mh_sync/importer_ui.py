@@ -105,7 +105,7 @@ def addImporterUIToTab(layout, scn):
     importHumanBox.prop(scn, 'MhImportRig', text="Import rig")
     #importHumanBox.prop(scn, 'MhRigBody', text="Rig body + parts")
     #importHumanBox.prop(scn, 'MhRigClothes', text="Rig clothes")
-    #importHumanBox.prop(scn, 'MhRigIsParent', text="Use rig as parent")
+    importHumanBox.prop(scn, 'MhRigIsParent', text="Use rig as parent")
 
     # importHumanBox.prop(scn, 'MhHandIK', text="Hand IK")
     # importHumanBox.prop(scn, 'MhFootIK', text="Foot IK")
