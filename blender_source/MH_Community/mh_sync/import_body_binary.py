@@ -40,8 +40,10 @@ class ImportBodyBinary():
         self.scaleMode = str(bpy.context.scene.MhScaleMode)
         self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
         self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
-
+        self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
         self.importWhat = str(bpy.context.scene.MhImportWhat)
+        self.helpers = str(bpy.context.scene.MhHandleHelper)
+        self.subdiv = str(bpy.context.scene.MhAddSubdiv)
 
         self.all_joint_verts = []
         self.all_helper_verts = []
@@ -223,8 +225,9 @@ class ImportBodyBinary():
                 if name.startswith("helper-"):
                     self.all_helper_verts.extend(verts)
                 if self.helpers == "MASK":
-                    vgroup = self.obj.vertex_groups.new(name=name)
-                    vgroup.add(verts, 1.0, 'ADD')
+                    if name == "body" or self.detailedHelpers:
+                        vgroup = self.obj.vertex_groups.new(name=name)
+                        vgroup.add(verts, 1.0, 'ADD')
 
         if self.helpers == "DELETE":
             if len(self.all_joint_verts) > 0:
@@ -233,6 +236,11 @@ class ImportBodyBinary():
             if len(self.all_helper_verts) > 0:
                 # TODO: delete vertices
                 pass
+        else:
+            vgroup = self.obj.vertex_groups.new(name="HelperGeometry")
+            vgroup.add(self.all_helper_verts, 1.0, 'ADD')
+            vgroup = self.obj.vertex_groups.new(name="JointCubes")
+            vgroup.add(self.all_joint_verts, 1.0, 'ADD')
 
         if self.helpers == "MASK":
             mask = self.obj.modifiers.new("Mask", 'MASK')
@@ -285,12 +293,7 @@ class ImportBodyBinary():
 
         self.bm.to_mesh(self.mesh)
         self.bm.free()
-
-        self.helpers = str(bpy.context.scene.MhHandleHelper)
-
-        if self.helpers != "NOTHING":
-            self.handleHelpers()
-
+        self.handleHelpers()
         self.maskBody()
 
         del self.vertCache
@@ -425,8 +428,12 @@ class ImportBodyBinary():
 
     def afterProxiesImported(self):
         print("All proxies imported")
-        self.nextProxyToWeight = 0
-        ImportWeighting(self.obj, onFinished=self.weightNextProxy)
+        if not self.armatureObject is None:
+            self.nextProxyToWeight = 0
+            ImportWeighting(self.obj, onFinished=self.weightNextProxy)
+        else:
+            print("No armature object, skipping weighting")
+            self.finalize()
 
     def weightNextProxy(self):
 
@@ -457,6 +464,15 @@ class ImportBodyBinary():
             self.obj.select = True
         else:
             self.armatureObject.select = True
+
+        if self.subdiv:
+            subdiv = self.obj.modifiers.new("Subdivision", 'SUBSURF')
+            subdiv.levels = 0
+            subdiv.render_levels = 2
+            for proxy in self.importedProxies:
+                subdiv = proxy.obj.modifiers.new("Subdivision", 'SUBSURF')
+                subdiv.levels = 0
+                subdiv.render_levels = 2
 
         print("DONE!")
 
