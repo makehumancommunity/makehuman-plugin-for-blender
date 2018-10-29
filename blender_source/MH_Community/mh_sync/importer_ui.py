@@ -53,6 +53,8 @@ def registerImporterConstantsAndSettings():
     bpy.types.Scene.MhRigClothes = BoolProperty(name="Rig clothes", description="Use the imported rig as a skeleton for rigging clothes", default=True)
     bpy.types.Scene.MhRigIsParent = BoolProperty(name="Use rig as parent", description="Use the rig as parent for all imported / created objects", default=True)
 
+    bpy.types.Scene.MhAdjustPosition = BoolProperty(name="Place feet on ground", description="Move the toon after import so that feet are on ground (z = 0.0). This is not to be confused with the feet on ground option inside MH.", default=True)
+
     # bpy.types.Scene.MhHandIK = BoolProperty(name="Hand IK", description="Create hand IK controls", default=False)
     # bpy.types.Scene.MhFootIK = BoolProperty(name="Foot IK", description="Create foot IK controls", default=False)
     # bpy.types.Scene.MhHideFK = BoolProperty(name="Hide FK", description="Hide FK bones that are part of an IK chain", default=True)
@@ -110,6 +112,10 @@ def addImporterUIToTab(layout, scn):
     # importHumanBox.prop(scn, 'MhHandIK', text="Hand IK")
     # importHumanBox.prop(scn, 'MhFootIK', text="Foot IK")
     # importHumanBox.prop(scn, 'MhHideFK', text="Hide FK")
+
+    importHumanBox.separator()
+    importHumanBox.label(text="Various:")
+    importHumanBox.prop(scn, 'MhAdjustPosition', text="Place feet on ground")
 
     importHumanBox.separator()
     importHumanBox.operator("mh_community.import_body", text="Import human")

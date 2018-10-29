@@ -33,6 +33,7 @@ class ImportBodyBinary():
         self.armatureObject = None
         self.hasProxy = False
         self.scaleFactor = 0.1
+        self.groundMean = 0.0
 
         self.startMillis = int(round(time.time() * 1000))
         self.lastMillis = self.startMillis
@@ -46,11 +47,14 @@ class ImportBodyBinary():
         self.subdiv = str(bpy.context.scene.MhAddSubdiv)
         self.matobjname = bpy.context.scene.MhMaterialObjectName
         self.rigisparent = bpy.context.scene.MhRigIsParent
+        self.adjust = bpy.context.scene.MhAdjustPosition
 
         self.all_joint_verts = []
         self.all_helper_verts = []
 
         self.all_meta_faces = []
+
+        self.vertPosCache = []
 
         if self.scaleMode == "DECIMETER":
             self.scaleFactor = 1.0
@@ -124,6 +128,7 @@ class ImportBodyBinary():
             vert.index = i
 
             self.vertCache.append(vert)
+            self.vertPosCache.append( (x, -y, z) )
 
             i = i + 1
 
@@ -224,6 +229,14 @@ class ImportBodyBinary():
             if len(verts) > 0:
                 if name.startswith("joint-"):
                     self.all_joint_verts.extend(verts)
+                    if name == "joint-ground":
+                        sum = 0.0
+                        for v in verts:
+                            sum = sum + self.vertPosCache[v][2]
+                        self.groundMean = sum / 8.0
+                        print("GROUND MEAN: " + str(self.groundMean))
+
+
                 if name.startswith("helper-"):
                     self.all_helper_verts.extend(verts)
                 if self.helpers == "MASK":
@@ -301,6 +314,7 @@ class ImportBodyBinary():
         del self.vertCache
         del self.faceCache
         del self.texco
+        del self.vertPosCache
 
         FetchServerData('getBodyMaterialInfo',self.gotBodyMaterialInfo)
 
@@ -471,10 +485,16 @@ class ImportBodyBinary():
             mask.show_on_cage = True
             mask.invert_vertex_group = True
 
+        self.objToAdjust = self.obj
+
         if self.armatureObject is None:
             self.obj.select = True
         else:
             self.armatureObject.select = True
+            self.objToAdjust = self.armatureObject
+
+        if self.adjust:
+            self.objToAdjust.location.z = -self.groundMean
 
         if self.subdiv:
             subdiv = self.obj.modifiers.new("Subdivision", 'SUBSURF')
