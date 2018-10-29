@@ -185,8 +185,8 @@ class DefaultRigInfo (RigInfo):
         self.head = 'head'
         self.kneeIKChainLength =  2
         self.footIKChainLength =  4
-        self.handIKChainLength =  5
-        self.elbowIKChainLength = 3
+        self.handIKChainLength =  4
+        self.elbowIKChainLength = 2
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # cannot be static, since dot is only at instance level
     def boneFor(self, baseName, isLeft):
@@ -207,11 +207,45 @@ class DefaultRigInfo (RigInfo):
         bpy.ops.object.mode_set(mode=current_mode)
         return left > minZ and left == right
 
+    def clavicle(self, isLeft): return 'clavicle.' + ('L' if isLeft else 'R')
+    def upperArm(self, isLeft): return 'upperarm02.' + ('L' if isLeft else 'R')
+    def lowerArm(self, isLeft): return 'lowerarm02.' + ('L' if isLeft else 'R')
+    def thigh(self, isLeft): return 'upperleg02.' + ('L' if isLeft else 'R')
+
+    def _defaultLockInfo(self):
+        out = {}
+        out["lockX"] = True
+        out["lockY"] = False
+        out["lockZ"] = True
+        out["limitXMin"] = None
+        out["limitXMax"] = None
+        out["limitYMin"] = -20
+        out["limitYMax"] = 20
+        out["limitZMin"] = None
+        out["limitZMax"] = None
+        return out
+
+    def additionalLocks(self):
+
+        bones = {}
+        bones["lowerarm02"] = self._defaultLockInfo()
+        bones["upperarm02"] = self._defaultLockInfo()
+        bones["lowerleg02"] = self._defaultLockInfo()
+        bones["upperleg02"] = self._defaultLockInfo()
+
+        out = {}
+        for key in bones.keys():
+            out[key + ".L"] = bones[key]
+            out[key + ".R"] = bones[key]
+
+        return out
+
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for IK rigging support, which DefaultRig does not have
-    def IKCapable(self): return False
+    def IKCapable(self): return True
     def hand(self, isLeft): return self.boneFor('wrist', isLeft) # also used for amputation
-    def calf(self, isLeft): return self.boneFor('lowerleg01', isLeft) # used by super.hasFeetOnGround()
+    def calf(self, isLeft): return 'lowerleg02.' + ('L' if isLeft else 'R')
     def foot(self, isLeft): return self.boneFor('foot', isLeft) # used for super.determineExportedUnits()
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for Finger rigging support

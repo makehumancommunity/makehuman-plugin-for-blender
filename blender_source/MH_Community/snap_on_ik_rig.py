@@ -27,6 +27,39 @@ class IkRig():
         self.addKneeAndFootIK(True)
         self.addKneeAndFootIK(False)
         bpy.ops.transform.transform(mode='BONE_SIZE', value=(unitMult, unitMult, unitMult, 0))
+
+        if isinstance(self.rigInfo, DefaultRigInfo):
+            pBones = self.armature.pose.bones
+            locks = self.rigInfo.additionalLocks()
+
+            for key in locks:
+                lock = locks[key]
+                bone = pBones[key]
+                bone.lock_ik_x = lock["lockX"]
+                bone.lock_ik_y = lock["lockY"]
+                bone.lock_ik_z = lock["lockZ"]
+
+                RADIAN = 3.14 / 180.0
+
+                if not lock["limitXMin"] is None or not lock["limitXMax"] is None:
+                    bone.use_ik_limit_x = True
+                    if not lock["limitXMin"] is None:
+                        bone.ik_min_x = lock["limitXMin"] * RADIAN
+                    if not lock["limitXMax"] is None:
+                        bone.ik_max_x = lock["limitXMax"] * RADIAN
+                if not lock["limitYMin"] is None or not lock["limitYMax"] is None:
+                    bone.use_ik_limit_y = True
+                    if not lock["limitYMin"] is None:
+                        bone.ik_min_y = lock["limitYMin"] * RADIAN
+                    if not lock["limitYMax"] is None:
+                        bone.ik_max_y = lock["limitYMax"] * RADIAN
+                if not lock["limitZMin"] is None or not lock["limitZMax"] is None:
+                    bone.use_ik_limit_z = True
+                    if not lock["limitZMin"] is None:
+                        bone.ik_min_z = lock["limitZMin"] * RADIAN
+                    if not lock["limitZMax"] is None:
+                        bone.ik_max_z = lock["limitZMax"] * RADIAN
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def addElbowAndHandIK(self, isLeft):
         side = 'L' if isLeft else 'R'
