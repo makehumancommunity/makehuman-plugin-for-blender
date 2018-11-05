@@ -131,6 +131,9 @@ class ImportProxyBinary():
                 verts[stride] = vert
                 vertIdxs[stride] = vert.index
                 stride = stride + 1
+            if verts[0] == verts[3]:
+                verts.pop(3)
+                vertIdxs.pop(3)
             face = self.bm.faces.new(verts)
             face.index = i
             face.smooth = True
