@@ -383,6 +383,8 @@ class ImportBodyBinary():
             matname = self.name + "." + matname
 
         mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
+        mat.diffuse_color = (1.0,0.7,0.7);
+
         self.obj.data.materials.append(mat)
 
         if self.importRig:
