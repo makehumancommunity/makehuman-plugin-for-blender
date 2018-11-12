@@ -35,6 +35,7 @@ class ImportProxyBinary():
         self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
         self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
         self.matobjname = bpy.context.scene.MhMaterialObjectName
+        self.prefixProxy = bpy.context.scene.MhPrefixProxy
 
         self.scaleFactor = 0.1
 
@@ -42,6 +43,22 @@ class ImportProxyBinary():
         self.lastMillis = self.startMillis
 
         self.scaleMode = str(bpy.context.scene.MhScaleMode)
+
+
+        self.generalPreset = str(bpy.context.scene.MhGeneralPreset)
+
+        if self.generalPreset != "BELOW":
+            self.scaleMode = "DECIMETER"
+            self.handleMaterials = "CREATENEW"
+            self.importWhat = "EVERYTHING"
+            self.helpers = "MASK"
+            self.subdiv = False
+            self.matobjname = True
+            self.importRig = False
+            self.detailedHelpers = True
+            self.rigisparent = False
+            self.adjust = False
+            self.prefixProxy = False
 
         if self.scaleMode == "DECIMETER":
             self.scaleFactor = 1.0
@@ -51,8 +68,12 @@ class ImportProxyBinary():
 
         self.minimumZ = 10000.0
 
-        self.mesh = bpy.data.meshes.new(humanName + "." + self.proxyInfo["name"] + "Mesh")
-        self.obj = bpy.data.objects.new(humanName + "." + self.proxyInfo["name"], self.mesh)
+        namebase = ""
+        if self.prefixProxy:
+            namebase = humanName + "."
+
+        self.mesh = bpy.data.meshes.new(namebase + self.proxyInfo["name"] + "Mesh")
+        self.obj = bpy.data.objects.new(namebase + self.proxyInfo["name"], self.mesh)
 
         self.obj.MhHuman = False
         self.obj.MhObjectType = proxyInfo["type"]
@@ -60,6 +81,11 @@ class ImportProxyBinary():
         self.obj.MhProxyName = proxyInfo["name"]
 
         # TODO: Set more info, for example name of toon
+
+        self.vertPosCache = []
+        self.mid_verts = []
+        self.left_verts = []
+        self.right_verts = []
 
         scene = bpy.context.scene
         scene.objects.link(self.obj)
@@ -101,11 +127,11 @@ class ImportProxyBinary():
             if z < self.minimumZ:
                 self.minimumZ = z
 
-
             vert = self.bm.verts.new( (x, -y, z) )
             vert.index = i
 
             self.vertCache.append(vert)
+            self.vertPosCache.append( (x, -y, z) )
 
             i = i + 1
 
@@ -222,14 +248,44 @@ class ImportProxyBinary():
         # TODO:   to find and exclude these
         allInvisibleVerts = list(allVerts - set(allVisibleVerts))
 
-        vgroupInvis = self.obj.vertex_groups.new(name="delete")
+        vgroupInvis = self.obj.vertex_groups.new(name="Delete")
         vgroupInvis.add(allInvisibleVerts, 1.0, 'ADD')
 
         mask = self.obj.modifiers.new("Hide faces", 'MASK')
-        mask.vertex_group = "delete"
+        mask.vertex_group = "Delete"
         mask.show_in_editmode = True
         mask.show_on_cage = True
         mask.invert_vertex_group = True
+
+    def makeClothesExtras(self):
+        i = 0
+        print("MakeClothes extras")
+
+        while i < len(self.vertPosCache):
+            vert = self.vertPosCache[i]
+            x = vert[0]
+
+            if x > -0.01 and x < 0.01:
+                self.mid_verts.append(i)
+            else:
+                if x < 0.0:
+                    self.right_verts.append(i)
+                if x > 0.0:
+                    self.left_verts.append(i)
+
+            i = i + 1
+
+        if len(self.right_verts) > 0:
+            vgroup = self.obj.vertex_groups.new(name="Right")
+            vgroup.add(self.right_verts, 1.0, 'ADD')
+
+        if len(self.left_verts) > 0:
+            vgroup = self.obj.vertex_groups.new(name="Left")
+            vgroup.add(self.left_verts, 1.0, 'ADD')
+
+        if len(self.mid_verts) > 0:
+            vgroup = self.obj.vertex_groups.new(name="Mid")
+            vgroup.add(self.mid_verts, 1.0, 'ADD')
 
     def afterMeshData(self):
 
@@ -237,6 +293,9 @@ class ImportProxyBinary():
 
         self.bm.to_mesh(self.mesh)
         self.bm.free()
+
+        if self.generalPreset == "MAKECLOTHES":
+            self.makeClothesExtras()
 
         self.maskFaces()
 

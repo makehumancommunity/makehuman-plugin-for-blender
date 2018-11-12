@@ -30,6 +30,7 @@ class ImportBodyBinary():
 
         self.name = "human"
 
+        self.armature = None
         self.armatureObject = None
         self.hasProxy = False
         self.scaleFactor = 0.1
@@ -38,21 +39,39 @@ class ImportBodyBinary():
         self.startMillis = int(round(time.time() * 1000))
         self.lastMillis = self.startMillis
 
+        self.generalPreset = str(bpy.context.scene.MhGeneralPreset)
+
         self.scaleMode = str(bpy.context.scene.MhScaleMode)
         self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
         self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
-        self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
         self.importWhat = str(bpy.context.scene.MhImportWhat)
         self.helpers = str(bpy.context.scene.MhHandleHelper)
         self.subdiv = str(bpy.context.scene.MhAddSubdiv)
         self.matobjname = bpy.context.scene.MhMaterialObjectName
+        self.importRig = bpy.context.scene.MhImportRig
+        self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
         self.rigisparent = bpy.context.scene.MhRigIsParent
         self.adjust = bpy.context.scene.MhAdjustPosition
 
+        if self.generalPreset != "BELOW":
+            self.scaleMode = "DECIMETER"
+            self.handleMaterials = "CREATENEW"
+            self.importWhat = "EVERYTHING"
+            self.helpers = "MASK"
+            self.subdiv = False
+            self.matobjname = True
+            self.importRig = False
+            self.detailedHelpers = False
+            self.rigisparent = False
+            self.adjust = False
+
         self.all_joint_verts = []
         self.all_helper_verts = []
-
         self.all_meta_faces = []
+
+        self.left_verts = []
+        self.right_verts = []
+        self.mid_verts = []
 
         self.vertPosCache = []
 
@@ -243,6 +262,11 @@ class ImportBodyBinary():
                     if name == "body" or self.detailedHelpers:
                         vgroup = self.obj.vertex_groups.new(name=name)
                         vgroup.add(verts, 1.0, 'ADD')
+                    else:
+                        if self.generalPreset == "MAKECLOTHES" and name.startswith("helper-"):
+                            vgroup = self.obj.vertex_groups.new(name=name)
+                            vgroup.add(verts, 1.0, 'ADD')
+
 
         if self.helpers == "DELETE":
             if len(self.all_joint_verts) > 0:
@@ -256,6 +280,37 @@ class ImportBodyBinary():
             vgroup.add(self.all_helper_verts, 1.0, 'ADD')
             vgroup = self.obj.vertex_groups.new(name="JointCubes")
             vgroup.add(self.all_joint_verts, 1.0, 'ADD')
+
+
+        if self.generalPreset == "MAKECLOTHES":
+            print("IS MAKECLOTHES")
+
+            i = 0
+            while i < len(self.vertPosCache):
+                vert = self.vertPosCache[i]
+                x = vert[0]
+
+                if x > -0.01 and x < 0.01:
+                    self.mid_verts.append(i)
+                else:
+                    if x < 0.0:
+                        self.right_verts.append(i)
+                    if x > 0.0:
+                        self.left_verts.append(i)
+
+                i = i + 1
+
+            if len(self.right_verts) > 0:
+                vgroup = self.obj.vertex_groups.new(name="Right")
+                vgroup.add(self.right_verts, 1.0, 'ADD')
+
+            if len(self.left_verts) > 0:
+                vgroup = self.obj.vertex_groups.new(name="Left")
+                vgroup.add(self.left_verts, 1.0, 'ADD')
+
+            if len(self.mid_verts) > 0:
+                vgroup = self.obj.vertex_groups.new(name="Mid")
+                vgroup.add(self.mid_verts, 1.0, 'ADD')
 
         if self.helpers == "MASK":
             mask = self.obj.modifiers.new("Mask", 'MASK')
@@ -293,11 +348,11 @@ class ImportBodyBinary():
         # TODO:   to find and exclude these
         allInvisibleVerts = list(allVerts - set(allVisibleVerts) - set(allMetaVerts))
 
-        vgroupInvis = self.obj.vertex_groups.new(name="delete")
+        vgroupInvis = self.obj.vertex_groups.new(name="Delete")
         vgroupInvis.add(allInvisibleVerts, 1.0, 'ADD')
 
         mask = self.obj.modifiers.new("Hide faces", 'MASK')
-        mask.vertex_group = "delete"
+        mask.vertex_group = "Delete"
         mask.show_in_editmode = True
         mask.show_on_cage = True
         mask.invert_vertex_group = True
@@ -330,7 +385,10 @@ class ImportBodyBinary():
         mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
         self.obj.data.materials.append(mat)
 
-        FetchServerData('getSkeleton', self.gotSkeleton)
+        if self.importRig:
+            FetchServerData('getSkeleton', self.gotSkeleton)
+        else:
+            FetchServerData('getProxiesInfo', self.gotProxiesInfo)
 
     def _deselectAll(self):
         for ob in bpy.context.selected_objects:

@@ -4,6 +4,11 @@
 import bpy
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 
+overridePresets = []
+overridePresets.append( ("BELOW", "Settings below", "Use settings below", 1) )
+overridePresets.append( ("MAKETARGET", "MakeTarget", "Optimal settings for MakeTarget", 2) )
+overridePresets.append( ("MAKECLOTHES", "MakeClothes", "Optimal settings for MakeClothes", 3) )
+
 handleHelperItems = []
 handleHelperItems.append( ("MASK", "Mask", "Mask helper geometry", 1) )
 handleHelperItems.append( ("NOTHING", "Leave be", "Leave helper geometry as is", 2) )
@@ -32,6 +37,9 @@ handleHiddenItems.append( ("DELETE", "Delete", "Delete vertices for hidden surfa
 
 def registerImporterConstantsAndSettings():
     # Properties for human importer
+
+    bpy.types.Scene.MhGeneralPreset = bpy.props.EnumProperty(items=overridePresets, name="handle_presents", description="If you plan on using MakeClothes or MakeTarget with the imported toon, choose one of these here. If doing so, all settings below will be ignored.", default="BELOW")
+
     bpy.types.Scene.MhHandleHelper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="How to handle helpers (such as clothes helper geometry and joint cubes)", default="MASK")
     bpy.types.Scene.MhScaleMode = bpy.props.EnumProperty(items=scaleModeItems, name="Scale mode", description="How long in real world terms is a blender unit?", default="METER")
     bpy.types.Scene.MhDetailedHelpers = BoolProperty(name="Detailed helper groups", description="Create one vertex group per helper part. This is usually superfluous unless you want to work with MakeTarget or MakeClothes", default=False)
@@ -76,6 +84,10 @@ def addImporterUIToTab(layout, scn):
     importHumanBox = layout.box()
     importHumanBox.label(text="Import human", icon="MESH_DATA")
 
+    importHumanBox.label(text="General preset:")
+    importHumanBox.prop(scn, 'MhGeneralPreset', text="")
+
+    importHumanBox.separator()
     importHumanBox.label(text="Import meshes:")
     importHumanBox.prop(scn, 'MhImportWhat', text="")
     importHumanBox.prop(scn, 'MhPrefixProxy', text="Prefix with toon")
