@@ -734,7 +734,7 @@ def unregister():
     del bpy.types.Scene.MhJitterMaxFrames
     del bpy.types.Scene.MhJitterMinRetracement
 
-    del bpy.types.Scene.handle_helper
+    del bpy.types.Scene.MhHandleHelper
     del bpy.types.Scene.MhScaleMode
 
 if __name__ == "__main__":
