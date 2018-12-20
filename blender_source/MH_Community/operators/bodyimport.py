@@ -10,6 +10,6 @@ class BodyImportOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from .mh_sync.import_body_binary import ImportBodyBinary
+        from ..mh_sync.import_body_binary import ImportBodyBinary
         ImportBodyBinary()
         return {'FINISHED'}
