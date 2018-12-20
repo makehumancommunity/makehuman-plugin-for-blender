@@ -1,5 +1,4 @@
-from MH_Community.rig_info import *
-from MH_Community.bone_surgery import *
+from ..rig import BoneSurgery
 
 import bpy
 

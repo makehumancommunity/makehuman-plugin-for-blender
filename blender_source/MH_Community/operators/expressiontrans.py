@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+from ..rig import RigInfo
 
 class ExpressionTransOperator(bpy.types.Operator):
     """Transfer MakeHuman expressions to a pose library.  Requirements:\n\nMust be the Default armature.\nMust be exported in decimeters to allow location translation.\nMust have a current Pose library."""
@@ -10,7 +11,6 @@ class ExpressionTransOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..rig_info import RigInfo
         from ..mh_sync.expr_to_poselib import ExprToPoselib
 
         armature = context.object
@@ -24,7 +24,6 @@ class ExpressionTransOperator(bpy.types.Operator):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
-        from ..rig_info import RigInfo
         ob = context.object
         if ob is None or ob.type != 'ARMATURE' or not ob.pose_library: return False
 

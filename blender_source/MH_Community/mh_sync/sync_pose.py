@@ -7,7 +7,7 @@ bl_info = {
 }
 
 from .sync_ops import SyncOperator
-from MH_Community.rig_info import *
+from ..rig import RigInfo
 
 import bpy
 from mathutils import Matrix, Vector

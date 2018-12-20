@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+from ..rig import RigInfo
+
 
 class PoseRightOperator(bpy.types.Operator):
     """This is a diagnostic operator, which poses both the capture & final armatures one frame at a time."""
@@ -18,7 +20,6 @@ class PoseRightOperator(bpy.types.Operator):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
-        from ..rig_info import RigInfo
         ob = context.object
         if ob is None or ob.type != 'ARMATURE': return False
 

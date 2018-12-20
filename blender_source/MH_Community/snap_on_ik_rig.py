@@ -1,6 +1,8 @@
 from .rig_info import *
 
 import bpy
+from .rig import DefaultRigInfo
+
 #===============================================================================
 class IkRig():
     def __init__(self, rigInfo):

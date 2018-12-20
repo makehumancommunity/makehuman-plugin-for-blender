@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+from ..rig import RigInfo
 
 class KinectAssignmentOperator(bpy.types.Operator):
     """Assign an animation to an action of the selected skeleton.\n\nCan only be done to a Kinect2 rig."""
@@ -21,7 +22,6 @@ class KinectAssignmentOperator(bpy.types.Operator):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
-        from ..rig_info import RigInfo
         ob = context.object
         if ob is None or ob.type != 'ARMATURE': return False
 

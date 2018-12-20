@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+from ..rig import RigInfo
 
 class AmputateFingersOperator(bpy.types.Operator):
     """Remove finger bones, and assign their weights to hand bone"""
@@ -10,8 +11,6 @@ class AmputateFingersOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..rig_info import RigInfo, Kinect2RigInfo
-        from ..bone_surgery import BoneSurgery
         armature = context.object
 
         rigInfo = RigInfo.determineRig(armature)
@@ -35,7 +34,6 @@ class AmputateFingersOperator(bpy.types.Operator):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
-        from ..rig_info import RigInfo
         ob = context.object
         if ob is None or ob.type != 'ARMATURE': return False
 

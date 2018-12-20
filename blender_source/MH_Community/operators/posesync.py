@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+from ..rig import RigInfo
 
 class PoseSyncOperator(bpy.types.Operator):
     """Synchronize the pose of the skeleton of a human with MH.  Requirements:\n\nMust be the Default armature.\nMust be exported in decimeters to allow location translation."""
@@ -10,7 +11,6 @@ class PoseSyncOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..rig_info import RigInfo
         from ..mh_sync.sync_pose import SyncPose
 
         armature = context.object
@@ -24,7 +24,6 @@ class PoseSyncOperator(bpy.types.Operator):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
-        from ..rig_info import RigInfo
         ob = context.object
         if ob is None or ob.type != 'ARMATURE': return False
 

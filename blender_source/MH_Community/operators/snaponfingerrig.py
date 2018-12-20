@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+from ..rig import RigInfo
 
 class SnapOnFingerRigOperator(bpy.types.Operator):
     """Snap on finger control bones.\nNote an IK rig is always added with .ik in bones names, regardless of imported with MHX or Collada."""
@@ -10,7 +11,6 @@ class SnapOnFingerRigOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..rig_info import RigInfo
         from ..snap_on_finger_rig import FingerRig
         armature = context.object
 
@@ -26,7 +26,6 @@ class SnapOnFingerRigOperator(bpy.types.Operator):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
-        from ..rig_info import RigInfo
         ob = context.object
         if ob is None or ob.type != 'ARMATURE': return False
 

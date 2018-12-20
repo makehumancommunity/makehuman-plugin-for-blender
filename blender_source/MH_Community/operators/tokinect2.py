@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+from ..rig import RigInfo
 
 class ToKinect2Operator(bpy.types.Operator):
     """Transform a default Rig, with or without toes, to one suited for use with an XBox One Kinect-2 device.\n\nCannot be done after fingers have been amputated,\nor a finger IK has been added."""
@@ -10,7 +11,6 @@ class ToKinect2Operator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..rig_info import RigInfo
         from ..kinect_sensor.to_kinect2 import ToKinectV2
         armature = context.object
 
@@ -30,7 +30,6 @@ class ToKinect2Operator(bpy.types.Operator):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
-        from ..rig_info import RigInfo
         ob = context.object
         if ob is None or ob.type != 'ARMATURE': return False
 
