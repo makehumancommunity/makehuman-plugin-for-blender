@@ -15,6 +15,7 @@ import itertools
 
 from .material import *
 from .fetch_server_data import FetchServerData
+from ..util import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -87,10 +88,9 @@ class ImportProxyBinary():
         self.left_verts = []
         self.right_verts = []
 
-        scene = bpy.context.scene
-        scene.objects.link(self.obj)
-        scene.objects.active = self.obj
-        self.obj.select = True
+        linkObject(self.obj)
+        activateObject(self.obj)
+        selectObject(self.obj)
 
         self.mesh = bpy.context.object.data
         self.bm = bmesh.new()
@@ -208,7 +208,10 @@ class ImportProxyBinary():
             i = i + 1
 
         uv_layer = self.bm.loops.layers.uv.verify()
-        self.bm.faces.layers.tex.verify()
+
+        if not bl28():
+            # TODO: There is probably a way to do this in blender 2.8 too
+            self.bm.faces.layers.tex.verify()
 
         for face in self.bm.faces:
             for i, loop in enumerate(face.loops):

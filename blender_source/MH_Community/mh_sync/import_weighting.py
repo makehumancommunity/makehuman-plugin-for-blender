@@ -89,7 +89,7 @@ class ImportWeighting():
         if self.debug:
             print("Handling weights for bone " + boneName + " (" + str(numVerts) + " vertices)")
 
-        vertGroup = self.myObject.vertex_groups.new(boneName)
+        vertGroup = self.myObject.vertex_groups.new(name=boneName)
 
         bytesStart = self.processedVertices * 4 # both vert list and weights come as four bytes per vertex
         bytesEnd = self.processedVertices * 4 + numVerts * 4

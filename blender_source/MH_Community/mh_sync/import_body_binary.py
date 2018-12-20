@@ -18,6 +18,7 @@ from .material import *
 from .fetch_server_data import FetchServerData
 from .import_proxy_binary import ImportProxyBinary
 from .import_weighting import ImportWeighting
+from ..util import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -110,10 +111,9 @@ class ImportBodyBinary():
 
         # TODO: Set more info, for example name of toon
 
-        scene = bpy.context.scene
-        scene.objects.link(self.obj)
-        scene.objects.active = self.obj
-        self.obj.select = True
+        linkObject(self.obj)
+        activateObject(self.obj)
+        selectObject(self.obj)
 
         self.mesh = bpy.context.object.data
         self.bm = bmesh.new()
@@ -220,7 +220,10 @@ class ImportBodyBinary():
             i = i + 1
 
         uv_layer = self.bm.loops.layers.uv.verify()
-        self.bm.faces.layers.tex.verify()
+
+        if not bl28():
+            # TODO: There's probably some way to do this in blender 2.8 too
+            self.bm.faces.layers.tex.verify()
 
         for face in self.bm.faces:
             for i, loop in enumerate(face.loops):
@@ -394,7 +397,7 @@ class ImportBodyBinary():
 
     def _deselectAll(self):
         for ob in bpy.context.selected_objects:
-            ob.select = False
+            deselectObject(ob)
 
     def _addBone(self, boneInfo, parentBone=None):
         bone = self.armature.edit_bones.new(boneInfo["name"])
@@ -435,9 +438,8 @@ class ImportBodyBinary():
             self.armatureObject = bpy.data.objects.new(self.name, self.armature)
             self.armatureObject.MhObjectType = "Skeleton"
 
-            scene = bpy.context.scene
-            scene.objects.link(self.armatureObject)
-            scene.objects.active = self.armatureObject
+            linkObject(self.armatureObject)
+            activateObject(self.armatureObject)
 
             bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
@@ -457,7 +459,7 @@ class ImportBodyBinary():
             modifier.object = self.armatureObject
 
             if self.helpers == "MASK":
-                scene.objects.active = self.obj
+                activateObject(self.obj)
                 bpy.ops.object.modifier_move_up(modifier="Armature")
 
         FetchServerData('getProxiesInfo', self.gotProxiesInfo)
@@ -548,9 +550,9 @@ class ImportBodyBinary():
         self.objToAdjust = self.obj
 
         if self.armatureObject is None:
-            self.obj.select = True
+            selectObject(self.obj)
         else:
-            self.armatureObject.select = True
+            selectObject(self.armatureObject)
             self.objToAdjust = self.armatureObject
 
         if self.adjust:

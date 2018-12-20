@@ -20,3 +20,9 @@ def selectObject(obj):
         obj.select_set(True)
     else:
         obj.select = True
+
+def deselectObject(obj):
+    if bl28():
+        obj.select_set(False)
+    else:
+        obj.select = False
