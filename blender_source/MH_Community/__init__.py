@@ -32,7 +32,7 @@ from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, C
 from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAndSettings
 
 #===============================================================================
-class Community_Panel(bpy.types.Panel):
+class MHC_PT_Community_Panel(bpy.types.Panel):
     bl_label = "MakeHuman"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -124,7 +124,7 @@ class Community_Panel(bpy.types.Panel):
 
 #===============================================================================
 # extra classes to support animation lists
-class Animation_items(bpy.types.UIList):
+class MHC_UL_AnimationItems(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "name", text="", emboss=False, translate=False, icon='BORDER_RECT')
 
@@ -146,8 +146,8 @@ bpy.types.Armature.exportedUnits = bpy.props.StringProperty(
 )
 
 classes =  [
-    Community_Panel,
-    Animation_items
+    MHC_PT_Community_Panel,
+    MHC_UL_AnimationItems
 ]
 
 from .operators import *
