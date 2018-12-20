@@ -103,7 +103,7 @@ class MHC_PT_Community_Panel(bpy.types.Panel):
             kinectBoxAssignment = layout.box()
             kinectBoxAssignment.label(text="Action Assignment:")
             kinectBoxAssignment.operator("mh_community.refresh_kinect")
-            kinectBoxAssignment.template_list("Animation_items", "", scn, "MhKinectAnimations", scn, "MhKinectAnimation_index")
+            kinectBoxAssignment.template_list("MHC_UL_AnimationItems", "", scn, "MhKinectAnimations", scn, "MhKinectAnimation_index")
             kinectBoxAssignment.prop(scn, "MhKinectBaseActionName")
             kinectBoxAssignment.prop(scn, "MhExcludeFingers")
             kinectBoxAssignment.operator("mh_community.assign_kinect")
