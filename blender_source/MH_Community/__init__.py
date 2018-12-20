@@ -1,33 +1,32 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import bpy
+
+appver = (2, 80, 0)
+BLENDER_REGION = "UI"
+
+if bpy.app.version < appver:
+    appver = (2, 79, 0)
+    BLENDER_REGION = "TOOLS"
+
 bl_info = {
     "name": "MH Community Plug-in",
     "author": "Joel Palmius",
     "version": (0, 4),
-    "blender": (2, 79, 0),
+    "blender": appver,
     "location": "View3D > Properties > MH",
     "description": "MakeHuman interactive operations",
     "wiki_url": "https://github.com/makehumancommunity/community-plugins/tree/master/blender_source/MH_Community",
     "category": "MakeHuman"}
 
-if "bpy" in locals():
-    print("Reloading MH community plug-in v %d.%d" % bl_info["version"])
-    import imp
-    imp.reload(mh_sync)  # directory
-    imp.reload(kinect_sensor)  # directory
-    imp.reload(rig)  # directory
-    imp.reload(separate_eyes)
-    imp.reload(animation_trimming)
-else:
-    print("Loading MH community plug-in v %d.%d" % bl_info["version"])
-    from . import mh_sync # directory
-    from . import kinect_sensor # directory
-    from . import separate_eyes
-    from .rig import RigInfo, BoneSurgery, IkRig, FingerRig
-    from . import animation_trimming
+print("Loading MH community plug-in v %d.%d" % bl_info["version"])
+from . import mh_sync # directory
+from . import kinect_sensor # directory
+from . import separate_eyes
+from .rig import RigInfo, BoneSurgery, IkRig, FingerRig
+from . import animation_trimming
 
-import bpy
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAndSettings
 
@@ -35,7 +34,7 @@ from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAn
 class MHC_PT_Community_Panel(bpy.types.Panel):
     bl_label = "MakeHuman"
     bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = BLENDER_REGION
     bl_category = "MakeHuman"
 
     def draw(self, context):
