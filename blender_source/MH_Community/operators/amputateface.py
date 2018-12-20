@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo
 
-class AmputateFaceOperator(bpy.types.Operator):
+class MHC_OT_AmputateFaceOperator(bpy.types.Operator):
     """Remove face bones, and assign their weights to head bone"""
     bl_idname = "mh_community.amputate_face"
     bl_label = "Face"

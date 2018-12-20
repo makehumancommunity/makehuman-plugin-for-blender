@@ -3,7 +3,7 @@
 
 import bpy
 
-class ActionJitterReducerOperator(bpy.types.Operator):
+class MHC_OT_ActionJitterReducerOperator(bpy.types.Operator):
     """Smooth armature movements which get quickly reversed through data reduction.\n\nCan be done with any armature based action against any rig.\n\nDo not do multiple times.  Undo, change args, & do again."""
     bl_idname = 'mh_community.smooth_animation'
     bl_label = 'Smooth'

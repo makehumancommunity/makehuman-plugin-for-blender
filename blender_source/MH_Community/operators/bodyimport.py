@@ -3,7 +3,7 @@
 
 import bpy
 
-class BodyImportOperator(bpy.types.Operator):
+class MHC_OT_BodyImportOperator(bpy.types.Operator):
     """Import a human from MH"""
     bl_idname = "mh_community.import_body"
     bl_label = "Import body from MH"

@@ -3,7 +3,7 @@
 
 import bpy
 
-class StartKinectRecordingOperator(bpy.types.Operator):
+class MHC_OT_StartKinectRecordingOperator(bpy.types.Operator):
     """Begin a Kinect motion capture session.\n\nCan only be done on Windows."""
     bl_idname = 'mh_community.start_kinect'
     bl_label = 'Record'

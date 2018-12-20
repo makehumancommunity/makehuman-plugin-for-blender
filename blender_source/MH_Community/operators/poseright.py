@@ -5,7 +5,7 @@ import bpy
 from ..rig import RigInfo
 
 
-class PoseRightOperator(bpy.types.Operator):
+class MHC_OT_PoseRightOperator(bpy.types.Operator):
     """This is a diagnostic operator, which poses both the capture & final armatures one frame at a time."""
     bl_idname = 'mh_community.pose_right'
     bl_label = '1 Right'

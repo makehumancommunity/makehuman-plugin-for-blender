@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo
 
-class ExpressionTransOperator(bpy.types.Operator):
+class MHC_OT_ExpressionTransOperator(bpy.types.Operator):
     """Transfer MakeHuman expressions to a pose library.  Requirements:\n\nMust be the Default armature.\nMust be exported in decimeters to allow location translation.\nMust have a current Pose library."""
     bl_idname = "mh_community.expressions_trans"
     bl_label = "To Pose library"

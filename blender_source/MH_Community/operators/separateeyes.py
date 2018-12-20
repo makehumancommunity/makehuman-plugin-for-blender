@@ -5,7 +5,7 @@ import bpy
 
 HIPOLY_VERTS  = 1064
 LOWPOLY_VERTS = 96
-class SeparateEyesOperator(bpy.types.Operator):
+class MHC_OT_SeparateEyesOperator(bpy.types.Operator):
     """Separate The Eye mesh into left & right meshes, and move origin to center of mass of each."""
     bl_idname = 'mh_community.separate_eyes'
     bl_label = 'Separate Eyes'

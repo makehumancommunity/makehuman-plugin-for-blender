@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo
 
-class KinectAssignmentOperator(bpy.types.Operator):
+class MHC_OT_KinectAssignmentOperator(bpy.types.Operator):
     """Assign an animation to an action of the selected skeleton.\n\nCan only be done to a Kinect2 rig."""
     bl_idname = 'mh_community.assign_kinect'
     bl_label = 'Assign'

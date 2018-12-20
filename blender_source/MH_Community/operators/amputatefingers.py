@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo
 
-class AmputateFingersOperator(bpy.types.Operator):
+class MHC_OT_AmputateFingersOperator(bpy.types.Operator):
     """Remove finger bones, and assign their weights to hand bone"""
     bl_idname = "mh_community.amputate_fingers"
     bl_label = "Fingers"

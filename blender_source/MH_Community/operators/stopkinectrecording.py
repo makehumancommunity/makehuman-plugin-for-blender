@@ -3,7 +3,7 @@
 
 import bpy
 
-class StopKinectRecordingOperator(bpy.types.Operator):
+class MHC_OT_StopKinectRecordingOperator(bpy.types.Operator):
     """Complete a Kinect motion capture session."""
     bl_idname = 'mh_community.stop_kinect'
     bl_label = 'Stop'

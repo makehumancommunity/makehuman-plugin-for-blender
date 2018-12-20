@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo
 
-class PoseSyncOperator(bpy.types.Operator):
+class MHC_OT_PoseSyncOperator(bpy.types.Operator):
     """Synchronize the pose of the skeleton of a human with MH.  Requirements:\n\nMust be the Default armature.\nMust be exported in decimeters to allow location translation."""
     bl_idname = "mh_community.sync_pose"
     bl_label = "Synchronize MH Pose"

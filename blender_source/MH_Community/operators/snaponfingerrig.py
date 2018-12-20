@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo, FingerRig
 
-class SnapOnFingerRigOperator(bpy.types.Operator):
+class MHC_OT_SnapOnFingerRigOperator(bpy.types.Operator):
     """Snap on finger control bones.\nNote an IK rig is always added with .ik in bones names, regardless of imported with MHX or Collada."""
     bl_idname = 'mh_community.add_finger_rig'
     bl_label = '+'

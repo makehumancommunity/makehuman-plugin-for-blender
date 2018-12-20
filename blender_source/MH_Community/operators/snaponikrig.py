@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo, IkRig
 
-class SnapOnIkRigOperator(bpy.types.Operator):
+class MHC_OT_SnapOnIkRigOperator(bpy.types.Operator):
     """Add bones which convert this to an IK Rig\n\nOnly Game or Kinect2 rigs."""
     bl_idname = 'mh_community.add_ik_rig'
     bl_label = '+'

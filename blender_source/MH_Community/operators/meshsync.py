@@ -3,7 +3,7 @@
 
 import bpy
 
-class MeshSyncOperator(bpy.types.Operator):
+class MHC_OT_MeshSyncOperator(bpy.types.Operator):
     """Synchronize the shape of a human with MH"""
     bl_idname = "mh_community.sync_mh_mesh"
     bl_label = "Synchronize MH Mesh"

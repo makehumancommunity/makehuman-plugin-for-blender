@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo
 
-class ToKinect2Operator(bpy.types.Operator):
+class MHC_OT_ToKinect2Operator(bpy.types.Operator):
     """Transform a default Rig, with or without toes, to one suited for use with an XBox One Kinect-2 device.\n\nCannot be done after fingers have been amputated,\nor a finger IK has been added."""
     bl_idname = 'mh_community.to_kinect2'
     bl_label = 'Convert Rig'

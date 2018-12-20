@@ -3,7 +3,7 @@
 
 import bpy
 
-class KinectRefreshOperator(bpy.types.Operator):
+class MHC_OT_KinectRefreshOperator(bpy.types.Operator):
     """Re-populate any captures recorded with a previously loaded blend.\nGood for populating multi-character animation across .blend files."""
     bl_idname = 'mh_community.refresh_kinect'
     bl_label = 'Refresh List'

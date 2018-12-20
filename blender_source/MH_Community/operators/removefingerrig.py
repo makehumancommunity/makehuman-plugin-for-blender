@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo, FingerRig
 
-class RemoveFingerRigOperator(bpy.types.Operator):
+class MHC_OT_RemoveFingerRigOperator(bpy.types.Operator):
     """Remove the finger IK rig previously added."""
     bl_idname = 'mh_community.remove_finger_rig'
     bl_label = '-'

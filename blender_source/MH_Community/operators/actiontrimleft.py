@@ -3,7 +3,7 @@
 
 import bpy
 
-class ActionTrimLeftOperator(bpy.types.Operator):
+class MHC_OT_ActionTrimLeftOperator(bpy.types.Operator):
     """Remove all keyframes, of the current action, before the current frame, shifting remaining to the left.\n\nCan be done with any armature based action against any rig."""
     bl_idname = 'mh_community.trim_left'
     bl_label = 'Left'

@@ -4,7 +4,7 @@
 import bpy
 from ..rig import RigInfo, IkRig
 
-class RemoveIkRigOperator(bpy.types.Operator):
+class MHC_OT_RemoveIkRigOperator(bpy.types.Operator):
     """Remove the IK rig previously added."""
     bl_idname = 'mh_community.remove_ik_rig'
     bl_label = '-'
