@@ -5,6 +5,8 @@ import bpy
 import os
 import pprint
 
+from ..util import *
+
 pp = pprint.PrettyPrinter(indent=4)
 
 def _createMHImageTextureNode(nodes, imagePathAbsolute):
@@ -21,7 +23,7 @@ def _createMHImageTextureNode(nodes, imagePathAbsolute):
     texnode.image = image
     return texnode
 
-def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
+def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW", eeveeOpaque=False):
 
     #pp.pprint(materialSettingsHash)
     x = 0
@@ -42,6 +44,9 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
     if mat is None:
         print("Creating new material " + name)
         mat = bpy.data.materials.new(name)
+
+    if bl28() and not eeveeOpaque:
+        mat.blend_method = 'BLEND'
 
     mat.use_nodes = True
     tree = mat.node_tree
