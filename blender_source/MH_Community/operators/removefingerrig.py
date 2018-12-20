@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
-from ..rig import RigInfo
+from ..rig import RigInfo, FingerRig
 
 class RemoveFingerRigOperator(bpy.types.Operator):
     """Remove the finger IK rig previously added."""
@@ -11,7 +11,6 @@ class RemoveFingerRigOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..snap_on_finger_rig import FingerRig
         armature = context.object
 
         rigInfo = RigInfo.determineRig(armature)

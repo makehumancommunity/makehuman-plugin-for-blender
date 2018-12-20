@@ -18,17 +18,13 @@ if "bpy" in locals():
     imp.reload(kinect_sensor)  # directory
     imp.reload(rig)  # directory
     imp.reload(separate_eyes)
-    imp.reload(snap_on_finger_rig)
-    imp.reload(snap_on_ik_rig)
     imp.reload(animation_trimming)
 else:
     print("Loading MH community plug-in v %d.%d" % bl_info["version"])
     from . import mh_sync # directory
     from . import kinect_sensor # directory
     from . import separate_eyes
-    from . import snap_on_finger_rig
-    from . import snap_on_ik_rig
-    from .rig import RigInfo, BoneSurgery
+    from .rig import RigInfo, BoneSurgery, IkRig, FingerRig
     from . import animation_trimming
 
 import bpy

@@ -7,6 +7,8 @@ from .defaultriginfo import DefaultRigInfo
 from .gameriginfo import GameRigInfo
 from .kinect2riginfo import Kinect2RigInfo
 from .bonesurgery import BoneSurgery
+from .ikrig import IkRig
+from .fingerrig import FingerRig
 
 __all__ = [
     RigInfo,
@@ -14,5 +16,7 @@ __all__ = [
     DefaultRigInfo,
     GameRigInfo,
     Kinect2RigInfo,
-    BoneSurgery
+    BoneSurgery,
+    IkRig,
+    FingerRig
 ]

@@ -1,14 +1,15 @@
-from .rig_info import *
 
 import bpy
-from .rig import DefaultRigInfo
+from . import DefaultRigInfo
 
-#===============================================================================
+
+# ===============================================================================
 class IkRig():
     def __init__(self, rigInfo):
         self.rigInfo = rigInfo
         self.armature = self.rigInfo.armature
-#===============================================================================
+
+    # ===============================================================================
     def add(self):
         bpy.ops.object.mode_set(mode='POSE')
         bpy.ops.pose.select_all(action='SELECT')
@@ -20,7 +21,7 @@ class IkRig():
         val = 0.6 * unitMult
         bpy.ops.transform.transform(mode='BONE_SIZE', value=(val, val, val, 0))
         bpy.ops.pose.select_all(action='DESELECT')
-        
+
         self.changeLocks(False)
 
         self.addElbowAndHandIK(True)
@@ -72,14 +73,14 @@ class IkRig():
 
         upperArmName = self.rigInfo.upperArm(isLeft)
         upperArm = eBones[upperArmName]
-        
+
         lowerArmName = self.rigInfo.lowerArm(isLeft)
-        
+
         handName = self.rigInfo.hand(isLeft)
         hand = eBones[handName]
         # - - - - - - - -
         elbowHead = upperArm.tail.copy()
-        elbowHead.y = abs(elbowHead.y) * -4 # always forward, negative
+        elbowHead.y = abs(elbowHead.y) * -4  # always forward, negative
         elbowTail = elbowHead.copy()
         elbowTail.y = elbowTail.y * 2
 
@@ -101,8 +102,9 @@ class IkRig():
         handIK.select = True
         # - - - - - - - -
         self.addIK_Constraint(upperArmName, elbowIKName, self.rigInfo.elbowIKChainLength)
-        self.addIK_Constraint(lowerArmName, handIKName , self.rigInfo.handIKChainLength )
+        self.addIK_Constraint(lowerArmName, handIKName, self.rigInfo.handIKChainLength)
         self.addCopyRotation(handName, handIKName)
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def addKneeAndFootIK(self, isLeft):
         side = 'L' if isLeft else 'R'
@@ -114,13 +116,13 @@ class IkRig():
         thighName = self.rigInfo.thigh(isLeft)
         thigh = eBones[thighName]
 
-        calfName = self.rigInfo.calf (isLeft)
-        
-        footName = self.rigInfo.foot (isLeft)
+        calfName = self.rigInfo.calf(isLeft)
+
+        footName = self.rigInfo.foot(isLeft)
         foot = eBones[footName]
 
         kneeHead = thigh.tail.copy()
-        kneeHead.y = abs(kneeHead.y) * -10 # always forward, negative
+        kneeHead.y = abs(kneeHead.y) * -10  # always forward, negative
         kneeTail = kneeHead.copy()
         kneeTail.y = kneeHead.y * 1.5
 
@@ -142,11 +144,12 @@ class IkRig():
         footIK.select = True
         # - - - - - - - -
         self.addIK_Constraint(thighName, kneeIKName, self.rigInfo.kneeIKChainLength)
-        self.addIK_Constraint(calfName, footIKName , self.rigInfo.footIKChainLength )
+        self.addIK_Constraint(calfName, footIKName, self.rigInfo.footIKChainLength)
         self.addCopyRotation(footName, footIKName)
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def addCopyRotation(self, boneName, subtargetName):
-        print ('adding copy rotation constraint to ' + boneName + ', with sub target ' + subtargetName)
+        print('adding copy rotation constraint to ' + boneName + ', with sub target ' + subtargetName)
         # apply constraints to the pose bone version
         bpy.ops.object.mode_set(mode='POSE')
         pBones = self.armature.pose.bones
@@ -158,7 +161,7 @@ class IkRig():
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def addIK_Constraint(self, boneName, ikBoneName, chain_count):
-        print ('adding IK constraint to ' + boneName + ', with sub target ' + ikBoneName + ', and chain length ' + str(chain_count))
+        print('adding IK constraint to ' + boneName + ', with sub target ' + ikBoneName + ', and chain length ' + str(chain_count))
         # apply constraints to the pose bone version
         bpy.ops.object.mode_set(mode='POSE')
         pBones = self.armature.pose.bones
@@ -168,24 +171,26 @@ class IkRig():
         con.target = self.armature
         con.subtarget = ikBoneName
         con.chain_count = chain_count
-#===============================================================================
+
+    # ===============================================================================
     def changeLocks(self, locked):
         # take location locks off pelvis & clavicles
         pelvis = self.armature.pose.bones[self.rigInfo.pelvis]
         pelvis.lock_location[0] = locked
         pelvis.lock_location[1] = locked
         pelvis.lock_location[2] = locked
-        
+
         lClavicle = self.armature.pose.bones[self.rigInfo.clavicle(True)]
         lClavicle.lock_location[0] = locked
         lClavicle.lock_location[1] = locked
         lClavicle.lock_location[2] = locked
-        
+
         rClavicle = self.armature.pose.bones[self.rigInfo.clavicle(False)]
         rClavicle.lock_location[0] = locked
         rClavicle.lock_location[1] = locked
         rClavicle.lock_location[2] = locked
-#===============================================================================
+
+    # ===============================================================================
     def remove(self):
         self.changeLocks(True)
         self.removeSide(True)
@@ -194,15 +199,17 @@ class IkRig():
         unitMult = self.rigInfo.unitMultplierToExported()
         val = unitMult / 0.6
         bpy.ops.transform.transform(mode='BONE_SIZE', value=(val, val, val, 0))
-        
+
         self.armature.data.draw_type = 'STICK'
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def removeSide(self, isLeft):
         side = 'L' if isLeft else 'R'
         self.demolish('elbow.ik.' + side, [self.rigInfo.upperArm(isLeft)])
-        self.demolish('hand.ik.'  + side, [self.rigInfo.lowerArm(isLeft), self.rigInfo.hand(isLeft)])
-        self.demolish('knee.ik.'  + side, [self.rigInfo.thigh   (isLeft)])
-        self.demolish('foot.ik.'  + side, [self.rigInfo.calf    (isLeft), self.rigInfo.foot (isLeft)])
+        self.demolish('hand.ik.' + side, [self.rigInfo.lowerArm(isLeft), self.rigInfo.hand(isLeft)])
+        self.demolish('knee.ik.' + side, [self.rigInfo.thigh(isLeft)])
+        self.demolish('foot.ik.' + side, [self.rigInfo.calf(isLeft), self.rigInfo.foot(isLeft)])
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # no need of BoneSurgery module, since no weights to give back
     def demolish(self, controlBoneName, boneNames):
@@ -215,11 +222,11 @@ class IkRig():
         for bIndex, boneName in enumerate(boneNames):
             self.armature.data.bones[boneName].select = True
             self.armature.data.bones[boneName].hide = False
-            
+
         for bone in bpy.context.selected_pose_bones:
             # Create a list of all the copy location constraints on this bone
-            copyRotConstraints = [ c for c in bone.constraints if c.type == 'COPY_ROTATION' or c.type == 'IK']
+            copyRotConstraints = [c for c in bone.constraints if c.type == 'COPY_ROTATION' or c.type == 'IK']
 
             # Iterate over all the bone's copy location constraints and delete them all
             for c in copyRotConstraints:
-                bone.constraints.remove( c ) # Remove constraint
+                bone.constraints.remove(c)  # Remove constraint

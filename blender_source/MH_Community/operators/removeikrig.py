@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
-from ..rig import RigInfo
+from ..rig import RigInfo, IkRig
 
 class RemoveIkRigOperator(bpy.types.Operator):
     """Remove the IK rig previously added."""
@@ -11,7 +11,6 @@ class RemoveIkRigOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..snap_on_ik_rig import IkRig
         armature = context.object
 
         rigInfo = RigInfo.determineRig(armature)
