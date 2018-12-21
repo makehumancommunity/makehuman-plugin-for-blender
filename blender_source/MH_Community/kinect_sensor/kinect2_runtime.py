@@ -216,5 +216,5 @@ class KinectSensor():
         KinectSensor.animationBuffers[idx].assign(armature, baseActionName, excludeFingers)
 
     @staticmethod
-    def oneRight(armature, idx):
-        KinectSensor.animationBuffers[idx].oneRight(armature)
+    def oneRight(armature, idx, scale):
+        KinectSensor.animationBuffers[idx].oneRight(armature, scale)

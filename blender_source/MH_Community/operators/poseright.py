@@ -15,7 +15,12 @@ class MHC_OT_PoseRightOperator(bpy.types.Operator):
         from ..kinect_sensor.kinect2_runtime import KinectSensor
 
         armature = context.object
-        KinectSensor.oneRight(armature, context.scene.MhKinectAnimation_index)
+        rigInfo = RigInfo.determineRig(armature)
+        units = rigInfo.determineExportedUnits()
+        scale = 1
+        if units == 'INCHES'      : scale = 39.3701
+        elif units == 'DECIMETERS': scale = 10
+        KinectSensor.oneRight(armature, context.scene.MhKinectAnimation_index, scale)
         return {'FINISHED'}
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod

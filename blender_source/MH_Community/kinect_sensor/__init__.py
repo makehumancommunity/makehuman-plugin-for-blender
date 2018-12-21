@@ -7,6 +7,7 @@ if "bpy" in locals():
     imp.reload(empties)
     imp.reload(jitter_reduction)
     imp.reload(kinect2_runtime)
+    imp.reload(kinect_ui)
     imp.reload(to_kinect2)
 else:
     print("Loading kinect Sensor plug-in")
@@ -16,6 +17,7 @@ else:
     from . import empties
     from . import jitter_reduction
     from . import kinect2_runtime
+    from . import kinect_ui
     from . import to_kinect2
 
 import bpy

@@ -11,7 +11,8 @@ if "bpy" in locals():
     imp.reload(sync_pose)
     imp.reload(import_body_binary)
     imp.reload(directory_ops)
-    imp.reload(expr_to_poselib)
+    imp.reload(expression_transfer)
+    imp.reload(shapes_from_pose)
 else:
     print("Loading sync plug-in")
     from . import sync_ops
@@ -19,7 +20,8 @@ else:
     from . import sync_pose
     from . import import_body_binary
     from . import directory_ops
-    from . import expr_to_poselib
+    from . import expression_transfer
+    from . import shapes_from_pose
 
 import bpy
 print("sync plug-in loaded")

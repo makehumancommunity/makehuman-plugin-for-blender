@@ -1,4 +1,5 @@
-from ..rig import BoneSurgery
+from ..rig.bonesurgery import BoneSurgery
+from ..rig.kinect2riginfo import Kinect2RigInfo
 
 import bpy
 
