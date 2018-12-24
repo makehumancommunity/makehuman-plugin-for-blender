@@ -17,7 +17,9 @@ class AnimationBuffer:
         self.hands = []
         self.clipPlanes = []
 
-        self.frame = -1 # nuke for production
+        self.frame = -1
+        self.empties = None
+        self.capture = None        
 
     def loadSensorFrame(self, frame, bones, hands, clipPlane):
         self.frames.append(frame)

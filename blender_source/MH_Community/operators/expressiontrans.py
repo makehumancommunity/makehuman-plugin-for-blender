@@ -19,7 +19,7 @@ class MHC_OT_ExpressionTransOperator(bpy.types.Operator):
             self.report({'ERROR'}, 'Location translation only possible when exported in decimeters to match MakeHuman.')
             return {'FINISHED'}
 
-        toShapeKeys = context.scene.mhExprDestination == "SHAPEKEYS"
+        toShapeKeys = context.scene.mhExprDestination == 'SHAPEKEYS'
         exprFilter = context.scene.MhExprFilterTag.lower()
         ExpressionTransfer(self, armature, toShapeKeys, exprFilter)
         return {'FINISHED'}
@@ -27,7 +27,8 @@ class MHC_OT_ExpressionTransOperator(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         ob = context.object
-        if ob is None or ob.type != 'ARMATURE' or not ob.pose_library: return False
+        if ob is None or ob.type != 'ARMATURE': return False
+        if context.scene.mhExprDestination == 'POSELIBRARY' or not ob.pose_library: return False
 
         # can now assume ob is an armature with an active pose library
         rigInfo = RigInfo.determineRig(ob)
