@@ -1,6 +1,7 @@
 
 import bpy
 from . import DefaultRigInfo
+from ..util import bl28
 
 
 # ===============================================================================
@@ -15,7 +16,19 @@ class IkRig():
         bpy.ops.pose.select_all(action='SELECT')
         bpy.ops.pose.transforms_clear()
 
-        self.armature.data.draw_type = 'BBONE'
+        if bl28():
+            # TODO: There seems to be a bug in current blender 2.80 beta code, where BBONE
+            # is not available to python in the pertinent enum, eventhough it's possible
+            # to set in the UI. We'll have to revisit this at some later point to fix it.
+            #
+            # The API reference says it should be there: https://docs.blender.org/api/blender2.8/bpy.types.Armature.html
+            try:
+                self.armature.display_type = 'BBONE'
+            except:
+                pass
+        else:
+            self.armature.data.draw_type = 'BBONE'
+
         # make all regular bone slightly smaller, so IK's fit around
         unitMult = self.rigInfo.unitMultplierToExported()
         val = 0.6 * unitMult
