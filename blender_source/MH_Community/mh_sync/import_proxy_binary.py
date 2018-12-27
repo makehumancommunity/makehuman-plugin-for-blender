@@ -317,7 +317,8 @@ class ImportProxyBinary():
         if self.prefixMaterial:
             matname = self.humanName + "." + matname
 
-        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
+        shouldBeOpaque = self.proxyInfo["type"] == "Proxymeshes"
+        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials, eeveeOpaque=shouldBeOpaque)
 
         brown = (0.08, 0.015, 0.015)
 
