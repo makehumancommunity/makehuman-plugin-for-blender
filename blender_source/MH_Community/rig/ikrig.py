@@ -17,15 +17,7 @@ class IkRig():
         bpy.ops.pose.transforms_clear()
 
         if bl28():
-            # TODO: There seems to be a bug in current blender 2.80 beta code, where BBONE
-            # is not available to python in the pertinent enum, eventhough it's possible
-            # to set in the UI. We'll have to revisit this at some later point to fix it.
-            #
-            # The API reference says it should be there: https://docs.blender.org/api/blender2.8/bpy.types.Armature.html
-            try:
-                self.armature.display_type = 'BBONE'
-            except:
-                pass
+            self.armature.data.display_type = 'BBONE'
         else:
             self.armature.data.draw_type = 'BBONE'
 
