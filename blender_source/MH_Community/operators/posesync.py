@@ -15,7 +15,7 @@ class MHC_OT_PoseSyncOperator(bpy.types.Operator):
 
         armature = context.object
         rigInfo = RigInfo.determineRig(armature)
-        if rigInfo.determineExportedUnits != 'DECIMETERS' and not bpy.context.scene.MhNoLocation:
+        if rigInfo.determineExportedUnits() != 'DECIMETERS' and not bpy.context.scene.MhNoLocation:
             self.report({'ERROR'}, 'Location translation only possible when exported in decimeters to match MakeHuman.')
             return {'FINISHED'}
 

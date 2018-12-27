@@ -9,3 +9,4 @@ __pycache__
 /package.json
 /scripts/
 /nbproject/
+/node_modules/

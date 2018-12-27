@@ -17,7 +17,9 @@ class AnimationBuffer:
         self.hands = []
         self.clipPlanes = []
 
-        self.frame = -1 # nuke for production
+        self.frame = -1
+        self.empties = None
+        self.capture = None        
 
     def loadSensorFrame(self, frame, bones, hands, clipPlane):
         self.frames.append(frame)
@@ -32,7 +34,7 @@ class AnimationBuffer:
             print('root basis:  x:' + ('%.4f' % self.RootLocBasis.x) + ', y:' + ('%.4f' % self.RootLocBasis.y) + ', z:' + ('%.4f' % self.RootLocBasis.z) + '\n')
         
     def isFinger(self, boneName):
-        return boneName.find('HandTip') >= 0 or boneName.find('Thumb') >= 0
+        return boneName.find('Hand') >= 0 or boneName.find('HandTip') >= 0 or boneName.find('Thumb') >= 0
 
     def assign(self, armature, baseActionName, excludeFingers):
         # only does something on the first call for an armature
@@ -48,7 +50,7 @@ class AnimationBuffer:
         bpy.ops.object.mode_set(mode='EDIT')
         skelRootHeight = armature.data.edit_bones[SPINE_MID].head.z
         self.rootScaling = self.RootLocBasis.y / skelRootHeight
-        print('skelRootHeight ' + str(skelRootHeight) + ', rootScaling ' + str(self.rootScaling))
+        print('RootLocBasis.y' + str(self.RootLocBasis.y) + ', skelRootHeight ' + str(skelRootHeight) + ', rootScaling ' + str(self.rootScaling))
         bpy.ops.object.mode_set(mode='POSE')
 
         self.assignLoc(armature, excludeFingers)
@@ -65,20 +67,31 @@ class AnimationBuffer:
      #   print('rel root loc frame: ' + str(frameNum) + ', x:' + ('%.4f' % loc.x) + ', y:' + ('%.4f' % loc.y) + ', z:' + ('%.4f' % loc.z) + '\n')
         return loc        
     #===========================================================================
+    def reset(self):
+        if self.empties is not None:
+            self.empties.nukeConstraints()
+            self.empties.nuke()
+            self.empties = None
+            
+        if self.capture is not None:
+            self.capture.cleanUp()
+            self.capture = None
+            
+        self.frame = -1
+    #===========================================================================
     def assignLoc(self, armature, excludeFingers):
-        capture = CaptureArmature(armature)
-        captureSkel = capture.captureSkel
-        empties = Empties(captureSkel)
+        self.reset()
+        
+        self.capture = CaptureArmature(armature)
+        self.empties = Empties(self.capture.captureSkel)
         bpy.ops.object.mode_set(mode='POSE')
 
         for i in range(len(self.frames)):
             # assign the empties to position capture skel, copy rotations to orig, then assign animation frame
-            empties.assign(self.bones[i])
+            self.empties.assign(self.bones[i])
             self.assignFrame(armature, self.frames[i], excludeFingers)
 
-        empties.nukeConstraints()
-        empties.nuke()
-        capture.cleanUp()
+        self.reset()
         bpy.ops.pose.transforms_clear()
 
     def assignFrame(self, armature, frameNum, excludeFingers):
@@ -102,12 +115,11 @@ class AnimationBuffer:
             bone.rotation_quaternion = rot
             bone.keyframe_insert('rotation_quaternion', frame = frameNum, group = name)
 
-    def oneRight(self, armature):
-        capture = CaptureArmature(armature)
-        captureSkel = capture.captureSkel
+    def oneRight(self, armature, scale):
+        self.capture = CaptureArmature(armature)
         beginning = self.frame == -1
         if beginning:
-            self.empties = Empties(capture.captureSkel) # 39.3701 for inches
+            self.empties = Empties(self.capture.captureSkel, scale) # 39.3701 for inches
 
         self.frame = self.frame + 1 if self.frame + 1 < len(self.bones) else 0
         self.empties.assign(self.bones[self.frame])

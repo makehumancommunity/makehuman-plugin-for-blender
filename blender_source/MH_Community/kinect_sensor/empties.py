@@ -2,9 +2,6 @@ from .to_kinect2 import *
 from .calibrate_armature import *
 from .capture_armature import *
 
-from math        import radians, pow, sqrt, atan2, asin
-from mathutils   import Matrix, Quaternion, Vector, Euler
-
 import bpy
 #===============================================================================
 class Empties:

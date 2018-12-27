@@ -2,21 +2,25 @@
 # -*- coding: utf-8 -*-
 
 bl_info = {
-    "name": "Transfer MakeHuman expressions to a pose library",
+    "name": "Transfer MakeHuman expressions",
     "category": "Armature",
 }
 
 from .directory_ops import GetUserDir, GetSysDir
 from .sync_pose import SyncPose
+from .shapes_from_pose import shapesFromPose
 
 import bpy
 from json import load
 import os
 
-class ExprToPoselib():
-    def __init__(self):
-        self.exprFilter = bpy.context.scene.MhExprFilterTag.lower()
-        self.skeleton = bpy.context.active_object
+class ExpressionTransfer():
+    def __init__(self, operator, skeleton, toShapeKeys, exprFilter):
+        self.operator = operator
+        self.skeleton = skeleton
+        self.toShapeKeys = toShapeKeys
+        self.exprFilter = exprFilter
+
         self.frameNum = len(self.skeleton.pose_library.pose_markers)
         GetUserDir(self.UserDirReady)
 
@@ -56,5 +60,8 @@ class ExprToPoselib():
                         continue
 
                 SyncPose(filepath, True)
-                self.frameNum += 1
-                bpy.ops.poselib.pose_add(frame=self.frameNum, name=name)
+                if self.toShapeKeys:
+                    shapesFromPose(self.operator, self.skeleton, name)
+                else:
+                    self.frameNum += 1
+                    bpy.ops.poselib.pose_add(frame=self.frameNum, name=name)
