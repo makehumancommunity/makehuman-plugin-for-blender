@@ -45,9 +45,6 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW", eeveeOpaq
         print("Creating new material " + name)
         mat = bpy.data.materials.new(name)
 
-    if bl28() and not eeveeOpaque:
-        mat.blend_method = 'BLEND'
-
     mat.use_nodes = True
     tree = mat.node_tree
     nodes = tree.nodes
@@ -88,6 +85,26 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW", eeveeOpaq
     else:
         principled.location = (x+100, y+10)
         links.new(output.inputs['Surface'], principled.outputs['BSDF'])
+
+    if "normalMapTexture" in materialSettingsHash:
+        nmtex = materialSettingsHash["normalMapTexture"]
+        if nmtex and nmtex != "":
+            nmTexture = _createMHImageTextureNode(nodes, nmtex)
+            nmTexture.location = (x - 800, y - 300)
+
+            nmap = nodes.new("ShaderNodeNormalMap")
+            nmap.location = (x - 500, y - 300)
+
+            links.new(nmap.inputs['Color'], nmTexture.outputs['Color'])
+            links.new(principled.inputs['Normal'], nmap.outputs['Normal'])
+
+            # Materials which has both a) transparency and b) a normal map tends
+            # to look very strange in eevee. If a normal map is specified for
+            # the material, render the item opaque in the viewport and in eevee.
+            eeveeOpaque = True
+
+    if bl28() and not eeveeOpaque:
+        mat.blend_method = 'BLEND'
 
     return mat
 
