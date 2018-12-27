@@ -83,6 +83,7 @@ class IkRig():
 
         handName = self.rigInfo.hand(isLeft)
         hand = eBones[handName]
+        hand.hide = True
         # - - - - - - - -
         elbowHead = upperArm.tail.copy()
         elbowHead.y = abs(elbowHead.y) * -4  # always forward, negative
@@ -125,6 +126,7 @@ class IkRig():
 
         footName = self.rigInfo.foot(isLeft)
         foot = eBones[footName]
+        foot.hide = True
 
         kneeHead = thigh.tail.copy()
         kneeHead.y = abs(kneeHead.y) * -10  # always forward, negative
