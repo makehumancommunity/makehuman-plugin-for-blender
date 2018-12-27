@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
-from ..rig import RigInfo
+from ..rig import RigInfo, BoneSurgery
 
 class MHC_OT_AmputateFaceOperator(bpy.types.Operator):
     """Remove face bones, and assign their weights to head bone"""

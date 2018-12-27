@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
-from ..rig import RigInfo
+from ..rig import RigInfo, BoneSurgery, Kinect2RigInfo
 
 class MHC_OT_AmputateFingersOperator(bpy.types.Operator):
     """Remove finger bones, and assign their weights to hand bone"""
