@@ -3,18 +3,16 @@
 
 import bpy
 
-appver = (2, 80, 0)
 BLENDER_REGION = "UI"
 
-if bpy.app.version < appver:
-    appver = (2, 79, 0)
+if bpy.app.version < (2, 80, 0):
     BLENDER_REGION = "TOOLS"
 
 bl_info = {
     "name": "MH Community Plug-in",
     "author": "Joel Palmius",
     "version": (0, 4),
-    "blender": appver,
+    "blender": (2, 80, 0),
     "location": "View3D > Properties > MH",
     "description": "MakeHuman interactive operations",
     "wiki_url": "https://github.com/makehumancommunity/makehuman-plugin-for-blender",
