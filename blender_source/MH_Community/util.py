@@ -3,9 +3,12 @@ import bpy
 def bl28():
     return bpy.app.version >= (2, 80, 0)
 
-def linkObject(obj):
+def linkObject(obj, parent=None):
     if bl28():
-        bpy.context.collection.objects.link(obj)
+        if parent:
+            parent.objects.link(obj)
+        else:
+            bpy.context.collection.objects.link(obj)
     else:
         bpy.context.scene.objects.link(obj)
 
