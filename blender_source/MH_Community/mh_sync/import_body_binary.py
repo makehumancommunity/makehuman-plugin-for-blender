@@ -105,7 +105,7 @@ class ImportBodyBinary():
                 self.name = name
 
         self.mesh = bpy.data.meshes.new(self.name + "BodyMesh")
-        self.obj = bpy.data.objects.new(self.name + "Body", self.mesh)
+        self.obj = bpy.data.objects.new(self.name + ".Body", self.mesh)
 
         self.obj.MhHuman = True
         self.obj.MhObjectType = "Basemesh"
