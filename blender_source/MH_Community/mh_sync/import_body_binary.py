@@ -53,6 +53,7 @@ class ImportBodyBinary():
         self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
         self.rigisparent = bpy.context.scene.MhRigIsParent
         self.adjust = bpy.context.scene.MhAdjustPosition
+        self.addCollection = bpy.context.scene.MhAddCollection
 
         if self.generalPreset != "BELOW":
             self.scaleMode = "DECIMETER"
@@ -104,14 +105,19 @@ class ImportBodyBinary():
                 self.name = name
 
         self.mesh = bpy.data.meshes.new(self.name + "BodyMesh")
-        self.obj = bpy.data.objects.new(self.name + "Body", self.mesh)
+        self.obj = bpy.data.objects.new(self.name + ".Body", self.mesh)
 
         self.obj.MhHuman = True
         self.obj.MhObjectType = "Basemesh"
 
         # TODO: Set more info, for example name of toon
 
-        linkObject(self.obj)
+        self.collection = None
+        if self.addCollection and bl28():
+            self.collection = bpy.data.collections.new(self.name)
+            bpy.context.collection.children.link(self.collection)
+
+        linkObject(self.obj, self.collection)
         activateObject(self.obj)
         selectObject(self.obj)
 
@@ -385,8 +391,8 @@ class ImportBodyBinary():
         if self.prefixMaterial:
             matname = self.name + "." + matname
 
-        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials, eeveeOpaque=True)
-        mat.diffuse_color = (1.0,0.7,0.7);
+        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
+        mat.diffuse_color = (1.0,0.7,0.7)
 
         self.obj.data.materials.append(mat)
 
@@ -438,8 +444,10 @@ class ImportBodyBinary():
             self.armatureObject = bpy.data.objects.new(self.name, self.armature)
             self.armatureObject.MhObjectType = "Skeleton"
 
-            linkObject(self.armatureObject)
+            linkObject(self.armatureObject, self.collection)
             activateObject(self.armatureObject)
+            self.armatureObject.data.display_type = 'WIRE'
+            self.armatureObject.show_in_front = True
 
             bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
@@ -476,7 +484,7 @@ class ImportBodyBinary():
             return
 
         if self.importWhat == "EVERYTHING":
-            ImportProxyBinary(self.obj, self.name, self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded)
+            ImportProxyBinary(self.obj, self.name, self.proxiesInfo[self.nextProxyToImport], self.proxyLoaded, self.collection)
 
         if self.importWhat == "BODYPARTS":
             info = self.proxiesInfo[self.nextProxyToImport]

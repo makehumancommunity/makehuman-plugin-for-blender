@@ -23,7 +23,7 @@ def _createMHImageTextureNode(nodes, imagePathAbsolute):
     texnode.image = image
     return texnode
 
-def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW", eeveeOpaque=False):
+def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
 
     #pp.pprint(materialSettingsHash)
     x = 0
@@ -46,6 +46,8 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW", eeveeOpaq
         mat = bpy.data.materials.new(name)
 
     mat.use_nodes = True
+    if bl28():
+        mat.blend_method = 'HASHED'
     tree = mat.node_tree
     nodes = tree.nodes
     links = tree.links
@@ -97,14 +99,6 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW", eeveeOpaq
 
             links.new(nmap.inputs['Color'], nmTexture.outputs['Color'])
             links.new(principled.inputs['Normal'], nmap.outputs['Normal'])
-
-            # Materials which has both a) transparency and b) a normal map tends
-            # to look very strange in eevee. If a normal map is specified for
-            # the material, render the item opaque in the viewport and in eevee.
-            eeveeOpaque = True
-
-    if bl28() and not eeveeOpaque:
-        mat.blend_method = 'BLEND'
 
     return mat
 

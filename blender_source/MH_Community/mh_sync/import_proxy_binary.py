@@ -23,7 +23,7 @@ ENABLE_PROFILING_OUTPUT = False
 
 class ImportProxyBinary():
 
-    def __init__(self, humanObject, humanName, proxyInfo, onFinished=None):
+    def __init__(self, humanObject, humanName, proxyInfo, onFinished=None, collection=None):
         print("Importing proxy: " + proxyInfo["name"])
 
         #pp.pprint(proxyInfo)
@@ -32,6 +32,7 @@ class ImportProxyBinary():
         self.humanName = humanName
         self.proxyInfo = proxyInfo
         self.onFinished = onFinished
+        self.collection = collection
 
         self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
         self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
@@ -88,7 +89,7 @@ class ImportProxyBinary():
         self.left_verts = []
         self.right_verts = []
 
-        linkObject(self.obj)
+        linkObject(self.obj, self.collection)
         activateObject(self.obj)
         selectObject(self.obj)
 
@@ -317,8 +318,7 @@ class ImportProxyBinary():
         if self.prefixMaterial:
             matname = self.humanName + "." + matname
 
-        shouldBeOpaque = self.proxyInfo["type"] == "Proxymeshes"
-        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials, eeveeOpaque=shouldBeOpaque)
+        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
 
         brown = (0.08, 0.015, 0.015)
 
