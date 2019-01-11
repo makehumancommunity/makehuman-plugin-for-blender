@@ -94,7 +94,7 @@ class IkRig():
         elbowIK = eBones.new(elbowIKName)
         elbowIK.head = elbowHead
         elbowIK.tail = elbowTail
-        elbowIK.parent = eBones[self.rigInfo.root]
+        #elbowIK.parent = eBones[self.rigInfo.root]
         elbowIK.use_deform = False
         elbowIK.select = True
         # - - - - - - - -
@@ -103,7 +103,7 @@ class IkRig():
         handIK.head = hand.head.copy()
         handIK.tail = hand.tail.copy()
         handIK.roll = hand.roll
-        handIK.parent = eBones[self.rigInfo.root]
+        #handIK.parent = eBones[self.rigInfo.root]
         handIK.use_deform = False
         handIK.select = True
         # - - - - - - - -
@@ -137,7 +137,7 @@ class IkRig():
         kneeIK = eBones.new(kneeIKName)
         kneeIK.head = kneeHead
         kneeIK.tail = kneeTail
-        kneeIK.parent = eBones[self.rigInfo.root]
+        #kneeIK.parent = eBones[self.rigInfo.root]
         kneeIK.use_deform = False
         kneeIK.select = True
         # - - - - - - - -
@@ -146,7 +146,7 @@ class IkRig():
         footIK.head = foot.head.copy()
         footIK.tail = foot.tail.copy()
         footIK.roll = foot.roll
-        footIK.parent = eBones[self.rigInfo.root]
+        #footIK.parent = eBones[self.rigInfo.root]
         footIK.use_deform = False
         footIK.select = True
         # - - - - - - - -
