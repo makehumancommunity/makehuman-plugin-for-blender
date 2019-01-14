@@ -446,8 +446,12 @@ class ImportBodyBinary():
 
             linkObject(self.armatureObject, self.collection)
             activateObject(self.armatureObject)
-            self.armatureObject.data.display_type = 'WIRE'
-            self.armatureObject.show_in_front = True
+            if bl28():
+                self.armatureObject.data.display_type = 'WIRE'
+                self.armatureObject.show_in_front = True
+            else:
+                self.armatureObject.data.draw_type = 'WIRE'
+                self.armatureObject.show_x_ray = True
 
             bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
