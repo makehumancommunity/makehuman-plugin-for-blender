@@ -169,7 +169,7 @@ class ImportBodyBinary():
 
         i = 0
         while i < iMax:
-            stride = 0;
+            stride = 0
             verts = [None, None, None, None]
             vertIdxs = [None, None, None, None]
             while stride < 4:
@@ -214,7 +214,7 @@ class ImportBodyBinary():
         faceTexco = []
 
         while i < iMax:
-            stride = 0;
+            stride = 0
             ftex = [None, None, None, None]
             while stride < 4:
                 sliceStart = i * 4 * 4  # 4-byte ints, four mappings per face
@@ -538,7 +538,7 @@ class ImportBodyBinary():
 
         if len(self.importedProxies) < 1:
             self.finalize()
-            return;
+            return
 
         if self.nextProxyToWeight < len(self.importedProxies):
             proxy = self.importedProxies[self.nextProxyToWeight]

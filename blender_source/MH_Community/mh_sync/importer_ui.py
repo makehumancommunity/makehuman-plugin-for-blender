@@ -63,6 +63,8 @@ def registerImporterConstantsAndSettings():
 
     bpy.types.Scene.MhAdjustPosition = BoolProperty(name="Place feet on ground", description="Move the toon after import so that feet are on ground (z = 0.0). This is not to be confused with the feet on ground option inside MH.", default=True)
     bpy.types.Scene.MhAddCollection = BoolProperty(name='Create collection from name', description='Create a collection from model\'s name and add all objects to the collection on import', default=True)
+    bpy.types.Scene.MhHost = StringProperty(name='Host Address', description='Set Host Adress To Connect With MakeHuman', default='127.0.0.1')
+    bpy.types.Scene.MhPort = IntProperty(name='Port Number', description='Set Port Number To Connect With MakeHuman', default=12345)
 
     # bpy.types.Scene.MhHandIK = BoolProperty(name="Hand IK", description="Create hand IK controls", default=False)
     # bpy.types.Scene.MhFootIK = BoolProperty(name="Foot IK", description="Create foot IK controls", default=False)
@@ -133,3 +135,9 @@ def addImporterUIToTab(layout, scn):
 
     importHumanBox.separator()
     importHumanBox.operator("mh_community.import_body", text="Import human")
+
+    importHumanBox.label(text="Host :")
+    importHumanBox.prop(scn, 'MhHost', text="")
+
+    importHumanBox.label(text="Port :")
+    importHumanBox.prop(scn, 'MhPort', text="")

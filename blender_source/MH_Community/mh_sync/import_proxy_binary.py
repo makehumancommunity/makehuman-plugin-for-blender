@@ -148,7 +148,7 @@ class ImportProxyBinary():
 
         i = 0
         while i < iMax:
-            stride = 0;
+            stride = 0
             verts = [None, None, None, None]
             vertIdxs = [None, None, None, None]
             while stride < 4:
@@ -197,7 +197,7 @@ class ImportProxyBinary():
         faceTexco = []
 
         while i < iMax:
-            stride = 0;
+            stride = 0
             ftex = [None, None, None, None]
             while stride < 4:
                 sliceStart = i * 4 * 4  # 4-byte ints, four mappings per face
