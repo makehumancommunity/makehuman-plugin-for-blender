@@ -128,6 +128,7 @@ class ImportBodyBinary():
 
         FetchServerData('getBodyVerticesBinary',self.gotVerticesData,True)
 
+
     def gotVerticesData(self, data):
         self._profile()
         self.vertCache = []
@@ -156,15 +157,8 @@ class ImportBodyBinary():
         self._profile()
         self.faceCache = []
 
-
-        pp.pprint(self.bodyInfo)
-
         shape = self.bodyInfo["facesShape"]
         typeCode = self.bodyInfo["facesTypeCode"]
-
-        print("FACE NUMPY")
-        print(shape)
-        print(typeCode)
 
         numpyMesh = convertBufferToShapedNumpyArray(data, typeCode, shape)
 
@@ -174,25 +168,6 @@ class ImportBodyBinary():
         self.faceVertIndexes = numpyMesh.tolist()
 
         addNumpyArrayAsFaces(self.bm, numpyMesh, self.vertCache, faceCache=self.faceCache, smooth=True)
-
-        # i = 0
-        # while i < iMax:
-        #     stride = 0
-        #     verts = [None, None, None, None]
-        #     vertIdxs = [None, None, None, None]
-        #     while stride < 4:
-        #         sliceStart = i * 4 * 4  # 4-byte ints, four vertices per face
-        #         vertbytes = data[sliceStart + stride * 4:sliceStart + stride * 4 + 4]
-        #         vert = self.vertCache[int(struct.unpack("I", bytes(vertbytes))[0])]
-        #         verts[stride] = vert
-        #         vertIdxs[stride] = vert.index
-        #         stride = stride + 1
-        #     face = self.bm.faces.new(verts)
-        #     face.index = i
-        #     face.smooth = True
-        #     self.faceCache.append(face)
-        #     self.faceVertIndexes.append(vertIdxs)
-        #     i = i + 1
 
         FetchServerData('getBodyTextureCoordsBinary', self.gotTextureCoords, True)
 
@@ -263,7 +238,7 @@ class ImportBodyBinary():
                 verts.extend(list(set(itertools.chain.from_iterable(faceSubSet))))
 
             if len(verts) > 0:
-                
+
                 if name.startswith("joint-"):
                     self.all_joint_verts.extend(verts)
                     if name == "joint-ground":
