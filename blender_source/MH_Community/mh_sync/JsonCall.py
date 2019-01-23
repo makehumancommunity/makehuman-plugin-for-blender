@@ -181,7 +181,7 @@ class JsonCall():
 
 
     def serialize(self):
-        ret = "{\n";
+        ret = "{\n"
         ret = ret + "  \"function\": \"" + self.function + "\",\n"
         ret = ret + "  \"error\": \"" + self.error + "\",\n"
         ret = ret + "  \"params\": {\n"
@@ -207,7 +207,7 @@ class JsonCall():
 
     def send(self, host = "127.0.0.1", port = 12345, expectBinaryResponse = False):
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect(('127.0.0.1', 12345))
+        client.connect((host, port))
         client.send(bytes(self.serialize(), 'utf-8'))
 
         data = None
