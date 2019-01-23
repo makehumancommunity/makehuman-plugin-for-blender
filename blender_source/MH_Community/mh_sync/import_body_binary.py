@@ -12,6 +12,7 @@ import pprint
 import struct
 import time
 import itertools
+import numpy as np
 
 from mathutils import Matrix, Vector
 from .material import *
@@ -19,6 +20,7 @@ from .fetch_server_data import FetchServerData
 from .import_proxy_binary import ImportProxyBinary
 from .import_weighting import ImportWeighting
 from ..util import *
+from .meshutils import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -75,7 +77,7 @@ class ImportBodyBinary():
         self.right_verts = []
         self.mid_verts = []
 
-        self.vertPosCache = []
+        self.vertPosCache = None
 
         if self.scaleMode == "DECIMETER":
             self.scaleFactor = 1.0
@@ -130,61 +132,67 @@ class ImportBodyBinary():
         self._profile()
         self.vertCache = []
 
-        iMax = int(len(data) / 4 / 3)
+        shape = self.bodyInfo["verticesShape"]
+        typeCode = self.bodyInfo["verticesTypeCode"]
+        numpyMesh = convertBufferToShapedNumpyArray(data, typeCode, shape, self.scaleFactor)
+
+        iMax = len(numpyMesh)
         assert(iMax == int(self.bodyInfo["numVertices"]))
+
+        self.vertPosCache = np.zeros(numpyMesh.shape, numpyMesh.dtype)
+
+        addNumpyArrayAsVerts(self.bm, numpyMesh, self.vertCache, self.vertPosCache)
 
         i = 0
         while i < iMax:
-            sliceStart = i * 4 * 3 # 4-byte floats, three values per vertex
-
-            # Coordinate order from MH is XZY
-            xbytes = data[sliceStart:sliceStart + 4]
-            zbytes = data[sliceStart + 4:sliceStart + 4 + 4]
-            ybytes = data[sliceStart + 4 + 4:sliceStart + 4 + 4 +4]
-
-            x = struct.unpack("f", bytes(xbytes))[0] * self.scaleFactor
-            z = struct.unpack("f", bytes(zbytes))[0] * self.scaleFactor
-            y = struct.unpack("f", bytes(ybytes))[0] * self.scaleFactor
-
-            if z < self.minimumZ:
-                self.minimumZ = z
-
-            vert = self.bm.verts.new( (x, -y, z) )
-            vert.index = i
-
-            self.vertCache.append(vert)
-            self.vertPosCache.append( (x, -y, z) )
-
+            if numpyMesh[i][1] < self.minimumZ:
+                self.minimumZ = numpyMesh[i][1]
             i = i + 1
 
         FetchServerData('getBodyFacesBinary',self.gotFacesData,True)
 
+
     def gotFacesData(self, data):
         self._profile()
         self.faceCache = []
-        self.faceVertIndexes=[]
 
-        iMax = int(len(data) / 4 / 4)
-        assert (iMax == int(self.bodyInfo["numFaces"]))
 
-        i = 0
-        while i < iMax:
-            stride = 0
-            verts = [None, None, None, None]
-            vertIdxs = [None, None, None, None]
-            while stride < 4:
-                sliceStart = i * 4 * 4  # 4-byte ints, four vertices per face
-                vertbytes = data[sliceStart + stride * 4:sliceStart + stride * 4 + 4]
-                vert = self.vertCache[int(struct.unpack("I", bytes(vertbytes))[0])]
-                verts[stride] = vert
-                vertIdxs[stride] = vert.index
-                stride = stride + 1
-            face = self.bm.faces.new(verts)
-            face.index = i
-            face.smooth = True
-            self.faceCache.append(face)
-            self.faceVertIndexes.append(vertIdxs)
-            i = i + 1
+        pp.pprint(self.bodyInfo)
+
+        shape = self.bodyInfo["facesShape"]
+        typeCode = self.bodyInfo["facesTypeCode"]
+
+        print("FACE NUMPY")
+        print(shape)
+        print(typeCode)
+
+        numpyMesh = convertBufferToShapedNumpyArray(data, typeCode, shape)
+
+        iMax = len(numpyMesh)
+        assert(iMax == int(self.bodyInfo["numFaces"]))
+
+        self.faceVertIndexes = numpyMesh.tolist()
+
+        addNumpyArrayAsFaces(self.bm, numpyMesh, self.vertCache, faceCache=self.faceCache, smooth=True)
+
+        # i = 0
+        # while i < iMax:
+        #     stride = 0
+        #     verts = [None, None, None, None]
+        #     vertIdxs = [None, None, None, None]
+        #     while stride < 4:
+        #         sliceStart = i * 4 * 4  # 4-byte ints, four vertices per face
+        #         vertbytes = data[sliceStart + stride * 4:sliceStart + stride * 4 + 4]
+        #         vert = self.vertCache[int(struct.unpack("I", bytes(vertbytes))[0])]
+        #         verts[stride] = vert
+        #         vertIdxs[stride] = vert.index
+        #         stride = stride + 1
+        #     face = self.bm.faces.new(verts)
+        #     face.index = i
+        #     face.smooth = True
+        #     self.faceCache.append(face)
+        #     self.faceVertIndexes.append(vertIdxs)
+        #     i = i + 1
 
         FetchServerData('getBodyTextureCoordsBinary', self.gotTextureCoords, True)
 
@@ -255,6 +263,7 @@ class ImportBodyBinary():
                 verts.extend(list(set(itertools.chain.from_iterable(faceSubSet))))
 
             if len(verts) > 0:
+                
                 if name.startswith("joint-"):
                     self.all_joint_verts.extend(verts)
                     if name == "joint-ground":
