@@ -1,4 +1,27 @@
 import bpy
+import time
+
+_startMillis = None
+_lastMillis = None
+
+ENABLE_PROFILING=True
+
+def profile(position = "timestamp"):
+    global ENABLE_PROFILING
+    if not ENABLE_PROFILING:
+        return
+
+    global _startMillis
+    global _lastMillis
+
+    if _startMillis is None:
+        _startMillis = int(round(time.time() * 1000))
+        _lastMillis = _startMillis - 1
+
+    currentMillis = int(round(time.time() * 1000))
+    print(position + ": " + str(currentMillis - _startMillis) + " / " + str(currentMillis - _lastMillis))
+    _lastMillis = currentMillis
+
 
 def bl28():
     return bpy.app.version >= (2, 80, 0)

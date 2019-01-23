@@ -10,21 +10,21 @@ import bpy
 import bmesh
 import pprint
 import struct
-import time
 import itertools
 
 from mathutils import Matrix, Vector
 from .material import *
 from .fetch_server_data import FetchServerData
 from .import_proxy_binary import ImportProxyBinary
+from ..util import profile
 
 pp = pprint.PrettyPrinter(indent=4)
-
-ENABLE_PROFILING_OUTPUT = False
 
 class ImportWeighting():
 
     def __init__(self, objectToWorkWith, skeletonObject=None, onFinished=None):
+
+        profile("start weighting")
 
         self.myObject = objectToWorkWith
         self.skeletonObj = skeletonObject
@@ -46,14 +46,10 @@ class ImportWeighting():
                 print("Mesh uuid: " + self.uuid)
             FetchServerData('getProxyWeightInfo', self.gotWeightInfo, params={ "uuid": self.uuid })
 
-    def _profile(self, position="timestamp"):
-        if not ENABLE_PROFILING_OUTPUT:
-            return
-        currentMillis = int(round(time.time() * 1000))
-        print(position + ": " + str(currentMillis - self.startMillis) + " / " + str(currentMillis - self.lastMillis))
-        self.lastMillis = currentMillis
 
     def gotWeightInfo(self, data):
+        profile("gotWeightInfo")
+
         #pp.pprint(data)
         assert(not data is None)
         self.sumVerts = data["sumVerts"]
@@ -66,6 +62,9 @@ class ImportWeighting():
             FetchServerData('getProxyWeightsVertList', self.gotVertListData, expectBinary=True, params={ "uuid": self.uuid })
 
     def gotVertListData(self, data):
+
+        profile("gotVertListData")
+
         if self.debug:
             print("vert list: " + str(len(data)) + " bytes")
         self.vertListBytes = bytearray(data)
@@ -75,14 +74,22 @@ class ImportWeighting():
             FetchServerData('getProxyWeights', self.gotWeightsData, expectBinary=True, params={ "uuid": self.uuid })
 
     def gotWeightsData(self, data):
+
+        profile("gotWeightsData")
+
         if self.debug:
             print("weight data: " + str(len(data)) + " bytes")
         self.weightBytes = bytearray(data)
         for info in self.weights:
             self.handleWeight(info)
+
+        profile("weightsHandled")
         self.finalize()
 
     def handleWeight(self, info):
+
+        beforeTime = int(round(time.time() * 1000))
+
         boneName = info["bone"]
         numVerts = info["numVertices"]
 
@@ -106,6 +113,13 @@ class ImportWeighting():
             vertNum = struct.unpack("I", bytes(oneVertBytes))[0]
             vertGroup.add([vertNum], weight, 'ADD')
             i = i + 1
+
+        afterTime = int(round(time.time() * 1000))
+
+        totalTime = afterTime - beforeTime
+
+        if totalTime > 5:
+            print("Weighting bone " + boneName + " for " + self.myObject.name + " took " + str(totalTime) + " milliseconds")
 
 
     def finalize(self):
