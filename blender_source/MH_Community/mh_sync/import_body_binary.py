@@ -24,7 +24,7 @@ from .meshutils import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
-ENABLE_PROFILING_OUTPUT = False
+ENABLE_PROFILING_OUTPUT = True
 
 class ImportBodyBinary():
 
@@ -126,11 +126,11 @@ class ImportBodyBinary():
         self.mesh = bpy.context.object.data
         self.bm = bmesh.new()
 
+        self._profile("gotBodyInfo")
         FetchServerData('getBodyVerticesBinary',self.gotVerticesData,True)
 
 
     def gotVerticesData(self, data):
-        self._profile()
         self.vertCache = []
 
         shape = self.bodyInfo["verticesShape"]
@@ -150,16 +150,15 @@ class ImportBodyBinary():
                 self.minimumZ = numpyMesh[i][1]
             i = i + 1
 
+        self._profile("gotVerticesData")
         FetchServerData('getBodyFacesBinary',self.gotFacesData,True)
 
 
     def gotFacesData(self, data):
-        self._profile()
         self.faceCache = []
 
         shape = self.bodyInfo["facesShape"]
         typeCode = self.bodyInfo["facesTypeCode"]
-
         numpyMesh = convertBufferToShapedNumpyArray(data, typeCode, shape)
 
         iMax = len(numpyMesh)
@@ -169,43 +168,41 @@ class ImportBodyBinary():
 
         addNumpyArrayAsFaces(self.bm, numpyMesh, self.vertCache, faceCache=self.faceCache, smooth=True)
 
+        self._profile("gotFacesData")
         FetchServerData('getBodyTextureCoordsBinary', self.gotTextureCoords, True)
 
     def gotTextureCoords(self, data):
-        iMax = int(len(data) / 4 / 2)
+
+        shape = self.bodyInfo["textureCoordsShape"]
+        typeCode = self.bodyInfo["textureCoordsTypeCode"]
+        numpyMesh = convertBufferToShapedNumpyArray(data, typeCode, shape)
+
+        iMax = len(numpyMesh)
         assert (iMax == int(self.bodyInfo["numTextureCoords"]))
 
-        self.texco = []
+        self.texco = numpyMesh
 
-        i = 0
-        while i < iMax:
-            sliceStart = i * 4 * 2  # 4-byte floats, two values per coordinate
-            ubytes = data[sliceStart:sliceStart + 4]
-            vbytes = data[sliceStart + 4:sliceStart + 4 + 4]
-            u = struct.unpack("f", bytes(ubytes))[0]
-            v = struct.unpack("f", bytes(vbytes))[0]
-            self.texco.append([u, v])
-            i = i + 1
-
+        self._profile("gotTextureCoords")
         FetchServerData('getBodyFaceUVMappingsBinary', self.gotFaceUVMappings, True)
 
     def gotFaceUVMappings(self, data):
-        iMax = int(len(data) / 4 / 4)
+
+        shape = self.bodyInfo["faceUVMappingsShape"]
+        typeCode = self.bodyInfo["faceUVMappingsTypeCode"]
+        numpyMesh = convertBufferToShapedNumpyArray(data, typeCode, shape)
+
+        iMax = len(numpyMesh)
         assert (iMax == int(self.bodyInfo["numFaceUVMappings"]))
 
         i = 0
-        faceTexco = []
+        faceTexco = np.zeros((iMax, 4, 2), self.texco.dtype)
 
         while i < iMax:
             stride = 0
-            ftex = [None, None, None, None]
             while stride < 4:
-                sliceStart = i * 4 * 4  # 4-byte ints, four mappings per face
-                mapbytes = data[sliceStart + stride * 4:sliceStart + stride * 4 + 4]
-                idx = struct.unpack("I", bytes(mapbytes))[0]
-                ftex[stride] = self.texco[int(idx)]
+                idx = numpyMesh[i][stride]
+                faceTexco[i][stride] = self.texco[int(idx)]
                 stride = stride + 1
-            faceTexco.append(ftex)
             i = i + 1
 
         uv_layer = self.bm.loops.layers.uv.verify()
@@ -221,13 +218,14 @@ class ImportBodyBinary():
                 uv[0] = texco[0]
                 uv[1] = texco[1]
 
+        self._profile("gotFaceUVMappings")
         self.afterMeshData()
 
     def handleHelpers(self):
-
+        self._profile()
         for fg in self.bodyInfo["faceGroups"]:
             name = fg["name"]
-            self._profile(name)
+            #self._profile(name)
             verts = []
             for startStop in fg["fgStartStops"]:
                 first = startStop[0]
@@ -247,7 +245,6 @@ class ImportBodyBinary():
                             sum = sum + self.vertPosCache[v][2]
                         self.groundMean = sum / 8.0
                         print("GROUND MEAN: " + str(self.groundMean))
-
 
                 if name.startswith("helper-"):
                     self.all_helper_verts.extend(verts)
@@ -311,6 +308,8 @@ class ImportBodyBinary():
             mask.show_in_editmode = True
             mask.show_on_cage = True
 
+        self._profile("handleHelpers")
+
     def _faceListToVertSet(self, faceList):
         vertList = []
         for faceIdx in list(faceList):
@@ -350,8 +349,10 @@ class ImportBodyBinary():
         mask.show_on_cage = True
         mask.invert_vertex_group = True
 
-    def afterMeshData(self):
+        self._profile("maskBody")
 
+    def afterMeshData(self):
+        self._profile()
         bmesh.ops.recalc_face_normals(self.bm, faces=self.bm.faces)
 
         self.bm.to_mesh(self.mesh)
@@ -367,6 +368,7 @@ class ImportBodyBinary():
         FetchServerData('getBodyMaterialInfo',self.gotBodyMaterialInfo)
 
     def gotBodyMaterialInfo(self, data):
+        self._profile()
         matname = data["name"]
 
         if self.matobjname:
@@ -379,6 +381,8 @@ class ImportBodyBinary():
         mat.diffuse_color = (1.0,0.7,0.7)
 
         self.obj.data.materials.append(mat)
+
+        self._profile("gotBodyMaterialInfo")
 
         if self.importRig:
             FetchServerData('getSkeleton', self.gotSkeleton)
@@ -458,6 +462,7 @@ class ImportBodyBinary():
                 activateObject(self.obj)
                 bpy.ops.object.modifier_move_up(modifier="Armature")
 
+        self._profile("gotSkeleton")
         FetchServerData('getProxiesInfo', self.gotProxiesInfo)
 
     def gotProxiesInfo(self, data):
@@ -510,6 +515,7 @@ class ImportBodyBinary():
         self.importNextProxy()
 
     def afterProxiesImported(self):
+        self._profile("afterProxiesImported")
         print("All proxies imported")
         if not self.armatureObject is None:
             self.nextProxyToWeight = 0
@@ -530,6 +536,8 @@ class ImportBodyBinary():
             ImportWeighting(proxy.obj, onFinished=self.weightNextProxy)
         else:
             self.finalize()
+
+        self._profile("weightNextProxy")
 
 
     def finalize(self):

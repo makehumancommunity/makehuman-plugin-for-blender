@@ -26,7 +26,6 @@ class ImportWeighting():
 
     def __init__(self, objectToWorkWith, skeletonObject=None, onFinished=None):
 
-        print("Import weighting for: " + objectToWorkWith.name)
         self.myObject = objectToWorkWith
         self.skeletonObj = skeletonObject
         self.onFinished = onFinished
@@ -36,6 +35,7 @@ class ImportWeighting():
         self.isBaseMesh = (self.myObject.MhObjectType == "Basemesh")
 
         if self.debug:
+            print("Import weighting for: " + objectToWorkWith.name)
             print("isBaseMesh: " + str(self.isBaseMesh))
 
         if self.isBaseMesh:
