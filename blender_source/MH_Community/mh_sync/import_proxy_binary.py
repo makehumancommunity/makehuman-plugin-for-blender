@@ -320,19 +320,18 @@ class ImportProxyBinary():
 
         mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
 
-        brown = (0.08, 0.015, 0.015)
 
         if self.proxyInfo["type"] == "Proxymeshes":
-            mat.diffuse_color = (1.0, 0.7, 0.7)
+            mat.diffuse_color = (1.0, 0.7, 0.7, 1.0)
 
         if self.proxyInfo["type"] == "Clothes":
-            mat.diffuse_color = (0.5, 1.0, 1.0)
+            mat.diffuse_color = (0.5, 1.0, 1.0, 1.0)
 
         if self.proxyInfo["type"] in ["Hair", "Eyebrows", "Eyelashes"]:
-            mat.diffuse_color = brown
+            mat.diffuse_color = (0.08, 0.015, 0.015, 1.0)
 
         if self.proxyInfo["type"] == "Eyes":
-            mat.diffuse_color = (1.0, 1.0, 1.0)
+            mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
 
         self.obj.data.materials.append(mat)
         if not self.onFinished is None:
