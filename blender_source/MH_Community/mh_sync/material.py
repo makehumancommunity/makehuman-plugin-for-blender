@@ -23,7 +23,8 @@ def _createMHImageTextureNode(nodes, imagePathAbsolute):
     texnode.image = image
     return texnode
 
-def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
+
+def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0), ifExists="CREATENEW"):
 
     #pp.pprint(materialSettingsHash)
     x = 0
@@ -63,6 +64,10 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
     if fixrough and roughness < 0.1 and not "eye" in name.lower():
         roughness = 0.5
     principled.inputs['Roughness'].default_value = roughness
+    if len(principled.inputs[0].default_value) == 4:
+        principled.inputs[0].default_value = baseColor
+    else:
+        principled.inputs[0].default_value = baseColor[:-1]
 
     #print(principled)
     #for i in principled.inputs:
@@ -99,6 +104,11 @@ def createMHMaterial(name, materialSettingsHash, ifExists="CREATENEW"):
 
             links.new(nmap.inputs['Color'], nmTexture.outputs['Color'])
             links.new(principled.inputs['Normal'], nmap.outputs['Normal'])
+
+    if len(mat.diffuse_color) == 4:
+        mat.diffuse_color = baseColor
+    else:
+        mat.diffuse_color = baseColor[:-1]
 
     return mat
 

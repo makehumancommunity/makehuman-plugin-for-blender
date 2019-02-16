@@ -56,6 +56,7 @@ class ImportBodyBinary():
         self.rigisparent = bpy.context.scene.MhRigIsParent
         self.adjust = bpy.context.scene.MhAdjustPosition
         self.addCollection = bpy.context.scene.MhAddCollection
+        self.baseColor = (1.0, 0.7, 0.7)
 
         if self.generalPreset != "BELOW":
             self.scaleMode = "DECIMETER"
@@ -122,6 +123,9 @@ class ImportBodyBinary():
         linkObject(self.obj, self.collection)
         activateObject(self.obj)
         selectObject(self.obj)
+
+        if "skinColor" in data:
+            self.baseColor = tuple(data["skinColor"])
 
         self.mesh = bpy.context.object.data
         self.bm = bmesh.new()
@@ -377,8 +381,7 @@ class ImportBodyBinary():
         if self.prefixMaterial:
             matname = self.name + "." + matname
 
-        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
-        mat.diffuse_color = (1.0,0.7,0.7)
+        mat = createMHMaterial(matname, data, self.baseColor, ifExists=self.handleMaterials)
 
         self.obj.data.materials.append(mat)
 

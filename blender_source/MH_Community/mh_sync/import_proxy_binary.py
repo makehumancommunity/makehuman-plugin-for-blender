@@ -21,6 +21,14 @@ pp = pprint.PrettyPrinter(indent=4)
 
 ENABLE_PROFILING_OUTPUT = False
 
+PROXY_COLORS = {"Proxymeshes": (1.0, 0.7, 0.7, 1.0),
+                "Clothes": (0.5, 1.0, 1.0, 1.0),
+                "Hair": (0.08, 0.015, 0.015, 1.0),
+                "Eyebrows": (0.08, 0.015, 0.015, 1.0),
+                "Eyelashes": (0.08, 0.015, 0.015, 1.0),
+                "Eyes": (1.0, 1.0, 1.0, 1.0)
+                }
+
 class ImportProxyBinary():
 
     def __init__(self, humanObject, humanName, proxyInfo, onFinished=None, collection=None):
@@ -318,21 +326,12 @@ class ImportProxyBinary():
         if self.prefixMaterial:
             matname = self.humanName + "." + matname
 
-        mat = createMHMaterial(matname, data, ifExists=self.handleMaterials)
+        baseColor = data.get("viewPortColor", PROXY_COLORS.get(self.proxyInfo["type"], (0.8, 0.8, 0.8, 1.0)))
 
-        brown = (0.08, 0.015, 0.015)
+        if len(baseColor) < 4:
+            baseColor = tuple([*baseColor, data.get("viewPortAlpha", 1.0)])
 
-        if self.proxyInfo["type"] == "Proxymeshes":
-            mat.diffuse_color = (1.0, 0.7, 0.7)
-
-        if self.proxyInfo["type"] == "Clothes":
-            mat.diffuse_color = (0.5, 1.0, 1.0)
-
-        if self.proxyInfo["type"] in ["Hair", "Eyebrows", "Eyelashes"]:
-            mat.diffuse_color = brown
-
-        if self.proxyInfo["type"] == "Eyes":
-            mat.diffuse_color = (1.0, 1.0, 1.0)
+        mat = createMHMaterial(matname, data, baseColor=baseColor, ifExists=self.handleMaterials)
 
         self.obj.data.materials.append(mat)
         if not self.onFinished is None:
