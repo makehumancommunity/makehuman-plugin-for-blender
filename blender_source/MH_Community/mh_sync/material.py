@@ -64,10 +64,15 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
     if fixrough and roughness < 0.1 and not "eye" in name.lower():
         roughness = 0.5
     principled.inputs['Roughness'].default_value = roughness
-    if len(principled.inputs[0].default_value) == 4:
-        principled.inputs[0].default_value = baseColor
+    if len(principled.inputs['Base Color'].default_value) == 4:
+        if 'diffuseColor' in materialSettingsHash:
+            col = materialSettingsHash.get('diffuseColor')
+            col.append(1.0)
+            principled.inputs['Base Color'].default_value = col
+        else:
+            principled.inputs['Base Color'].default_value = baseColor
     else:
-        principled.inputs[0].default_value = baseColor[:-1]
+        principled.inputs['Base Color'].default_value = materialSettingsHash.get('diffuseColor', baseColor[:-1])
 
     #print(principled)
     #for i in principled.inputs:
