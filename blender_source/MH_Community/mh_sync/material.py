@@ -64,10 +64,15 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
     if fixrough and roughness < 0.1 and not "eye" in name.lower():
         roughness = 0.5
     principled.inputs['Roughness'].default_value = roughness
-    if len(principled.inputs[0].default_value) == 4:
-        principled.inputs[0].default_value = baseColor
+    if len(principled.inputs['Base Color'].default_value) == 4:
+        if 'diffuseColor' in materialSettingsHash:
+            col = materialSettingsHash.get('diffuseColor')
+            col.append(1.0)
+            principled.inputs['Base Color'].default_value = col
+        else:
+            principled.inputs['Base Color'].default_value = baseColor
     else:
-        principled.inputs[0].default_value = baseColor[:-1]
+        principled.inputs['Base Color'].default_value = materialSettingsHash.get('diffuseColor', baseColor[:-1])
 
     #print(principled)
     #for i in principled.inputs:
@@ -106,9 +111,13 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
             links.new(principled.inputs['Normal'], nmap.outputs['Normal'])
 
     if len(mat.diffuse_color) == 4:
-        mat.diffuse_color = baseColor
+        if len(baseColor) == 4:
+            mat.diffuse_color = baseColor
     else:
-        mat.diffuse_color = baseColor[:-1]
+        if len(baseColor) == 4:
+            mat.diffuse_color = baseColor[:-1]
+        else:
+            mat.diffuse_color = baseColor
 
     return mat
 
