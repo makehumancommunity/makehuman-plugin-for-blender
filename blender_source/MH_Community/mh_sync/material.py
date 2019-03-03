@@ -111,9 +111,13 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
             links.new(principled.inputs['Normal'], nmap.outputs['Normal'])
 
     if len(mat.diffuse_color) == 4:
-        mat.diffuse_color = baseColor
+        if len(baseColor) == 4:
+            mat.diffuse_color = baseColor
     else:
-        mat.diffuse_color = baseColor[:-1]
+        if len(baseColor) == 4:
+            mat.diffuse_color = baseColor[:-1]
+        else:
+            mat.diffuse_color = baseColor
 
     return mat
 
