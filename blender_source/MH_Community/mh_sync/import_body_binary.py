@@ -444,6 +444,9 @@ class ImportBodyBinary():
                 self.armatureObject.data.draw_type = 'WIRE'
                 self.armatureObject.show_x_ray = True
 
+            print(bpy.ops.object)
+            print(self.armatureObject)
+            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
             bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 
             self.skeletonOffset = data["offset"]
