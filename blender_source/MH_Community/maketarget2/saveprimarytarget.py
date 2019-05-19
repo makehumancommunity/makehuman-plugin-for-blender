@@ -21,12 +21,23 @@ class MHC_OT_SavePrimaryTargetOperator(bpy.types.Operator):
 
     def execute(self, context):
 
+        scaleFactor = 10.0
+        scaleMode = str(bpy.context.scene.MhScaleMode)
+
+        if scaleMode == "DECIMETER":
+            scaleFactor = 1.0
+
+        if scaleMode == "CENTIMETER":
+            scaleFactor = 0.1
+
         obj = context.active_object
         sks = obj.data.shape_keys
         bt = sks.key_blocks["Basis"]
         pt = sks.key_blocks["PrimaryTarget"]
 
         with open("/tmp/target.target","w") as f:
+            f.write("# This is a target file for MakeHuman. It was written by MakeTarget2, which is a\n")
+            f.write("# part of the MakeHuman Community plugin for Blender.\n#\n")
             f.write("# basemesh hm08\n")
             numverts = len(bt.data)
             i = 0
@@ -35,9 +46,9 @@ class MHC_OT_SavePrimaryTargetOperator(bpy.types.Operator):
                 ptvco = pt.data[i].co
                 if btvco != ptvco:
                     diffco = ptvco - btvco
-                    x = str(diffco[0])
-                    y = str(-diffco[1])
-                    z = str(diffco[2])
+                    x = str(diffco[0] * scaleFactor)
+                    y = str(-diffco[1] * scaleFactor)
+                    z = str(diffco[2] * scaleFactor)
                     f.write(str(i) + " " + x + " " + z + " " + y + "\n")
                 i = i + 1
         return {'FINISHED'}
