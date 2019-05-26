@@ -1,14 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import bpy
+import bpy, bpy_extras, os, re
+from bpy_extras.io_utils import ExportHelper
+from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 
-
-class MHC_OT_SavePrimaryTargetOperator(bpy.types.Operator):
-    """Print all differing vertices to console"""
+class MHC_OT_SavePrimaryTargetOperator(bpy.types.Operator, ExportHelper):
+    """Save the required shape key to a file (i.e export a target)"""
     bl_idname = "mh_community.save_primary_target"
     bl_label = "Save primary target"
-    bl_options = {'REGISTER', 'UNDO'}
+
+    filter_glob = StringProperty(default='*.target', options={'HIDDEN'})
+    filename_ext = ".target"
 
     @classmethod
     def poll(self, context):
@@ -35,7 +38,7 @@ class MHC_OT_SavePrimaryTargetOperator(bpy.types.Operator):
         bt = sks.key_blocks["Basis"]
         pt = sks.key_blocks["PrimaryTarget"]
 
-        with open("/tmp/target.target","w") as f:
+        with open(self.filepath,"w") as f:
             f.write("# This is a target file for MakeHuman. It was written by MakeTarget2, which is a\n")
             f.write("# part of the MakeHuman Community plugin for Blender.\n#\n")
             f.write("# basemesh hm08\n")

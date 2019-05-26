@@ -6,8 +6,6 @@
 import bpy
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 
-bpy.types.Scene.MhPrimaryTargetName = StringProperty(name='Target filename', description='Target file name, relative to the custom targets directory', default='')
-
 from .maketarget2 import MHC_PT_MakeTarget_Panel
 
 from .createprimarytarget import MHC_OT_CreatePrimaryTargetOperator

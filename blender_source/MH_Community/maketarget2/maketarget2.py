@@ -22,10 +22,9 @@ class MHC_PT_MakeTarget_Panel(bpy.types.Panel):
 
         saveBox = layout.box()
         saveBox.label(text="Save Target", icon="MESH_DATA")
-        saveBox.prop(scn, 'MhPrimaryTargetName', text="")
-        saveBox.operator("mh_community.save_primary_target", text="Save primary")
+        saveBox.operator("mh_community.save_primary_target", text="Save target")
 
         debugBox = layout.box()
         debugBox.label(text="Debug Target", icon="MESH_DATA")
-        debugBox.operator("mh_community.print_primary_target", text="Print primary")
+        debugBox.operator("mh_community.print_primary_target", text="Print target")
 
