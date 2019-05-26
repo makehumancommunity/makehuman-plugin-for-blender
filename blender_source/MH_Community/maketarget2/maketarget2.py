@@ -16,8 +16,9 @@ class MHC_PT_MakeTarget_Panel(bpy.types.Panel):
         scn = context.scene
 
         createBox = layout.box()
-        createBox.label(text="Create Target", icon="MESH_DATA")
-        createBox.operator("mh_community.create_primary_target", text="Create primary")
+        createBox.label(text="Initialize", icon="MESH_DATA")
+        createBox.operator("mh_community.create_primary_target", text="Create target")
+        createBox.operator("mh_community.load_primary_target", text="Load target")
 
         saveBox = layout.box()
         saveBox.label(text="Save Target", icon="MESH_DATA")

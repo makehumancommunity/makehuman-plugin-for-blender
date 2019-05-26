@@ -4,7 +4,7 @@
 import bpy
 
 class MHC_OT_CreatePrimaryTargetOperator(bpy.types.Operator):
-    """Setup required shape keys"""
+    """Setup required shape keys (i.e create a target)"""
     bl_idname = "mh_community.create_primary_target"
     bl_label = "Create primary target"
     bl_options = {'REGISTER', 'UNDO'}
