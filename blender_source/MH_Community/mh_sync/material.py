@@ -3,30 +3,29 @@
 
 import bpy
 import os
-import pprint
 
 from ..util import *
 
-pp = pprint.PrettyPrinter(indent=4)
-
-def _createMHImageTextureNode(nodes, imagePathAbsolute):
+def _createMHImageTextureNode(nodes, imagePathAbsolute, color_space='sRGB'):
     fn = os.path.basename(imagePathAbsolute)
-    #print(bpy.data.images)
     if fn in bpy.data.images:
         print("image existed")
         image = bpy.data.images[fn]
     else:
         image = bpy.data.images.load(imagePathAbsolute)
-    #print(image)
 
     texnode = nodes.new("ShaderNodeTexImage")
+    if bl28():
+        image.colorspace_settings.name = color_space
+    else:
+        if color_space == 'Non-Color':
+            texnode.color_space = 'NONE'
     texnode.image = image
     return texnode
 
 
 def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0), ifExists="CREATENEW"):
 
-    #pp.pprint(materialSettingsHash)
     x = 0
     y = 400
 
@@ -57,7 +56,7 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
         nodes.remove(nodes[0])
 
     output = nodes.new("ShaderNodeOutputMaterial")
-    output.location = (x+400, y+10)
+    output.location = (x + 250, y + 10)
 
     principled = nodes.new("ShaderNodeBsdfPrincipled")
     roughness = 1.0 - materialSettingsHash["shininess"]
@@ -67,57 +66,82 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
     if len(principled.inputs['Base Color'].default_value) == 4:
         if 'diffuseColor' in materialSettingsHash:
             col = materialSettingsHash.get('diffuseColor')
-            col.append(1.0)
+            while len(col) < 4:
+                col.append(1.0)
             principled.inputs['Base Color'].default_value = col
         else:
             principled.inputs['Base Color'].default_value = baseColor
-    else:
+    else: # This section is for backward compatibility with Blender 2.79 and should be removed asap
         principled.inputs['Base Color'].default_value = materialSettingsHash.get('diffuseColor', baseColor[:-1])
 
-    #print(principled)
-    #for i in principled.inputs:
-    #    print(i)
 
     diffuse = materialSettingsHash["diffuseTexture"]
-    if not diffuse is None and diffuse != "":
+    if diffuse:
         diffuseTexture = _createMHImageTextureNode(nodes, diffuse)
-        diffuseTexture.location = (x-500, y+100)
+        diffuseTexture.location = (x - 500, y + 100)
 
-        diffuseAlphaMix = nodes.new("ShaderNodeMixShader")
-        diffuseAlphaMix.location = (x+100, y+50)
-        principled.location = (x-200, y-50)
-        transparent = nodes.new("ShaderNodeBsdfTransparent")
-        transparent.location = (x-200, y+100)
+        principled.location = (x - 100, y - 50)
 
-        links.new(output.inputs['Surface'], diffuseAlphaMix.outputs['Shader'])
-        links.new(diffuseAlphaMix.inputs[2], principled.outputs['BSDF'])
-        links.new(diffuseAlphaMix.inputs[0], diffuseTexture.outputs['Alpha'])
+        links.new(output.inputs['Surface'], principled.outputs['BSDF'])
         links.new(principled.inputs['Base Color'], diffuseTexture.outputs['Color'])
-        links.new(diffuseAlphaMix.inputs[1], transparent.outputs['BSDF'])
+        links.new(principled.inputs['Alpha'], diffuseTexture.outputs['Alpha'])
     else:
-        principled.location = (x+100, y+10)
+        principled.location = (x + 100, y + 10)
         links.new(output.inputs['Surface'], principled.outputs['BSDF'])
 
-    if "normalMapTexture" in materialSettingsHash:
-        nmtex = materialSettingsHash["normalMapTexture"]
-        if nmtex and nmtex != "":
-            nmTexture = _createMHImageTextureNode(nodes, nmtex)
-            nmTexture.location = (x - 800, y - 300)
+    nmtex = materialSettingsHash.get("normalMapTexture")
+    bmtex = materialSettingsHash.get("bumpMapTexture")
+
+    if nmtex and bmtex: # Material has bump- and normalmap
+
+        bmTexture = _createMHImageTextureNode(nodes, bmtex, 'Non-Color')
+        bmTexture.location = (x - 700, y - 300)
+
+        bmap = nodes.new("ShaderNodeBump")
+        bmap.location = (x - 400, y - 300)
+
+        links.new(bmap.inputs['Height'], bmTexture.outputs['Color'])
+        links.new(principled.inputs['Normal'], bmap.outputs['Normal'])
+
+        nmTexture = _createMHImageTextureNode(nodes, nmtex, 'Non-Color')
+        nmTexture.location = (x - 800, y - 900)
+
+        nmap = nodes.new("ShaderNodeNormalMap")
+        nmap.location = (x - 600, y - 700)
+
+        links.new(nmap.inputs['Color'], nmTexture.outputs['Color'])
+        links.new(bmap.inputs['Normal'], nmap.outputs['Normal'])
+
+    else:
+
+        if nmtex: # Material has only normalmap
+            nmTexture = _createMHImageTextureNode(nodes, nmtex, 'Non-Color')
+            nmTexture.location = (x - 700, y - 300)
 
             nmap = nodes.new("ShaderNodeNormalMap")
-            nmap.location = (x - 500, y - 300)
+            nmap.location = (x - 400, y - 300)
 
             links.new(nmap.inputs['Color'], nmTexture.outputs['Color'])
             links.new(principled.inputs['Normal'], nmap.outputs['Normal'])
 
-    if len(mat.diffuse_color) == 4:
-        if len(baseColor) == 4:
-            mat.diffuse_color = baseColor
-    else:
-        if len(baseColor) == 4:
-            mat.diffuse_color = baseColor[:-1]
+        elif bmtex: # Material has only bumpmap
+            bmTexture = _createMHImageTextureNode(nodes, bmtex, 'Non-Color')
+            bmTexture.location = (x - 700, y - 300)
+
+            bmap = nodes.new("ShaderNodeNormalMap")
+            bmap.location = (x - 400, y - 300)
+
+            links.new(bmap.inputs['Height'], bmTexture.outputs['Color'])
+            links.new(principled.inputs['Normal'], bmap.outputs['Normal'])
+
         else:
-            mat.diffuse_color = baseColor
+            pass
+
+
+    if len(mat.diffuse_color) == 4:
+        mat.diffuse_color = baseColor
+    else: # This section is for backward compatibility with Blender 2.79 and should be removed asap
+        mat.diffuse_color = baseColor[:-1]
 
     return mat
 

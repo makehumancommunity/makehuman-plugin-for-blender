@@ -56,7 +56,7 @@ class ImportBodyBinary():
         self.rigisparent = bpy.context.scene.MhRigIsParent
         self.adjust = bpy.context.scene.MhAdjustPosition
         self.addCollection = bpy.context.scene.MhAddCollection
-        self.baseColor = (1.0, 0.7, 0.7)
+        self.defaultSkinColor = (1.0, 0.7, 0.7, 1.0)
 
         if self.generalPreset != "BELOW":
             self.scaleMode = "DECIMETER"
@@ -124,8 +124,10 @@ class ImportBodyBinary():
         activateObject(self.obj)
         selectObject(self.obj)
 
-        if "skinColor" in data:
-            self.baseColor = tuple(data["skinColor"])
+        self.skinColor = data.get('skinColor', self.defaultSkinColor)
+
+        if len(self.skinColor) == 3:
+            self.skinColor.append(1.0)
 
         self.mesh = bpy.context.object.data
         self.bm = bmesh.new()
@@ -148,11 +150,9 @@ class ImportBodyBinary():
 
         addNumpyArrayAsVerts(self.bm, numpyMesh, self.vertCache, self.vertPosCache)
 
-        i = 0
-        while i < iMax:
+        for i in range(iMax):
             if numpyMesh[i][1] < self.minimumZ:
                 self.minimumZ = numpyMesh[i][1]
-            i = i + 1
 
         self._profile("gotVerticesData")
         FetchServerData('getBodyFacesBinary',self.gotFacesData,True)
@@ -198,16 +198,14 @@ class ImportBodyBinary():
         iMax = len(numpyMesh)
         assert (iMax == int(self.bodyInfo["numFaceUVMappings"]))
 
-        i = 0
         faceTexco = np.zeros((iMax, 4, 2), self.texco.dtype)
 
-        while i < iMax:
+        for i in range(iMax):
             stride = 0
             while stride < 4:
                 idx = numpyMesh[i][stride]
                 faceTexco[i][stride] = self.texco[int(idx)]
                 stride = stride + 1
-            i = i + 1
 
         uv_layer = self.bm.loops.layers.uv.verify()
 
@@ -279,8 +277,7 @@ class ImportBodyBinary():
         if self.generalPreset == "MAKECLOTHES":
             print("IS MAKECLOTHES")
 
-            i = 0
-            while i < len(self.vertPosCache):
+            for i in range(len(self.vertPosCache)):
                 vert = self.vertPosCache[i]
                 x = vert[0]
 
@@ -292,7 +289,6 @@ class ImportBodyBinary():
                     if x > 0.0:
                         self.left_verts.append(i)
 
-                i = i + 1
 
             if len(self.right_verts) > 0:
                 vgroup = self.obj.vertex_groups.new(name="Right")
@@ -381,7 +377,7 @@ class ImportBodyBinary():
         if self.prefixMaterial:
             matname = self.name + "." + matname
 
-        mat = createMHMaterial(matname, data, self.baseColor, ifExists=self.handleMaterials)
+        mat = createMHMaterial(matname, data, baseColor=self.skinColor, ifExists=self.handleMaterials)
 
         self.obj.data.materials.append(mat)
 
