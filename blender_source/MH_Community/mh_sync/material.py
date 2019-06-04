@@ -28,6 +28,7 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
 
     x = 0
     y = 400
+    print('Debug    :', materialSettingsHash.keys())
 
     fixrough = bpy.context.scene.MhFixRoughness
 
@@ -75,7 +76,7 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
         principled.inputs['Base Color'].default_value = materialSettingsHash.get('diffuseColor', baseColor[:-1])
 
 
-    diffuse = materialSettingsHash["diffuseTexture"]
+    diffuse = materialSettingsHash.get("diffuseTexture")
     if diffuse:
         diffuseTexture = _createMHImageTextureNode(nodes, diffuse)
         diffuseTexture.location = (x - 500, y + 100)
@@ -103,6 +104,8 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
         links.new(bmap.inputs['Height'], bmTexture.outputs['Color'])
         links.new(principled.inputs['Normal'], bmap.outputs['Normal'])
 
+        bmap.inputs['Strength'].default_value = materialSettingsHash.get('bumpMapIntensity', 1.0)
+
         nmTexture = _createMHImageTextureNode(nodes, nmtex, 'Non-Color')
         nmTexture.location = (x - 800, y - 900)
 
@@ -111,6 +114,7 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
 
         links.new(nmap.inputs['Color'], nmTexture.outputs['Color'])
         links.new(bmap.inputs['Normal'], nmap.outputs['Normal'])
+        nmap.inputs['Strength'].default_value = materialSettingsHash.get('normalMapIntensity', 1.0)
 
     else:
 
@@ -124,6 +128,8 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
             links.new(nmap.inputs['Color'], nmTexture.outputs['Color'])
             links.new(principled.inputs['Normal'], nmap.outputs['Normal'])
 
+            nmap.inputs['Strength'].default_value = materialSettingsHash.get('normalMapIntensity', 1.0)
+
         elif bmtex: # Material has only bumpmap
             bmTexture = _createMHImageTextureNode(nodes, bmtex, 'Non-Color')
             bmTexture.location = (x - 700, y - 300)
@@ -133,6 +139,8 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
 
             links.new(bmap.inputs['Height'], bmTexture.outputs['Color'])
             links.new(principled.inputs['Normal'], bmap.outputs['Normal'])
+
+            bmap.inputs['Strength'].default_value = materialSettingsHash.get('bumpMapIntensity', 1.0)
 
         else:
             pass
