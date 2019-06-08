@@ -78,10 +78,6 @@ classes =  [
 from .operators import *
 classes.extend(OPERATOR_CLASSES)
 
-if bpy.app.version >= (2, 80, 0):
-    from .maketarget2 import *
-    classes.extend(MAKETARGET2_CLASSES)
-
 def register():
     from bpy.utils import register_class
     for cls in classes:
