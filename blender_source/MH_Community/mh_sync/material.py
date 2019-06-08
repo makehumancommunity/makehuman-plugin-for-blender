@@ -28,7 +28,6 @@ def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0),
 
     x = 0
     y = 400
-    print('Debug    :', materialSettingsHash.keys())
 
     fixrough = bpy.context.scene.MhFixRoughness
 
