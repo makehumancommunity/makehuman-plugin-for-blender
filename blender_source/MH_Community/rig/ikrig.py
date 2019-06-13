@@ -207,7 +207,7 @@ class IkRig():
         val = unitMult / 0.6
         bpy.ops.transform.transform(mode='BONE_SIZE', value=(val, val, val, 0))
 
-        self.armature.data.draw_type = 'STICK'
+        self.armature.data.display_type = 'WIRE'
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def removeSide(self, isLeft):

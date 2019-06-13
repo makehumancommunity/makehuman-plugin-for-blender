@@ -19,19 +19,27 @@ class Empties:
         bpy.ops.object.mode_set(mode='OBJECT')
         self.empties = {}
         for name in KINECT_BONES:
-            o = bpy.data.objects.new( name, None )
-            o.empty_draw_size = 0.2 if name == SHOULDER_LEFT or name == SHOULDER_RIGHT else 0.1
-            o.empty_draw_type = 'ARROWS'
-            o.show_name = True
-            o.name = name
-
-            bpy.context.scene.objects.link(o) # needed to make visible, not really required outside of dev
+            size = (0.2 if name == SHOULDER_LEFT or name == SHOULDER_RIGHT else 0.1) * scaling
+            o = bpy.data.objects.new(name, None)
+            
+            if bpy.app.version < (2, 80, 0):
+                o.empty_draw_size = size
+                o.empty_draw_type = 'ARROWS'
+                o.name = name
+                o.show_name = True                
+                bpy.context.scene.objects.link(o) # needed to make visible, not really required outside of dev
+            else: 
+                o.empty_display_size = size
+                o.empty_display_type = 'ARROWS'
+                o.show_name = True
+                bpy.context.scene.collection.objects.link(o) # needed to make visible, not really required outside of dev
+                
             self.empties[name] = o
 
     def nuke(self):
         objs = bpy.data.objects
         for name in KINECT_BONES:
-            objs.remove(objs[name], True)
+            objs.remove(objs[name], do_unlink = True)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                       Location Assignment Methods
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -51,7 +59,7 @@ class Empties:
             self.addConstraints()
 
     def assignEmpty(self, boneName, loc):
-        empty = bpy.data.objects[boneName]
+        empty = self.empties[boneName]
 
         empty.location = Vector((loc['x']* self.scaling, loc['z']* self.scaling, loc['y']* self.scaling))
         

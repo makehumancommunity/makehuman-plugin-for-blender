@@ -7,7 +7,7 @@ from bpy.props import BoolProperty, StringProperty, IntProperty, CollectionPrope
 # extra classes to support animation lists
 class MHC_UL_AnimationItems(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        layout.prop(item, "name", text="", emboss=False, translate=False, icon='BORDER_RECT')
+        layout.prop(item, "name", text="", emboss=False, translate=False, icon='ARMATURE_DATA')
 
 class AnimationProps(bpy.types.PropertyGroup):
     id = IntProperty()

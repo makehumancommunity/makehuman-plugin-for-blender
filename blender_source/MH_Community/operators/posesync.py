@@ -13,11 +13,11 @@ class MHC_OT_PoseSyncOperator(bpy.types.Operator):
     def execute(self, context):
         from ..mh_sync.sync_pose import SyncPose
 
-        armature = context.object
-        rigInfo = RigInfo.determineRig(armature)
-        if rigInfo.determineExportedUnits() != 'DECIMETERS' and not bpy.context.scene.MhNoLocation:
-            self.report({'ERROR'}, 'Location translation only possible when exported in decimeters to match MakeHuman.')
-            return {'FINISHED'}
+#        armature = context.object
+#        rigInfo = RigInfo.determineRig(armature)
+#        if rigInfo.determineExportedUnits() != 'DECIMETERS' and not bpy.context.scene.MhNoLocation:
+#            self.report({'ERROR'}, 'Location translation only possible when exported in decimeters to match MakeHuman.')
+#            return {'FINISHED'}
 
         SyncPose()
         return {'FINISHED'}
