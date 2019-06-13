@@ -96,7 +96,11 @@ class AnimationBuffer:
 
     def assignFrame(self, armature, frameNum, excludeFingers):
         # this is REQUIRED to get something to actually get recorded other than just before assignment
-        bpy.context.scene.update()
+        if bpy.app.version < (2, 80, 0):
+            bpy.context.scene.update()
+        else:
+            bpy.context.view_layer.update()
+
         
         for name in KINECT_BONES:
             if excludeFingers and self.isFinger(name): continue
@@ -105,7 +109,7 @@ class AnimationBuffer:
             bone = armature.pose.bones[name]
 
             objectSpace = bone.matrix
-            localSpace = Matrix(armature.convert_space(bone, objectSpace, 'POSE', 'LOCAL'))
+            localSpace = Matrix(armature.convert_space(pose_bone = bone, matrix = objectSpace, from_space = 'POSE',  to_space = 'LOCAL'))
             loc, rot, scale = localSpace.decompose()
 
             if name == ROOT_BONE:
