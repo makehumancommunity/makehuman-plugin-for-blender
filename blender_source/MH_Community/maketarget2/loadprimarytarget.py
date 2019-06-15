@@ -10,7 +10,7 @@ class MHC_OT_LoadPrimaryTargetOperator(bpy.types.Operator, ImportHelper):
     bl_idname = "mh_community.load_primary_target"
     bl_label = "Load primary target"
 
-    filter_glob = StringProperty(default='*.target', options={'HIDDEN'})
+    filter_glob: StringProperty(default='*.target', options={'HIDDEN'})
 
     def execute(self, context):
         filename, extension = os.path.splitext(self.filepath)

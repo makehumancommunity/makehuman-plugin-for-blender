@@ -10,7 +10,7 @@ class MHC_OT_SavePrimaryTargetOperator(bpy.types.Operator, ExportHelper):
     bl_idname = "mh_community.save_primary_target"
     bl_label = "Save primary target"
 
-    filter_glob = StringProperty(default='*.target', options={'HIDDEN'})
+    filter_glob: StringProperty(default='*.target', options={'HIDDEN'})
     filename_ext = ".target"
 
     @classmethod
