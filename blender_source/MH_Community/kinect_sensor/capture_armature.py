@@ -13,7 +13,7 @@ class CaptureArmature:
         # duplicate the capture skeleton
         if self.captureSkel is None:
             bpy.ops.object.mode_set(mode='OBJECT')
-            self.scene.objects.active = self.retargetTo # errors in Blender 2.8
+            self.setActiveObject(self.retargetTo)                
             bpy.ops.object.duplicate(linked=False)
 
             self.captureSkel = bpy.context.active_object
@@ -31,12 +31,18 @@ class CaptureArmature:
     # nuke duplicate armature & remove any constraints on bones with the name 'RETARGET'
     def cleanUp(self):
         bpy.ops.object.mode_set(mode='OBJECT')
-        self.scene.objects.active = self.captureSkel # errors in Blender 2.8
+        self.setActiveObject(self.captureSkel)
         bpy.ops.object.delete(use_global = False)
 
-        self.scene.objects.active = self.retargetTo
+        self.setActiveObject(self.retargetTo)
         bpy.ops.object.mode_set(mode='POSE')
         for bone in self.retargetTo.pose.bones:
             for c in bone.constraints:
                 if c.name == 'RETARGET':
                     bone.constraints.remove(c)
+                    
+    def setActiveObject(self, object):
+        if bpy.app.version < (2, 80, 0):
+            self.scene.objects.active = object
+        else:
+            bpy.context.view_layer.objects.active = object

@@ -2,6 +2,7 @@
 import bpy
 #===============================================================================
 def shapesFromPose(operator, skeleton, shapeName):
+    nWarnings = 0
     scene = bpy.context.scene
     meshes = getMeshesForRig(scene, skeleton)
     allBones = getAllBones(skeleton)
@@ -13,15 +14,23 @@ def shapesFromPose(operator, skeleton, shapeName):
         # delete if key already exists
         deleteShape(mesh, shapeName)
 
+        # get temporary version with modifiers applied
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        objectWithModifiers = mesh.evaluated_get(depsgraph)
+        tmp = objectWithModifiers.to_mesh()
+
+        # need to make sure the number of vertices, like no 'hide faces modifier'
+        if tVerts != len(tmp.vertices):
+            operator.report({'WARNING'}, '     ' + mesh.name + ':  Had to be skipped, since current modifiers change the number of vertices')
+            nWarnings += 1
+            continue
+
         # add an empty key (create a basis when none)
-        key = mesh.shape_key_add(shapeName, False)
+        key = mesh.shape_key_add(name = shapeName, from_mix = False)
         key.value = 0 # keep un-applied
 
         # get basis, so can write only verts different than
         basis = mesh.data.shape_keys.key_blocks['Basis']
-
-        # get temporary version with modifiers applied
-        tmp = mesh.to_mesh(scene, True, 'PREVIEW')
 
         # assign the key the vert values of the current pose, when different than Basis
         nDiff = 0
@@ -42,7 +51,9 @@ def shapesFromPose(operator, skeleton, shapeName):
             mesh.shape_key_remove(key)
 
         # remove temp mesh
-        bpy.data.meshes.remove(tmp)
+        mesh.to_mesh_clear()
+
+    return nWarnings
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # determine all the meshes which are controlled by skeleton
 def getMeshesForRig(scene, skeleton):
@@ -52,7 +63,7 @@ def getMeshesForRig(scene, skeleton):
             meshes.append(object)
             # ensure that there is a Basis key
             if not object.data.shape_keys:
-                object.shape_key_add('Basis')
+                object.shape_key_add(name = 'Basis')
 
     return meshes
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

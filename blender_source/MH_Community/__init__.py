@@ -11,7 +11,7 @@ if bpy.app.version < (2, 80, 0):
 bl_info = {
     "name": "MH Community Plug-in",
     "author": "Joel Palmius",
-    "version": (0, 4),
+    "version": (0, 5),
     "blender": (2, 80, 0),
     "location": "View3D > Properties > MH",
     "description": "MakeHuman interactive operations",
@@ -28,11 +28,11 @@ from . import animation_trimming
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAndSettings
 from .mh_sync.bone_ui import addBoneUIToTab, registerBoneConstantsAndSettings
-from .kinect_sensor.kinect_ui import addKinectUIToTab, registerKinectConstantsAndSettings
+from .kinect_sensor.kinect_ui import addKinectUIToTab, registerKinectConstantsAndSettings, unregisterKinect
 
 #===============================================================================
 class MHC_PT_Community_Panel(bpy.types.Panel):
-    bl_label = "MakeHuman"
+    bl_label = "MakeHuman v %d.%d" % bl_info["version"]
     bl_space_type = "VIEW_3D"
     bl_region_type = BLENDER_REGION
     bl_category = "MakeHuman"
@@ -105,6 +105,8 @@ def unregister():
 
     del bpy.types.Scene.MhHandleHelper
     del bpy.types.Scene.MhScaleMode
+
+    unregisterKinect()
 
 if __name__ == "__main__":
     unregister()
