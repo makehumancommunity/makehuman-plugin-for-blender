@@ -226,8 +226,7 @@ class IkRig():
         bpy.ops.armature.delete()
 
         bpy.ops.object.mode_set(mode='POSE')
-        for bIndex, boneName in enumerate(boneNames):
-            self.armature.data.bones[boneName].select = True
+        for boneName in boneNames:
             self.armature.data.bones[boneName].hide = False
 
         for bone in bpy.context.selected_pose_bones:

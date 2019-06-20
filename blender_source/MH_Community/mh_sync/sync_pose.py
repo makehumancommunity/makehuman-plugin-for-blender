@@ -29,6 +29,14 @@ class SyncPose(SyncOperator):
         self.haveDots = self.bonesHaveDots()
         self.rootBone = self.getRootBone()
         
+        # when allowing translation it is a must that previous rest pose be saved & applied, but always doing
+        self.restPoses = {}
+        bpy.ops.object.mode_set(mode='POSE')
+        bpy.ops.pose.select_all(action='SELECT')
+        bpy.ops.pose.transforms_clear()
+        for bone in self.bones:
+            self.restPoses[bone.name] = bone.matrix
+        
 #        self.bonesInOrder = self.getChildBones(self.rootBone)
         
     def process(self, poseFilename = None, isExpression = False):
@@ -113,6 +121,15 @@ class SyncPose(SyncOperator):
         # cannot really happen, but
         return None
     
+    def restoreOriginal(self):
+        for bone in self.bones:
+            bone.matrix = self.restPoses[bone.name]
+            
+        if bpy.app.version < (2, 80, 0):
+            bpy.context.scene.update()
+        else:
+            bpy.context.view_layer.update()
+        
     def getChildBones(self, pBone):
         ret = []
         # recursively call against all direct children
