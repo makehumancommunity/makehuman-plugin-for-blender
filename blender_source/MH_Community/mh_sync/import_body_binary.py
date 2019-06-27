@@ -118,7 +118,7 @@ class ImportBodyBinary():
         self.collection = None
         if self.addCollection and bl28():
             self.collection = bpy.data.collections.new(self.name)
-            bpy.context.collection.children.link(self.collection)
+            bpy.context.scene.collection.children.link(self.collection)
 
         linkObject(self.obj, self.collection)
         activateObject(self.obj)
