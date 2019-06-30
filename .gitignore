@@ -10,3 +10,6 @@ __pycache__
 /scripts/
 /nbproject/
 /node_modules/
+
+venv
+
