@@ -22,6 +22,7 @@ from .snaponikrig import MHC_OT_SnapOnIkRigOperator
 from .startkinectrecording import MHC_OT_StartKinectRecordingOperator
 from .stopkinectrecording import MHC_OT_StopKinectRecordingOperator
 from .tokinect2 import MHC_OT_ToKinect2Operator
+from .loadpreset import MHC_OT_LoadPresetOperator
 
 OPERATOR_CLASSES = (
     MHC_OT_ActionJitterReducerOperator,
@@ -43,7 +44,8 @@ OPERATOR_CLASSES = (
     MHC_OT_SnapOnIkRigOperator,
     MHC_OT_StartKinectRecordingOperator,
     MHC_OT_StopKinectRecordingOperator,
-    MHC_OT_ToKinect2Operator
+    MHC_OT_ToKinect2Operator,
+    MHC_OT_LoadPresetOperator
 )
 
 __all__ = [
@@ -67,5 +69,6 @@ __all__ = [
     'MHC_OT_StartKinectRecordingOperator',
     'MHC_OT_StopKinectRecordingOperator',
     'MHC_OT_ToKinect2Operator',
+    'MHC_OT_LoadPresetOperator',
     'OPERATOR_CLASSES'
 ]
