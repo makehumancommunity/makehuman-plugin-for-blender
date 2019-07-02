@@ -42,7 +42,7 @@ def registerImporterConstantsAndSettings():
 
     settings = loadOrCreateDefaultSettings()
 
-    bpy.types.Scene.MhGeneralPreset = bpy.props.EnumProperty(items=overridePresets, name="handle_presents", description="If you plan on using MakeClothes or MakeTarget with the imported toon, choose one of these here. If doing so, all settings below will be ignored.", default="DEFAULT")
+    bpy.types.Scene.MhGeneralPreset = bpy.props.EnumProperty(items=overridePresets, name="handle_presents", description="If you plan on using MakeClothes or MakeTarget with the imported toon, you can load appropriate settings here", default="DEFAULT")
 
     bpy.types.Scene.MhHandleHelper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="How to handle helpers (such as clothes helper geometry and joint cubes)", default=settings["MhHandleHelper"])
     bpy.types.Scene.MhScaleMode = bpy.props.EnumProperty(items=scaleModeItems, name="Scale mode", description="How long in real world terms is a blender unit?", default=settings["MhScaleMode"])
