@@ -4,14 +4,15 @@
 import bpy
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 
+
 overridePresets = []
-overridePresets.append( ("BELOW", "Settings below", "Use settings below", 1) )
-overridePresets.append( ("MAKETARGET", "MakeTarget", "Optimal settings for MakeTarget", 2) )
-overridePresets.append( ("MAKECLOTHES", "MakeClothes", "Optimal settings for MakeClothes", 3) )
+overridePresets.append( ("DEFAULT", "Default", "(re)load the default settings", 1) )
+overridePresets.append( ("MAKETARGET", "MakeTarget", "Load optimal settings for MakeTarget", 2) )
+overridePresets.append( ("MAKECLOTHES", "MakeClothes", "Load optimal settings for MakeClothes", 3) )
 
 handleHelperItems = []
 handleHelperItems.append( ("MASK", "Mask", "Mask helper geometry", 1) )
-handleHelperItems.append( ("NOTHING", "Leave be", "Leave helper geometry as is", 2) )
+handleHelperItems.append( ("NOTHING", "Don't modify", "Leave helper geometry as is", 2) )
 handleHelperItems.append( ("DELETE", "Delete", "Delete helper geometry", 3))
 
 scaleModeItems = []
@@ -38,7 +39,7 @@ handleHiddenItems.append( ("DELETE", "Delete", "Delete vertices for hidden surfa
 def registerImporterConstantsAndSettings():
     # Properties for human importer
 
-    bpy.types.Scene.MhGeneralPreset = bpy.props.EnumProperty(items=overridePresets, name="handle_presents", description="If you plan on using MakeClothes or MakeTarget with the imported toon, choose one of these here. If doing so, all settings below will be ignored.", default="BELOW")
+    bpy.types.Scene.MhGeneralPreset = bpy.props.EnumProperty(items=overridePresets, name="handle_presents", description="If you plan on using MakeClothes or MakeTarget with the imported toon, choose one of these here. If doing so, all settings below will be ignored.", default="DEFAULT")
 
     bpy.types.Scene.MhHandleHelper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="How to handle helpers (such as clothes helper geometry and joint cubes)", default="MASK")
     bpy.types.Scene.MhScaleMode = bpy.props.EnumProperty(items=scaleModeItems, name="Scale mode", description="How long in real world terms is a blender unit?", default="METER")
@@ -82,62 +83,69 @@ def registerImporterConstantsAndSettings():
     # TODO: Rig clothes                 MhRigClothes
     # TODO: Use rig as parent           MhRigIsParent
 
-def addImporterUIToTab(layout, scn):
+def addImporterSettingsToTab(layout, scn):
 
-    importHumanBox = layout.box()
-    importHumanBox.label(text="Import human", icon="MESH_DATA")
+    presetBox = layout.box()
+    presetBox.label(text="Presets", icon="MODIFIER")
+    presetBox.prop(scn, 'MhGeneralPreset', text="")
 
-    importHumanBox.label(text="General preset:")
-    importHumanBox.prop(scn, 'MhGeneralPreset', text="")
+    meshBox = layout.box()
+    meshBox.label(text="Mesh settings", icon="MESH_DATA")
 
-    importHumanBox.separator()
-    importHumanBox.label(text="Import meshes:")
-    importHumanBox.prop(scn, 'MhImportWhat', text="")
-    importHumanBox.prop(scn, 'MhPrefixProxy', text="Prefix with toon")
-    importHumanBox.prop(scn, 'MhMaskBase', text="When proxy, mask base mesh")
-    importHumanBox.prop(scn, 'MhAddSubdiv', text="Add subdiv modifier")
+    meshBox.label(text="What to import")
+    meshBox.prop(scn, 'MhImportWhat', text="")
+    meshBox.prop(scn, 'MhPrefixProxy', text="Prefix object name with toon")
+    meshBox.prop(scn, 'MhMaskBase', text="Mask body when there is a proxy")
+    meshBox.prop(scn, 'MhAddSubdiv', text="Add subdiv modifier")
 
-    importHumanBox.separator()
-    importHumanBox.label(text="Helper geometry:")
-    importHumanBox.prop(scn, 'MhHandleHelper', text="")
-    importHumanBox.prop(scn, 'MhDetailedHelpers', text="Detailed helper groups")
+    helperBox = layout.box()
+    helperBox.label(text="Helper settings", icon="VPAINT_HLT")
+    helperBox.label(text="How to handle helpers")
+    helperBox.prop(scn, 'MhHandleHelper', text="")
+    helperBox.prop(scn, 'MhDetailedHelpers', text="Detailed helper groups")
 
     #importHumanBox.separator()
     #importHumanBox.label(text="Body hidden faces:")
     #importHumanBox.prop(scn, 'MhHiddenFaces', text="")
 
-    importHumanBox.separator()
-    importHumanBox.label(text="Blender unit equals:")
-    importHumanBox.prop(scn, 'MhScaleMode', text="")
+    materialsBox = layout.box()
+    materialsBox.label(text="Materials", icon="MATERIAL_DATA")
+    materialsBox.label(text="When a material exists...")
+    materialsBox.prop(scn, 'MhHandleMaterials', text="")
+    materialsBox.prop(scn, 'MhMaterialObjectName', text="Name after object")
+    materialsBox.prop(scn, 'MhPrefixMaterial', text="Prefix material name with toon")
+    materialsBox.prop(scn, 'MhFixRoughness', text="Fix bad roughness")
 
-    importHumanBox.separator()
-    importHumanBox.label(text="Materials:")
-    importHumanBox.prop(scn, 'MhHandleMaterials', text="")
-    importHumanBox.prop(scn, 'MhMaterialObjectName', text="Name after object")
-    importHumanBox.prop(scn, 'MhPrefixMaterial', text="Prefix with toon")
-    importHumanBox.prop(scn, 'MhFixRoughness', text="Fix bad roughness")
-
-    importHumanBox.separator()
-    importHumanBox.label(text="Rig / posing:")
-    importHumanBox.prop(scn, 'MhImportRig', text="Import rig")
+    rigBox = layout.box()
+    rigBox.label(text="Rig / posing:", icon="ARMATURE_DATA")
+    rigBox.prop(scn, 'MhImportRig', text="Import rig")
     #importHumanBox.prop(scn, 'MhRigBody', text="Rig body + parts")
     #importHumanBox.prop(scn, 'MhRigClothes', text="Rig clothes")
-    importHumanBox.prop(scn, 'MhRigIsParent', text="Use rig as parent")
+    rigBox.prop(scn, 'MhRigIsParent', text="Use rig as parent")
 
     # importHumanBox.prop(scn, 'MhHandIK', text="Hand IK")
     # importHumanBox.prop(scn, 'MhFootIK', text="Foot IK")
     # importHumanBox.prop(scn, 'MhHideFK', text="Hide FK")
 
-    importHumanBox.separator()
-    importHumanBox.label(text="Various:")
-    importHumanBox.prop(scn, 'MhAdjustPosition', text="Place feet on ground")
-    importHumanBox.prop(scn, 'MhAddCollection', text='Create collection from Name')
+    variousBox = layout.box()
+    variousBox.label(text="Various", icon="HAND")
+    variousBox.prop(scn, 'MhAdjustPosition', text="Place feet on ground")
+    variousBox.prop(scn, 'MhAddCollection', text='Create collection from Name')
+    variousBox.separator()
+    variousBox.label(text="Blender unit equals:")
+    variousBox.prop(scn, 'MhScaleMode', text="")
 
-    importHumanBox.separator()
+    connectionBox = layout.box()
+    connectionBox.label(text="Connect to MH", icon="LINKED")
+    connectionBox.label(text="Host :")
+    connectionBox.prop(scn, 'MhHost', text="")
+    connectionBox.label(text="Port :")
+    connectionBox.prop(scn, 'MhPort', text="")
+
+def addImporterUIToTab(layout, scn):
+
+    importHumanBox = layout.box()
+    importHumanBox.label(text="Import human", icon="MESH_DATA")
     importHumanBox.operator("mh_community.import_body", text="Import human")
 
-    importHumanBox.label(text="Host :")
-    importHumanBox.prop(scn, 'MhHost', text="")
 
-    importHumanBox.label(text="Port :")
-    importHumanBox.prop(scn, 'MhPort', text="")

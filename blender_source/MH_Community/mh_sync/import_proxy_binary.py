@@ -54,10 +54,9 @@ class ImportProxyBinary():
 
         self.scaleMode = str(bpy.context.scene.MhScaleMode)
 
-
         self.generalPreset = str(bpy.context.scene.MhGeneralPreset)
 
-        if self.generalPreset != "BELOW":
+        if self.generalPreset != "DEFAULT":
             self.scaleMode = "DECIMETER"
             self.handleMaterials = "CREATENEW"
             self.importWhat = "EVERYTHING"

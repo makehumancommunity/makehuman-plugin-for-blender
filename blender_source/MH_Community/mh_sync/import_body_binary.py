@@ -58,7 +58,7 @@ class ImportBodyBinary():
         self.addCollection = bpy.context.scene.MhAddCollection
         self.baseColor = (1.0, 0.7, 0.7)
 
-        if self.generalPreset != "BELOW":
+        if self.generalPreset != "DEFAULT":
             self.scaleMode = "DECIMETER"
             self.handleMaterials = "CREATENEW"
             self.importWhat = "EVERYTHING"
