@@ -67,6 +67,7 @@ def registerImporterConstantsAndSettings():
 
     bpy.types.Scene.MhAdjustPosition = BoolProperty(name="Place feet on ground", description="Move the toon after import so that feet are on ground (z = 0.0). This is not to be confused with the feet on ground option inside MH.", default=settings["MhAdjustPosition"])
     bpy.types.Scene.MhAddCollection = BoolProperty(name='Create collection from name', description='Create a collection from model\'s name and add all objects to the collection on import', default=settings["MhAddCollection"])
+    bpy.types.Scene.MhSubCollection = BoolProperty(name='Collections as children', description='New collections are created as children to the currently active collection. NOTICE: this will also force-show the current collection.', default=settings["MhSubCollection"])
     bpy.types.Scene.MhHost = StringProperty(name='Host Address', description='Set Host Adress To Connect With MakeHuman', default=settings["MhHost"])
     bpy.types.Scene.MhPort = IntProperty(name='Port Number', description='Set Port Number To Connect With MakeHuman', default=settings["MhPort"])
 
@@ -135,6 +136,7 @@ def addImporterSettingsToTab(layout, scn):
     variousBox.label(text="Various", icon="HAND")
     variousBox.prop(scn, 'MhAdjustPosition', text="Place feet on ground")
     variousBox.prop(scn, 'MhAddCollection', text='Create collection from Name')
+    variousBox.prop(scn, 'MhSubCollection', text='Collections as children')
     variousBox.separator()
     variousBox.label(text="Blender unit equals:")
     variousBox.prop(scn, 'MhScaleMode', text="")

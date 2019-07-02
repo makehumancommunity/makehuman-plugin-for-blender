@@ -55,6 +55,7 @@ class ImportBodyBinary():
         self.adjust = bpy.context.scene.MhAdjustPosition
         self.addCollection = bpy.context.scene.MhAddCollection
         self.hiddenFaces = bpy.types.Scene.MhHiddenFaces
+        self.subCollection = bpy.context.scene.MhSubCollection
 
         self.baseColor = (1.0, 0.7, 0.7)
 
@@ -106,7 +107,20 @@ class ImportBodyBinary():
         self.collection = None
         if self.addCollection and bl28():
             self.collection = bpy.data.collections.new(self.name)
-            bpy.context.scene.collection.children.link(self.collection)
+            if self.subCollection:
+                bpy.context.collection.children.link(self.collection)
+                bpy.context.collection.hide_select = False
+                bpy.context.collection.hide_render = False
+                bpy.context.collection.hide_viewport = False
+                # TODO:      Unfortunately, these three are not enough to avoid the crash that
+                # TODO:      happens when a collection is hidden in the viewport. Apparently
+                # TODO:      something more needs to be done to show the collection, but
+                # TODO:      at this point I don't know what
+            else:
+                bpy.context.scene.collection.children.link(self.collection)
+            self.collection.hide_select = False
+            self.collection.hide_render = False
+            self.collection.hide_viewport = False
 
         linkObject(self.obj, self.collection)
         activateObject(self.obj)

@@ -23,6 +23,7 @@ _defaultSettings["MhRigClothes"] = True
 _defaultSettings["MhRigIsParent"] = True
 _defaultSettings["MhAdjustPosition"] = True
 _defaultSettings["MhAddCollection"] = True
+_defaultSettings["MhSubCollection"] = False
 _defaultSettings["MhHost"] = '127.0.0.1'
 _defaultSettings["MhPort"] = 12345
 
