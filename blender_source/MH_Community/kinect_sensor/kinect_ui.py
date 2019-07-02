@@ -10,8 +10,8 @@ class MHC_UL_AnimationItems(bpy.types.UIList):
         layout.prop(item, "name", text="", emboss=False, translate=False, icon='ARMATURE_DATA')
 
 class AnimationProps(bpy.types.PropertyGroup):
-    id = IntProperty()
-    name = StringProperty()
+    id: IntProperty()
+    name: StringProperty()
 
 #===============================================================================
 def registerKinectConstantsAndSettings():
@@ -29,6 +29,18 @@ def registerKinectConstantsAndSettings():
 
     bpy.types.Scene.MhJitterMaxFrames = IntProperty(name='Max Duration', default=5, description="The maximum number of frames to detect that a bone quickly reversed itself.")
     bpy.types.Scene.MhJitterMinRetracement = FloatProperty(name='Min % Retracement', default=45, description="The percent of the move to be reversed to qualify as a jerk.")
+
+def unregisterKinect():
+    bpy.utils.unregister_class(AnimationProps)
+    bpy.utils.unregister_class(MHC_UL_AnimationItems)
+    bts = bpy.types.Scene
+    del bts.MhKinectCameraHeight
+    del bts.MhKinectAnimations
+    del bts.MhKinectAnimation_index
+    del bts.MhKinectBaseActionName
+    del bts.MhExcludeFingers
+    del bts.MhJitterMaxFrames
+    del bts.MhJitterMinRetracement
 
 KINECT_DEBUG_OPS = False
 

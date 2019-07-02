@@ -86,5 +86,6 @@ class ExpressionTransfer():
         
         # change back to rest pose; since did something know we are in pose mode
         if didSomething:
+            sp.restoreOriginal()
             bpy.ops.pose.select_all(action='SELECT')
             bpy.ops.pose.transforms_clear()

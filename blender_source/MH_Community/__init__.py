@@ -28,7 +28,7 @@ from . import animation_trimming
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAndSettings
 from .mh_sync.bone_ui import addBoneUIToTab, registerBoneConstantsAndSettings
-from .kinect_sensor.kinect_ui import addKinectUIToTab, registerKinectConstantsAndSettings
+from .kinect_sensor.kinect_ui import addKinectUIToTab, registerKinectConstantsAndSettings, unregisterKinect
 
 #===============================================================================
 class MHC_PT_Community_Panel(bpy.types.Panel):
@@ -78,10 +78,6 @@ classes =  [
 from .operators import *
 classes.extend(OPERATOR_CLASSES)
 
-if bpy.app.version >= (2, 80, 0):
-    from .maketarget2 import *
-    classes.extend(MAKETARGET2_CLASSES)
-
 def register():
     from bpy.utils import register_class
     for cls in classes:
@@ -109,6 +105,8 @@ def unregister():
 
     del bpy.types.Scene.MhHandleHelper
     del bpy.types.Scene.MhScaleMode
+
+    unregisterKinect()
 
 if __name__ == "__main__":
     unregister()
