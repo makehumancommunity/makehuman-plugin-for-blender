@@ -93,6 +93,7 @@ def addImporterSettingsToTab(layout, scn):
     presetBox.label(text="Presets", icon="MODIFIER")
     presetBox.prop(scn, 'MhGeneralPreset', text="")
     presetBox.operator("mh_community.load_preset", text="Load")
+    presetBox.operator("mh_community.save_preset", text="Save")
 
     meshBox = layout.box()
     meshBox.label(text="Mesh settings", icon="MESH_DATA")
