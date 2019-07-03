@@ -1,0 +1,181 @@
+{
+  "groups": {
+    "skinGroup": {
+      "label": "Skin",
+      "inputs": {
+        "colorMixIn": {
+          "type": "NodeSocketColor"
+        },
+        "colorMixInStrength": {
+          "type": "NodeSocketFloat"
+        },
+        "Roughness": {
+          "type": "NodeSocketFloat"
+        },
+        "brightness": {
+          "type": "NodeSocketFloat"
+        },
+        "contrast": {
+          "type": "NodeSocketFloat"
+        },
+        "Clearcoat": {
+          "type": "NodeSocketFloat"
+        },
+        "clearCoatRoughness": {
+          "type": "NodeSocketFloat"
+        }
+      },
+      "outputs": {
+        "shaderOutput": {
+          "type": "NodeSocketShader"
+        }
+      },
+      "location": [0, 100],
+      "create": true
+    }
+  },
+  "nodes" : {
+    "skinGroupInputs": {
+      "type": "NodeGroupInput",
+      "label": "Skin input",
+      "location": [-600, 100],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    },
+    "skinGroupOutputs": {
+      "type": "NodeGroupOutput",
+      "label": "Skin output",
+      "location": [600, 100],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    },
+    "output": {
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material output",
+      "location": [350, 100],
+      "group": "",
+      "values": {},
+      "create": true
+    },
+    "principled": {
+      "type": "ShaderNodeBsdfPrincipled",
+      "label": "Principled",
+      "location": [0, 100],
+      "group": "skinGroup",
+      "values": {
+        "Base Color": [0.8, 0.8, 0.8, 1.0]
+      },
+      "create": true
+    },
+    "diffuseTexture": {
+      "type": "ShaderNodeTexImage",
+      "label": "diffuseTexture",
+      "location": [-400, 100],
+      "group": "skinGroup",
+      "values": {},
+      "imageData": {
+        "path": "",
+        "colorspace_settings_name": "sRGB"
+      },
+      "create": false
+    },
+    "normalMapTexture": {
+      "type": "ShaderNodeTexImage",
+      "label": "normal map texture",
+      "location": [-600, -500],
+      "group": "skinGroup",
+      "values": {},
+      "imageData": {
+        "path": "",
+        "colorspace_settings_name": "Non-Color"
+      },
+      "create": false
+    },
+    "bumpMapTexture": {
+      "type": "ShaderNodeTexImage",
+      "label": "normal map texture",
+      "location": [-600, -200],
+      "group": "skinGroup",
+      "values": {},
+      "imageData": {
+        "path": "",
+        "colorspace_settings_name": "Non-Color"
+      },
+      "create": false
+    },
+    "bumpOrNormal": {
+      "type": "ShaderNodeNormalMap",
+      "label": "normal map",
+      "location": [-300, -300],
+      "group": "skinGroup",
+      "values": {
+        "Strength": 1.0
+      },
+      "create": false
+    },
+    "bumpAndNormal": {
+      "type": "ShaderNodeNormalMap",
+      "label": "normal map",
+      "location": [-300, -300],
+      "group": "skinGroup",
+      "values": {
+        "Strength": 1.0
+      },
+      "create": false
+    },
+    "bumpMap": {
+      "type": "ShaderNodeBump",
+      "label": "bump map",
+      "location": [-100, -300],
+      "group": "skinGroup",
+      "values": {},
+      "create": false
+    }
+  },
+  "connections" : [
+    {
+      "outputNode": "principled",
+      "outputSocket": "BSDF",
+      "inputNode": "skinGroupOutputs",
+      "inputSocket": "shaderOutput"
+    },
+    {
+      "outputNode": "diffuseTexture",
+      "outputSocket": "Color",
+      "inputNode": "principled",
+      "inputSocket": "Base Color"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Roughness",
+      "inputNode": "principled",
+      "inputSocket": "Roughness"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Clearcoat",
+      "inputNode": "principled",
+      "inputSocket": "Clearcoat"
+    },
+    {
+      "outputNode": "diffuseTexture",
+      "outputSocket": "Alpha",
+      "inputNode": "principled",
+      "inputSocket": "Alpha"
+    },
+    {
+      "outputNode": "normalMapTexture",
+      "outputSocket": "Color",
+      "inputNode": "bumpOrNormal",
+      "inputSocket": "Color"
+    },
+    {
+      "outputNode": "bumpOrNormal",
+      "outputSocket": "Normal",
+      "inputNode": "principled",
+      "inputSocket": "Normal"
+    }
+  ]
+}

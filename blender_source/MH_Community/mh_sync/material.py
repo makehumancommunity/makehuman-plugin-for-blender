@@ -104,20 +104,44 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
     with open(path,"r") as f:
         defaultMaterial = json.load(f)
 
+    for groupName in defaultMaterial["groups"].keys():
+        groupDef = defaultMaterial["groups"][groupName]
+        if groupDef["create"]:
+            formalGroupName = name + '_' + groupName
+            print("About to create " + formalGroupName)
+            groupDef["nodes"] = bpy.data.node_groups.new(formalGroupName, 'ShaderNodeTree')
+
+            for inputSocket in groupDef["inputs"].keys():
+                type = groupDef["inputs"][inputSocket]["type"]
+                groupDef["nodes"].inputs.new(type, inputSocket)
+
+            for outputSocket in groupDef["outputs"].keys():
+                type = groupDef["outputs"][outputSocket]["type"]
+                groupDef["nodes"].outputs.new(type, outputSocket)
+
+            groupDef["object"] = nodes.new("ShaderNodeGroup")
+            groupDef["object"].node_tree = bpy.data.node_groups[formalGroupName]
+            groupDef["object"].location = groupDef["location"]
+
     _updatePrincipled(defaultMaterial, materialSettingsHash, baseColor)
     _updateDiffuseTexture(defaultMaterial, materialSettingsHash)
     _updateNormalMapAndBumpmapTexture(defaultMaterial, materialSettingsHash)
 
-    pprint.pprint(defaultMaterial)
+    #pprint.pprint(defaultMaterial)
 
     for nodeName in defaultMaterial["nodes"].keys():
         nodeDef = defaultMaterial["nodes"][nodeName]
+        usedNodes = nodes
         if nodeDef["create"]:
             print("Will create node " + nodeName + " with type " + nodeDef["type"])
+            if nodeDef["group"]:
+                groupName = nodeDef["group"]
+                if defaultMaterial["groups"][groupName]["create"]:
+                    usedNodes = defaultMaterial["groups"][groupName]["nodes"].nodes
             if "imageData" in nodeDef:
-                nodeDef["object"] = _createMHImageTextureNode(nodes, nodeDef["imageData"]["path"], color_space=nodeDef["imageData"]["colorspace_settings_name"])
+                nodeDef["object"] = _createMHImageTextureNode(usedNodes, nodeDef["imageData"]["path"], color_space=nodeDef["imageData"]["colorspace_settings_name"])
             else:
-                nodeDef["object"] = nodes.new(nodeDef["type"])
+                nodeDef["object"] = usedNodes.new(nodeDef["type"])
             nodeDef["object"].location = nodeDef["location"]
 
             for propertyName in nodeDef["values"].keys():
@@ -126,15 +150,29 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
                 nodeDef["object"].inputs[propertyName].default_value = value
 
     for connection in defaultMaterial["connections"]:
-        outputNodeDef = defaultMaterial["nodes"][connection["outputNode"]]
-        inputNodeDef = defaultMaterial["nodes"][connection["inputNode"]]
 
-        if outputNodeDef["create"] and inputNodeDef["create"]: # If either doesn't exist, it doesn't make sense to link
-            outputNode = outputNodeDef["object"]
-            inputNode = inputNodeDef["object"]
-            outputSocket = connection["outputSocket"]
-            inputSocket = connection["inputSocket"]
-            links.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
+        inputName = connection["inputNode"]
+        outputName = connection["outputNode"]
+
+        if inputName in defaultMaterial["nodes"] and outputName in defaultMaterial["nodes"]:
+            outputNodeDef = defaultMaterial["nodes"][outputName]
+            inputNodeDef = defaultMaterial["nodes"][inputName]
+
+            if outputNodeDef["create"] and inputNodeDef["create"]: # If either doesn't exist, it doesn't make sense to link
+                usedLinks = links
+                if outputNodeDef["group"]:
+                    usedLinks = defaultMaterial["groups"][outputNodeDef["group"]]["nodes"].links
+                outputNode = outputNodeDef["object"]
+                inputNode = inputNodeDef["object"]
+                outputSocket = connection["outputSocket"]
+                inputSocket = connection["inputSocket"]
+                print("Will attempt to link " + connection["outputNode"] + "[" + outputSocket + "] to " + connection["inputNode"] + "[" + inputSocket + "]")
+                print(outputNode.outputs[outputSocket])
+                print(inputNode.inputs[inputSocket])
+                usedLinks.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
+        else:
+            # Then possibly a group
+            pass
 
     if len(mat.diffuse_color) == 4:
         mat.diffuse_color = baseColor
