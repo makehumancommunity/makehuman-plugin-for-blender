@@ -316,7 +316,7 @@ class ImportProxyBinary():
         if len(baseColor) < 4:
             baseColor = tuple([*baseColor, data.get("viewPortAlpha", 1.0)])
 
-        mat = createMHMaterial(matname, data, baseColor=baseColor, ifExists=self.handleMaterials)
+        mat = createMHMaterial2(matname, data, baseColor=baseColor, ifExists=self.handleMaterials)
 
         self.obj.data.materials.append(mat)
         if not self.onFinished is None:

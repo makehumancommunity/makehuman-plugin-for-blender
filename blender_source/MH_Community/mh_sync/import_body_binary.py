@@ -383,7 +383,7 @@ class ImportBodyBinary():
         if self.prefixMaterial:
             matname = self.name + "." + matname
 
-        mat = createMHMaterial(matname, data, baseColor=self.skinColor, ifExists=self.handleMaterials)
+        mat = createMHMaterial2(matname, data, baseColor=self.skinColor, ifExists=self.handleMaterials)
 
         self.obj.data.materials.append(mat)
 

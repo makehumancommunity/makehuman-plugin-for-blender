@@ -3,8 +3,10 @@
 
 import bpy
 import os
+import json
 
 from ..util import *
+import pprint
 
 def _createMHImageTextureNode(nodes, imagePathAbsolute, color_space='sRGB'):
     fn = os.path.basename(imagePathAbsolute)
@@ -23,8 +25,126 @@ def _createMHImageTextureNode(nodes, imagePathAbsolute, color_space='sRGB'):
     texnode.image = image
     return texnode
 
+def _updatePrincipled(materialDefinition, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)):
+
+    name = materialSettingsHash["name"]
+    fixrough = bpy.context.scene.MhFixRoughness
+
+    principled = materialDefinition["nodes"]["principled"]
+
+    roughness = 1.0 - materialSettingsHash["shininess"]
+    if fixrough and roughness < 0.1 and not "eye" in name.lower():
+        roughness = 0.5
+
+    principled["values"]["Roughness"] = roughness
+
+    if 'diffuseColor' in materialSettingsHash:
+        col = materialSettingsHash.get('diffuseColor')
+        while len(col) < 4:
+            col.append(1.0)
+        principled["values"]["Base Color"] = col
+
+def _updateDiffuseTexture(materialDefinition, materialSettingsHash):
+
+    diffuse = materialSettingsHash.get("diffuseTexture")
+    if diffuse:
+        diffuseDef = materialDefinition["nodes"]["diffuseTexture"]
+        diffuseDef["imageData"]["path"] = diffuse
+        diffuseDef["create"] = True
+
+def _updateNormalMapAndBumpmapTexture(materialDefinition, materialSettingsHash):
+
+    nmap = materialSettingsHash.get("normalMapTexture")
+    if nmap:
+        nmapDef = materialDefinition["nodes"]["normalMapTexture"]
+        nmapDef["imageData"]["path"] = nmap
+        nmapDef["create"] = True
+
+    bmap = materialSettingsHash.get("bumpMapTexture")
+    if bmap:
+        bmapDef = materialDefinition["nodes"]["bumpMapTexture"]
+        bmapDef["imageData"]["path"] = nmap
+        bmapDef["create"] = True
+        materialDefinition["nodes"]["bumpMap"]["create"] = True
+
+    if nmap or bmap:
+        if nmap and bmap:
+            materialDefinition["nodes"]["bumpAndNormal"]["create"] = True
+        else:
+            materialDefinition["nodes"]["bumpOrNormal"]["create"] = True
+
+def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0), ifExists="CREATENEW", materialFile="defaultMaterial.json"):
+
+    mat = None
+    if ifExists == "OVERWRITE" or ifExists == "REUSE":
+        mat = bpy.data.materials.get(name)
+        if not mat is None and ifExists == "REUSE":
+            print("Resuing existing material " + name)
+            return mat
+        else:
+            if not mat is None:
+                print("Overwriting existing material " + name)
+
+    if mat is None:
+        print("Creating new material " + name)
+        mat = bpy.data.materials.new(name)
+
+    mat.use_nodes = True
+    if bl28():
+        mat.blend_method = 'HASHED'
+    tree = mat.node_tree
+    nodes = tree.nodes
+    links = tree.links
+
+    while nodes:
+        nodes.remove(nodes[0])
+
+    path = os.path.join(os.path.dirname(__file__),materialFile)
+
+    with open(path,"r") as f:
+        defaultMaterial = json.load(f)
+
+    _updatePrincipled(defaultMaterial, materialSettingsHash, baseColor)
+    _updateDiffuseTexture(defaultMaterial, materialSettingsHash)
+    _updateNormalMapAndBumpmapTexture(defaultMaterial, materialSettingsHash)
+
+    pprint.pprint(defaultMaterial)
+
+    for nodeName in defaultMaterial["nodes"].keys():
+        nodeDef = defaultMaterial["nodes"][nodeName]
+        if nodeDef["create"]:
+            print("Will create node " + nodeName + " with type " + nodeDef["type"])
+            if "imageData" in nodeDef:
+                nodeDef["object"] = _createMHImageTextureNode(nodes, nodeDef["imageData"]["path"], color_space=nodeDef["imageData"]["colorspace_settings_name"])
+            else:
+                nodeDef["object"] = nodes.new(nodeDef["type"])
+            nodeDef["object"].location = nodeDef["location"]
+
+            for propertyName in nodeDef["values"].keys():
+                value = nodeDef["values"][propertyName]
+                print("Will attempt to set " + nodeName + "[" + propertyName + "] to " + str(value))
+                nodeDef["object"].inputs[propertyName].default_value = value
+
+    for connection in defaultMaterial["connections"]:
+        outputNodeDef = defaultMaterial["nodes"][connection["outputNode"]]
+        inputNodeDef = defaultMaterial["nodes"][connection["inputNode"]]
+
+        if outputNodeDef["create"] and inputNodeDef["create"]: # If either doesn't exist, it doesn't make sense to link
+            outputNode = outputNodeDef["object"]
+            inputNode = inputNodeDef["object"]
+            outputSocket = connection["outputSocket"]
+            inputSocket = connection["inputSocket"]
+            links.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
+
+    if len(mat.diffuse_color) == 4:
+        mat.diffuse_color = baseColor
+    else: # This section is for backward compatibility with Blender 2.79 and should be removed asap
+        mat.diffuse_color = baseColor[:-1]
+
+    return mat
 
 def createMHMaterial(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0), ifExists="CREATENEW"):
+
 
     x = 0
     y = 400
