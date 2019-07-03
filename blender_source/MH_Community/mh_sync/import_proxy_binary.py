@@ -46,6 +46,7 @@ class ImportProxyBinary():
         self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
         self.matobjname = bpy.context.scene.MhMaterialObjectName
         self.prefixProxy = bpy.context.scene.MhPrefixProxy
+        self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
 
         self.scaleFactor = 0.1
 
@@ -53,22 +54,6 @@ class ImportProxyBinary():
         self.lastMillis = self.startMillis
 
         self.scaleMode = str(bpy.context.scene.MhScaleMode)
-
-
-        self.generalPreset = str(bpy.context.scene.MhGeneralPreset)
-
-        if self.generalPreset != "BELOW":
-            self.scaleMode = "DECIMETER"
-            self.handleMaterials = "CREATENEW"
-            self.importWhat = "EVERYTHING"
-            self.helpers = "MASK"
-            self.subdiv = False
-            self.matobjname = True
-            self.importRig = False
-            self.detailedHelpers = True
-            self.rigisparent = False
-            self.adjust = False
-            self.prefixProxy = False
 
         if self.scaleMode == "DECIMETER":
             self.scaleFactor = 1.0
@@ -306,7 +291,7 @@ class ImportProxyBinary():
         self.bm.to_mesh(self.mesh)
         self.bm.free()
 
-        if self.generalPreset == "MAKECLOTHES":
+        if self.detailedHelpers:
             self.makeClothesExtras()
 
         self.maskFaces()

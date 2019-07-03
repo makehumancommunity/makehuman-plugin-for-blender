@@ -42,14 +42,12 @@ class ImportBodyBinary():
         self.startMillis = int(round(time.time() * 1000))
         self.lastMillis = self.startMillis
 
-        self.generalPreset = str(bpy.context.scene.MhGeneralPreset)
-
         self.scaleMode = str(bpy.context.scene.MhScaleMode)
         self.handleMaterials = str(bpy.context.scene.MhHandleMaterials)
         self.prefixMaterial = bpy.context.scene.MhPrefixMaterial
         self.importWhat = str(bpy.context.scene.MhImportWhat)
         self.helpers = str(bpy.context.scene.MhHandleHelper)
-        self.subdiv = str(bpy.context.scene.MhAddSubdiv)
+        self.subdiv = bpy.context.scene.MhAddSubdiv
         self.matobjname = bpy.context.scene.MhMaterialObjectName
         self.importRig = bpy.context.scene.MhImportRig
         self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
@@ -57,18 +55,10 @@ class ImportBodyBinary():
         self.adjust = bpy.context.scene.MhAdjustPosition
         self.addCollection = bpy.context.scene.MhAddCollection
         self.defaultSkinColor = (1.0, 0.7, 0.7, 1.0)
+        self.hiddenFaces = bpy.types.Scene.MhHiddenFaces
+        self.subCollection = bpy.context.scene.MhSubCollection
 
-        if self.generalPreset != "BELOW":
-            self.scaleMode = "DECIMETER"
-            self.handleMaterials = "CREATENEW"
-            self.importWhat = "EVERYTHING"
-            self.helpers = "MASK"
-            self.subdiv = False
-            self.matobjname = True
-            self.importRig = False
-            self.detailedHelpers = False
-            self.rigisparent = False
-            self.adjust = False
+        self.baseColor = (1.0, 0.7, 0.7)
 
         self.all_joint_verts = []
         self.all_helper_verts = []
@@ -118,7 +108,20 @@ class ImportBodyBinary():
         self.collection = None
         if self.addCollection and bl28():
             self.collection = bpy.data.collections.new(self.name)
-            bpy.context.scene.collection.children.link(self.collection)
+            if self.subCollection:
+                bpy.context.collection.children.link(self.collection)
+                bpy.context.collection.hide_select = False
+                bpy.context.collection.hide_render = False
+                bpy.context.collection.hide_viewport = False
+                # TODO:      Unfortunately, these three are not enough to avoid the crash that
+                # TODO:      happens when a collection is hidden in the viewport. Apparently
+                # TODO:      something more needs to be done to show the collection, but
+                # TODO:      at this point I don't know what
+            else:
+                bpy.context.scene.collection.children.link(self.collection)
+            self.collection.hide_select = False
+            self.collection.hide_render = False
+            self.collection.hide_viewport = False
 
         linkObject(self.obj, self.collection)
         activateObject(self.obj)
@@ -255,7 +258,7 @@ class ImportBodyBinary():
                         vgroup = self.obj.vertex_groups.new(name=name)
                         vgroup.add(verts, 1.0, 'ADD')
                     else:
-                        if self.generalPreset == "MAKECLOTHES" and name.startswith("helper-"):
+                        if self.detailedHelpers and name.startswith("helper-"):
                             vgroup = self.obj.vertex_groups.new(name=name)
                             vgroup.add(verts, 1.0, 'ADD')
 
@@ -274,7 +277,7 @@ class ImportBodyBinary():
             vgroup.add(self.all_joint_verts, 1.0, 'ADD')
 
 
-        if self.generalPreset == "MAKECLOTHES":
+        if self.detailedHelpers:
             print("IS MAKECLOTHES")
 
             for i in range(len(self.vertPosCache)):
@@ -303,7 +306,7 @@ class ImportBodyBinary():
                 vgroup.add(self.mid_verts, 1.0, 'ADD')
 
         if self.helpers == "MASK":
-            mask = self.obj.modifiers.new("Mask", 'MASK')
+            mask = self.obj.modifiers.new("Toggle helper visibility", 'MASK')
             mask.vertex_group = "body"
             mask.show_in_editmode = True
             mask.show_on_cage = True
@@ -358,7 +361,10 @@ class ImportBodyBinary():
         self.bm.to_mesh(self.mesh)
         self.bm.free()
         self.handleHelpers()
-        self.maskBody()
+
+        if self.hiddenFaces == "MASK":
+            self.maskBody()
+        # TODO: handle "MATERIAL" and "DELETE" too
 
         del self.vertCache
         del self.faceCache
@@ -561,7 +567,12 @@ class ImportBodyBinary():
         if self.adjust:
             self.objToAdjust.location.z = -self.groundMean
 
+        print("SUBDIV")
+        print(self.subdiv)
+        print(type(self.subdiv))
+
         if self.subdiv:
+            print("Adding subdiv")
             subdiv = self.obj.modifiers.new("Subdivision", 'SUBSURF')
             subdiv.levels = 0
             subdiv.render_levels = 2

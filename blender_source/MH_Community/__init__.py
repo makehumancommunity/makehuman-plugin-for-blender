@@ -26,7 +26,7 @@ from .rig import RigInfo, BoneSurgery, IkRig, FingerRig
 from . import animation_trimming
 
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
-from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAndSettings
+from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAndSettings, addImporterSettingsToTab
 from .mh_sync.bone_ui import addBoneUIToTab, registerBoneConstantsAndSettings
 from .kinect_sensor.kinect_ui import addKinectUIToTab, registerKinectConstantsAndSettings, unregisterKinect
 
@@ -54,15 +54,17 @@ class MHC_PT_Community_Panel(bpy.types.Panel):
             generalSyncBox.operator("mh_community.sync_mh_mesh", text="Sync with MH")
             generalSyncBox.operator("mh_community.separate_eyes")
 
-        elif scn.mhTabs == BONE_TAB:
             addBoneUIToTab(layout, scn)
+
+        elif scn.mhTabs == SETTINGS_TAB:
+            addImporterSettingsToTab(layout, scn)
 
         else:
             addKinectUIToTab(layout, scn)
 #===============================================================================
 MESH_TAB   = 'A'
-BONE_TAB   = 'B'
-KINECT_TAB = 'C'
+KINECT_TAB = 'B'
+SETTINGS_TAB   = 'C'
 
 # While MHX2 may set this, do not to rely on MHX.  Required in multiple places.
 bpy.types.Armature.exportedUnits = bpy.props.StringProperty(
@@ -86,9 +88,9 @@ def register():
     bpy.types.Scene.mhTabs = bpy.props.EnumProperty(
     name='meshOrBoneOrKinect',
     items = (
-             (MESH_TAB  , "Mesh"  , "Operators related to Make Human meshes"),
-             (BONE_TAB  , "Rig"  , "IK & other bone operators on Make Human skeletons"),
+             (MESH_TAB  , "Mesh"  , "Operators related to Make Human meshes and rigs"),
              (KINECT_TAB, "Kinect", "Motion Capture using Kinect V2 for converted Make Human meshes"),
+             (SETTINGS_TAB, "Settings", "Settings for MH operations"),
         ),
     default = MESH_TAB
 )
