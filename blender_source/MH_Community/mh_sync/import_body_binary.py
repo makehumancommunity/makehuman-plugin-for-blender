@@ -55,7 +55,7 @@ class ImportBodyBinary():
         self.adjust = bpy.context.scene.MhAdjustPosition
         self.addCollection = bpy.context.scene.MhAddCollection
         self.defaultSkinColor = (1.0, 0.7, 0.7, 1.0)
-        self.hiddenFaces = bpy.types.Scene.MhHiddenFaces
+        self.hiddenFaces = bpy.context.scene.MhHiddenFaces
         self.subCollection = bpy.context.scene.MhSubCollection
 
         self.baseColor = (1.0, 0.7, 0.7)
