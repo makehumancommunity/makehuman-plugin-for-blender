@@ -79,6 +79,8 @@ def registerImporterConstantsAndSettings():
     bpy.types.Object.MhProxyUUID = StringProperty(name="Proxy UUID", description="This is the UUID of the proxy in MakeHuman", default="")
     bpy.types.Object.MhObjectType = StringProperty(name="Object type", description="This is what type of MakeHuman object this is (such as Clothes, Eyes...)", default="")
 
+    bpy.types.Scene.MhEnhancedSkin = BoolProperty(name="Enhanced skin", description="Create enhanced skin node setup (rather than normal material)", default=settings["MhEnhancedSkin"])
+
     # In case MHX2 isn't loaded
     bpy.types.Object.MhHuman = BoolProperty(default=False)
 
@@ -141,6 +143,10 @@ def addImporterSettingsToTab(layout, scn):
     variousBox.separator()
     variousBox.label(text="Blender unit equals:")
     variousBox.prop(scn, 'MhScaleMode', text="")
+
+    extrasBox = layout.box()
+    extrasBox.label(text="Extras", icon="OUTLINER_OB_LIGHT")
+    extrasBox.prop(scn, 'MhEnhancedSkin', text='Enhanced skin material')
 
     connectionBox = layout.box()
     connectionBox.label(text="Connect to MH", icon="LINKED")

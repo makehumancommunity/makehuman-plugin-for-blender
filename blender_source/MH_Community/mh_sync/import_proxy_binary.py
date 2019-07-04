@@ -308,6 +308,11 @@ class ImportProxyBinary():
         if self.matobjname or matname in ["material", "materialMaterial", "bodyMaterial", "", "none"]:
             matname = self.proxyInfo["name"]
 
+        print(self.proxyInfo["type"])
+
+        if self.matobjname and self.proxyInfo["type"] == "Proxymeshes":
+            matname = "body"
+
         if self.prefixMaterial:
             matname = self.humanName + "." + matname
 
