@@ -82,7 +82,9 @@
       "label": "bump map",
       "location": [-100, -300],
       "group": "",
-      "values": {},
+      "values": {
+        "Strength": 0.5
+      },
       "create": false
     }
   },
@@ -112,7 +114,31 @@
       "inputSocket": "Color"
     },
     {
+      "outputNode": "normalMapTexture",
+      "outputSocket": "Color",
+      "inputNode": "bumpAndNormal",
+      "inputSocket": "Color"
+    },
+    {
       "outputNode": "bumpOrNormal",
+      "outputSocket": "Normal",
+      "inputNode": "principled",
+      "inputSocket": "Normal"
+    },
+    {
+      "outputNode": "bumpMapTexture",
+      "outputSocket": "Color",
+      "inputNode": "bumpMap",
+      "inputSocket": "Height"
+    },
+    {
+      "outputNode": "bumpAndNormal",
+      "outputSocket": "Normal",
+      "inputNode": "bumpMap",
+      "inputSocket": "Normal"
+    },
+    {
+      "outputNode": "bumpMap",
       "outputSocket": "Normal",
       "inputNode": "principled",
       "inputSocket": "Normal"

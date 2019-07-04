@@ -11,7 +11,7 @@ import pprint
 def _createMHImageTextureNode(nodes, imagePathAbsolute, color_space='sRGB'):
     fn = os.path.basename(imagePathAbsolute)
     if fn in bpy.data.images:
-        print("image existed")
+        print("image existed: " + imagePathAbsolute)
         image = bpy.data.images[fn]
     else:
         image = bpy.data.images.load(imagePathAbsolute)
@@ -53,7 +53,7 @@ def _updateDiffuseTexture(materialDefinition, materialSettingsHash):
         diffuseDef["create"] = True
 
 def _updateNormalMapAndBumpmapTexture(materialDefinition, materialSettingsHash):
-
+    # TODO: Modify intensity ("Strength") for normal map and bump map
     nmap = materialSettingsHash.get("normalMapTexture")
     if nmap:
         nmapDef = materialDefinition["nodes"]["normalMapTexture"]
@@ -63,7 +63,7 @@ def _updateNormalMapAndBumpmapTexture(materialDefinition, materialSettingsHash):
     bmap = materialSettingsHash.get("bumpMapTexture")
     if bmap:
         bmapDef = materialDefinition["nodes"]["bumpMapTexture"]
-        bmapDef["imageData"]["path"] = nmap
+        bmapDef["imageData"]["path"] = bmap
         bmapDef["create"] = True
         materialDefinition["nodes"]["bumpMap"]["create"] = True
 
@@ -113,7 +113,9 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
 
             for inputSocket in groupDef["inputs"].keys():
                 type = groupDef["inputs"][inputSocket]["type"]
-                groupDef["nodes"].inputs.new(type, inputSocket)
+                input = groupDef["nodes"].inputs.new(type, inputSocket)
+                if "value" in groupDef["inputs"][inputSocket]:
+                    input.default_value = groupDef["inputs"][inputSocket]["value"]
 
             for outputSocket in groupDef["outputs"].keys():
                 type = groupDef["outputs"][outputSocket]["type"]
@@ -127,7 +129,8 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
     _updateDiffuseTexture(defaultMaterial, materialSettingsHash)
     _updateNormalMapAndBumpmapTexture(defaultMaterial, materialSettingsHash)
 
-    #pprint.pprint(defaultMaterial)
+    if materialFile=="skinMaterial.json":
+        pprint.pprint(defaultMaterial)
 
     for nodeName in defaultMaterial["nodes"].keys():
         nodeDef = defaultMaterial["nodes"][nodeName]
@@ -143,6 +146,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
             else:
                 nodeDef["object"] = usedNodes.new(nodeDef["type"])
             nodeDef["object"].location = nodeDef["location"]
+            nodeDef["object"].label = nodeDef["label"] + " (" + nodeName + ")"
 
             for propertyName in nodeDef["values"].keys():
                 value = nodeDef["values"][propertyName]
@@ -152,7 +156,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
     for connection in defaultMaterial["connections"]:
 
         inputName = connection["inputNode"]
-        outputName = connection["outputNode"]
+        outputName = connection["outputNode"]        
 
         if inputName in defaultMaterial["nodes"] and outputName in defaultMaterial["nodes"]:
             outputNodeDef = defaultMaterial["nodes"][outputName]
@@ -171,8 +175,31 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
                 print(inputNode.inputs[inputSocket])
                 usedLinks.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
         else:
-            # Then possibly a group
-            pass
+            # either side or both is probably a group
+            inputNode = None
+            if inputName in defaultMaterial["nodes"]:
+                if defaultMaterial["nodes"][inputName]["create"]:
+                    inputNode = defaultMaterial["nodes"][inputName]["object"]
+            else:
+                if inputName in defaultMaterial["groups"]:
+                    if defaultMaterial["groups"][inputName]["create"]:
+                        inputNode = defaultMaterial["groups"][inputName]["object"]
+            outputNode = None
+            if outputName in defaultMaterial["nodes"]:
+                if defaultMaterial["nodes"][outputName]["create"]:
+                    outputNode = defaultMaterial["nodes"][outputName]["object"]
+            else:
+                if outputName in defaultMaterial["groups"]:
+                    if defaultMaterial["groups"][outputName]["create"]:
+                        outputNode = defaultMaterial["groups"][outputName]["object"]
+            if inputNode and outputNode:
+                outputSocket = connection["outputSocket"]
+                inputSocket = connection["inputSocket"]
+                print("Will attempt to link " + connection["outputNode"] + "[" + outputSocket + "] to " + connection["inputNode"] + "[" + inputSocket + "]")
+                print(outputNode.outputs[outputSocket])
+                print(inputNode.inputs[inputSocket])
+                # We won't support groups inside groups, so always assume this is top level
+                links.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
 
     if len(mat.diffuse_color) == 4:
         mat.diffuse_color = baseColor

@@ -4,25 +4,32 @@
       "label": "Skin",
       "inputs": {
         "colorMixIn": {
-          "type": "NodeSocketColor"
+          "type": "NodeSocketColor",
+          "value": [1.0, 0.2, 0.2, 1.0]
         },
         "colorMixInStrength": {
-          "type": "NodeSocketFloat"
+          "type": "NodeSocketFloat",
+          "value": 0.05
         },
         "Roughness": {
-          "type": "NodeSocketFloat"
+          "type": "NodeSocketFloat",
+          "value": 0.5
         },
-        "brightness": {
-          "type": "NodeSocketFloat"
+        "Brightness": {
+          "type": "NodeSocketFloat",
+          "value": 0.0
         },
-        "contrast": {
-          "type": "NodeSocketFloat"
+        "Contrast": {
+          "type": "NodeSocketFloat",
+          "value": 0.0
         },
         "Clearcoat": {
-          "type": "NodeSocketFloat"
+          "type": "NodeSocketFloat",
+          "value": 0.2
         },
-        "clearCoatRoughness": {
-          "type": "NodeSocketFloat"
+        "Clearcoat Roughness": {
+          "type": "NodeSocketFloat",
+          "value": 0.3
         }
       },
       "outputs": {
@@ -38,7 +45,7 @@
     "skinGroupInputs": {
       "type": "NodeGroupInput",
       "label": "Skin input",
-      "location": [-600, 100],
+      "location": [-800, -100],
       "group": "skinGroup",
       "values": {},
       "create": true
@@ -69,10 +76,11 @@
       },
       "create": true
     },
+
     "diffuseTexture": {
       "type": "ShaderNodeTexImage",
       "label": "diffuseTexture",
-      "location": [-400, 100],
+      "location": [-800, 300],
       "group": "skinGroup",
       "values": {},
       "imageData": {
@@ -132,7 +140,24 @@
       "group": "skinGroup",
       "values": {},
       "create": false
+    },
+    "colorMix": {
+      "type": "ShaderNodeMixRGB",
+      "label": "Color mix",
+      "location": [-500, 200],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    },
+    "brightContrast": {
+      "type": "ShaderNodeBrightContrast",
+      "label": "Brightness and Contrast",
+      "location": [-300, 100],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
     }
+
   },
   "connections" : [
     {
@@ -142,16 +167,64 @@
       "inputSocket": "shaderOutput"
     },
     {
+      "outputNode": "skinGroup",
+      "outputSocket": "shaderOutput",
+      "inputNode": "output",
+      "inputSocket": "Surface"
+    },
+    {
       "outputNode": "diffuseTexture",
+      "outputSocket": "Color",
+      "inputNode": "colorMix",
+      "inputSocket": "Color1"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "colorMixIn",
+      "inputNode": "colorMix",
+      "inputSocket": "Color2"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "colorMixInStrength",
+      "inputNode": "colorMix",
+      "inputSocket": "Fac"
+    },
+    {
+      "outputNode": "colorMix",
+      "outputSocket": "Color",
+      "inputNode": "brightContrast",
+      "inputSocket": "Color"
+    },
+    {
+      "outputNode": "brightContrast",
       "outputSocket": "Color",
       "inputNode": "principled",
       "inputSocket": "Base Color"
     },
     {
       "outputNode": "skinGroupInputs",
+      "outputSocket": "Brightness",
+      "inputNode": "brightContrast",
+      "inputSocket": "Bright"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Contrast",
+      "inputNode": "brightContrast",
+      "inputSocket": "Contrast"
+    },
+    {
+      "outputNode": "skinGroupInputs",
       "outputSocket": "Roughness",
       "inputNode": "principled",
       "inputSocket": "Roughness"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Clearcoat Roughness",
+      "inputNode": "principled",
+      "inputSocket": "Clearcoat Roughness"
     },
     {
       "outputNode": "skinGroupInputs",
