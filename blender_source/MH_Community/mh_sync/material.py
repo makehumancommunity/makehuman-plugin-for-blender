@@ -153,6 +153,21 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
                 print("Will attempt to set " + nodeName + "[" + propertyName + "] to " + str(value))
                 nodeDef["object"].inputs[propertyName].default_value = value
 
+            if nodeDef["type"] == "ShaderNodeValToRGB":
+                elements = nodeDef["object"].color_ramp.elements
+                numStopsInNode = len(elements)
+                numStopsInDef = len(nodeDef["stops"])
+
+                while numStopsInNode < numStopsInDef:
+                    elements.new(1.0)
+                    numStopsInNode = len(elements)
+
+                i = 0
+                for stop in elements:
+                    stop.position = nodeDef["stops"][i]
+                    i = i + 1
+
+
     for connection in defaultMaterial["connections"]:
 
         inputName = connection["inputNode"]
