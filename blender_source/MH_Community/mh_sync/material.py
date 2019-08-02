@@ -99,9 +99,12 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
     while nodes:
         nodes.remove(nodes[0])
 
-    path = os.path.join(os.path.dirname(__file__),materialFile)
+    nodesDir = os.path.join(os.path.dirname(__file__),"..","data","nodes")
+    texturesDir = os.path.join(os.path.dirname(__file__),"..","data","text")
 
-    with open(path,"r") as f:
+    materialPath = os.path.join(nodesDir,materialFile)
+
+    with open(materialPath,"r") as f:
         defaultMaterial = json.load(f)
 
     for groupName in defaultMaterial["groups"].keys():
