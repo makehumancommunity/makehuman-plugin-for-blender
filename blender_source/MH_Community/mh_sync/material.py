@@ -156,6 +156,9 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
                 print("Will attempt to set " + nodeName + "[" + propertyName + "] to " + str(value))
                 nodeDef["object"].inputs[propertyName].default_value = value
 
+            if nodeDef["type"] == "ShaderNodeMath":
+                nodeDef["object"].operation = nodeDef["operation"]
+
             if nodeDef["type"] == "ShaderNodeValToRGB":
                 elements = nodeDef["object"].color_ramp.elements
                 numStopsInNode = len(elements)
@@ -188,7 +191,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
                 inputNode = inputNodeDef["object"]
                 outputSocket = connection["outputSocket"]
                 inputSocket = connection["inputSocket"]
-                print("Will attempt to link " + connection["outputNode"] + "[" + outputSocket + "] to " + connection["inputNode"] + "[" + inputSocket + "]")
+                print("Will attempt to link " + connection["outputNode"] + "[" + str(outputSocket) + "] to " + connection["inputNode"] + "[" + str(inputSocket) + "]")
                 print(outputNode.outputs[outputSocket])
                 print(inputNode.inputs[inputSocket])
                 usedLinks.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
@@ -213,7 +216,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
             if inputNode and outputNode:
                 outputSocket = connection["outputSocket"]
                 inputSocket = connection["inputSocket"]
-                print("Will attempt to link " + connection["outputNode"] + "[" + outputSocket + "] to " + connection["inputNode"] + "[" + inputSocket + "]")
+                print("Will attempt to link " + connection["outputNode"] + "[" + str(outputSocket) + "] to " + connection["inputNode"] + "[" + str(inputSocket) + "]")
                 print(outputNode.outputs[outputSocket])
                 print(inputNode.inputs[inputSocket])
                 # We won't support groups inside groups, so always assume this is top level
