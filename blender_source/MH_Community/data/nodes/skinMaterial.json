@@ -45,7 +45,7 @@
         },
         "Pore strength": {
           "type": "NodeSocketFloat",
-          "value": 0.1
+          "value": 0.2
         }
       },
       "outputs": {
