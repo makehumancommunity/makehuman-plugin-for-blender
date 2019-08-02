@@ -33,7 +33,7 @@
         },
         "Pore scale": {
           "type": "NodeSocketFloat",
-          "value": 2000.0
+          "value": 2500.0
         },
         "Pore detail": {
           "type": "NodeSocketFloat",
@@ -42,6 +42,10 @@
         "Pore distortion": {
           "type": "NodeSocketFloat",
           "value": 1.0
+        },
+        "Pore strength": {
+          "type": "NodeSocketFloat",
+          "value": 0.1
         }
       },
       "outputs": {
@@ -57,7 +61,7 @@
     "skinGroupInputs": {
       "type": "NodeGroupInput",
       "label": "Skin input",
-      "location": [-800, -100],
+      "location": [-1200, -100],
       "group": "skinGroup",
       "values": {},
       "create": true
@@ -186,7 +190,7 @@
       "location": [-500, -800],
       "group": "skinGroup",
       "values": {},
-      "stops": [0.179, 0.450],
+      "stops": [0.2, 0.5],
       "create": true
     },
     "noiseBump": {
@@ -202,7 +206,7 @@
     "texco": {
       "type": "ShaderNodeTexCoord",
       "label": "Texture coords",
-      "location": [-1200, -100],
+      "location": [-1200, 300],
       "group": "skinGroup",
       "values": {},
       "create": true
@@ -340,6 +344,24 @@
       "outputSocket": "Pore distortion",
       "inputNode": "noise",
       "inputSocket": "Distortion"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Pore strength",
+      "inputNode": "noiseBump",
+      "inputSocket": "Strength"
+    },
+    {
+      "outputNode": "texco",
+      "outputSocket": "UV",
+      "inputNode": "diffuseTexture",
+      "inputSocket": "Vector"
+    },
+    {
+      "outputNode": "texco",
+      "outputSocket": "UV",
+      "inputNode": "normalMapTexture",
+      "inputSocket": "Vector"
     }
   ]
 }
