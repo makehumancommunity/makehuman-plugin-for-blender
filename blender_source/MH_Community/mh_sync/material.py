@@ -100,7 +100,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
         nodes.remove(nodes[0])
 
     nodesDir = os.path.join(os.path.dirname(__file__),"..","data","nodes")
-    texturesDir = os.path.join(os.path.dirname(__file__),"..","data","text")
+    texturesDir = os.path.join(os.path.dirname(__file__),"..","data","textures")
 
     materialPath = os.path.join(nodesDir,materialFile)
 
@@ -132,8 +132,10 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
     _updateDiffuseTexture(defaultMaterial, materialSettingsHash)
     _updateNormalMapAndBumpmapTexture(defaultMaterial, materialSettingsHash)
 
-    if materialFile=="skinMaterial.json":
-        pprint.pprint(defaultMaterial)
+    if "sss" in materialFile.lower():
+        sss = defaultMaterial["nodes"].get("ssstex")
+        if sss:
+            sss["imageData"]["path"] = os.path.join(texturesDir,"sss.png")
 
     for nodeName in defaultMaterial["nodes"].keys():
         nodeDef = defaultMaterial["nodes"][nodeName]

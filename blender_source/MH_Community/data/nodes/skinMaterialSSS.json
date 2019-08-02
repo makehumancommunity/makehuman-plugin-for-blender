@@ -47,7 +47,7 @@
           "type": "NodeSocketFloat",
           "value": 0.2
         },
-        "SSSColor": {
+        "SSS Color": {
           "type": "NodeSocketColor",
           "value": [1.0, 0.4, 0.4, 1.0]
         },
@@ -269,6 +269,27 @@
       "group": "skinGroup",
       "values": {},
       "create": true
+    },
+    "ssstex": {
+      "type": "ShaderNodeTexImage",
+      "label": "sssTexture",
+      "location": [-600, 900],
+      "group": "skinGroup",
+      "values": {},
+      "imageData": {
+        "path": "",
+        "colorspace_settings_name": "sRGB"
+      },
+      "create": true
+    },
+    "sssstrength": {
+      "type": "ShaderNodeMath",
+      "label": "SSS Strength",
+      "location": [-300, 800],
+      "group": "skinGroup",
+      "operation": "MULTIPLY",
+      "values": {},
+      "create": true
     }
   },
   "connections" : [
@@ -481,6 +502,36 @@
       "outputSocket": "Image",
       "inputNode": "principled",
       "inputSocket": "Subsurface Radius"
+    },
+    {
+      "outputNode": "texco",
+      "outputSocket": "UV",
+      "inputNode": "ssstex",
+      "inputSocket": "Vector"
+    },
+    {
+      "outputNode": "ssstex",
+      "outputSocket": "Color",
+      "inputNode": "sssstrength",
+      "inputSocket": 0
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "SSS strength",
+      "inputNode": "sssstrength",
+      "inputSocket": 1
+    },
+    {
+      "outputNode": "sssstrength",
+      "outputSocket": "Value",
+      "inputNode": "principled",
+      "inputSocket": "Subsurface"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "SSS Color",
+      "inputNode": "principled",
+      "inputSocket": "Subsurface Color"
     }
   ]
 }
