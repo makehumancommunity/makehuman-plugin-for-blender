@@ -1,0 +1,486 @@
+{
+  "groups": {
+    "skinGroup": {
+      "label": "Skin",
+      "inputs": {
+        "colorMixIn": {
+          "type": "NodeSocketColor",
+          "value": [1.0, 0.2, 0.2, 1.0]
+        },
+        "colorMixInStrength": {
+          "type": "NodeSocketFloat",
+          "value": 0.05
+        },
+        "Roughness": {
+          "type": "NodeSocketFloat",
+          "value": 0.7
+        },
+        "Brightness": {
+          "type": "NodeSocketFloat",
+          "value": 0.0
+        },
+        "Contrast": {
+          "type": "NodeSocketFloat",
+          "value": 0.0
+        },
+        "Clearcoat": {
+          "type": "NodeSocketFloat",
+          "value": 0.1
+        },
+        "Clearcoat Roughness": {
+          "type": "NodeSocketFloat",
+          "value": 0.3
+        },
+        "Pore scale": {
+          "type": "NodeSocketFloat",
+          "value": 2500.0
+        },
+        "Pore detail": {
+          "type": "NodeSocketFloat",
+          "value": 2.0
+        },
+        "Pore distortion": {
+          "type": "NodeSocketFloat",
+          "value": 1.0
+        },
+        "Pore strength": {
+          "type": "NodeSocketFloat",
+          "value": 0.2
+        },
+        "SSSColor": {
+          "type": "NodeSocketColor",
+          "value": [1.0, 0.4, 0.4, 1.0]
+        },
+        "SSS strength": {
+          "type": "NodeSocketFloat",
+          "value": 0.2
+        },
+        "SSS radius scale": {
+          "type": "NodeSocketFloat",
+          "value": 0.1
+        },
+        "SSS radius R": {
+          "type": "NodeSocketFloat",
+          "value": 1.0
+        },
+        "SSS radius G": {
+          "type": "NodeSocketFloat",
+          "value": 0.2
+        },
+        "SSS radius B": {
+          "type": "NodeSocketFloat",
+          "value": 0.1
+        }
+      },
+      "outputs": {
+        "shaderOutput": {
+          "type": "NodeSocketShader"
+        }
+      },
+      "location": [0, 100],
+      "create": true
+    }
+  },
+  "nodes" : {
+    "skinGroupInputs": {
+      "type": "NodeGroupInput",
+      "label": "Skin input",
+      "location": [-1200, -100],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    },
+    "skinGroupOutputs": {
+      "type": "NodeGroupOutput",
+      "label": "Skin output",
+      "location": [600, 100],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    },
+    "output": {
+      "type": "ShaderNodeOutputMaterial",
+      "label": "Material output",
+      "location": [350, 100],
+      "group": "",
+      "values": {},
+      "create": true
+    },
+    "principled": {
+      "type": "ShaderNodeBsdfPrincipled",
+      "label": "Principled",
+      "location": [0, 100],
+      "group": "skinGroup",
+      "values": {
+        "Base Color": [0.8, 0.8, 0.8, 1.0]
+      },
+      "create": true
+    },
+    "diffuseTexture": {
+      "type": "ShaderNodeTexImage",
+      "label": "diffuseTexture",
+      "location": [-800, 300],
+      "group": "skinGroup",
+      "values": {},
+      "imageData": {
+        "path": "",
+        "colorspace_settings_name": "sRGB"
+      },
+      "create": false
+    },
+    "normalMapTexture": {
+      "type": "ShaderNodeTexImage",
+      "label": "normal map texture",
+      "location": [-800, -500],
+      "group": "skinGroup",
+      "values": {},
+      "imageData": {
+        "path": "",
+        "colorspace_settings_name": "Non-Color"
+      },
+      "create": false
+    },
+    "bumpMapTexture": {
+      "type": "ShaderNodeTexImage",
+      "label": "normal map texture",
+      "location": [-600, -200],
+      "group": "skinGroup",
+      "values": {},
+      "imageData": {
+        "path": "",
+        "colorspace_settings_name": "Non-Color"
+      },
+      "create": false
+    },
+    "bumpOrNormal": {
+      "type": "ShaderNodeNormalMap",
+      "label": "normal map",
+      "location": [-500, -500],
+      "group": "skinGroup",
+      "values": {
+        "Strength": 1.0
+      },
+      "create": false
+    },
+    "bumpAndNormal": {
+      "type": "ShaderNodeNormalMap",
+      "label": "normal map",
+      "location": [-300, -300],
+      "group": "skinGroup",
+      "values": {
+        "Strength": 1.0
+      },
+      "create": false
+    },
+    "bumpMap": {
+      "type": "ShaderNodeBump",
+      "label": "bump map",
+      "location": [-100, -300],
+      "group": "skinGroup",
+      "values": {},
+      "create": false
+    },
+    "colorMix": {
+      "type": "ShaderNodeMixRGB",
+      "label": "Color mix",
+      "location": [-500, 200],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    },
+    "brightContrast": {
+      "type": "ShaderNodeBrightContrast",
+      "label": "Brightness and Contrast",
+      "location": [-300, 100],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    },
+    "noise": {
+      "type": "ShaderNodeTexNoise",
+      "label": "noise",
+      "location": [-800, -800],
+      "group": "skinGroup",
+      "values": {
+        "Scale": 2000.0,
+        "Detail": 2.0,
+        "Distortion": 1.0
+      },
+      "create": true
+    },
+    "colorramp": {
+      "type": "ShaderNodeValToRGB",
+      "label": "ramp",
+      "location": [-500, -800],
+      "group": "skinGroup",
+      "values": {},
+      "stops": [0.2, 0.5],
+      "create": true
+    },
+    "noiseBump": {
+      "type": "ShaderNodeBump",
+      "label": "noise bump",
+      "location": [-200, -500],
+      "group": "skinGroup",
+      "values": {
+        "Strength": 0.2
+      },
+      "create": true
+    },
+    "texco": {
+      "type": "ShaderNodeTexCoord",
+      "label": "Texture coords",
+      "location": [-1200, 300],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    },
+    "sssr": {
+      "type": "ShaderNodeMath",
+      "label": "SSS Radius Red",
+      "location": [-900, 800],
+      "group": "skinGroup",
+      "operation": "MULTIPLY",
+      "values": {},
+      "create": true
+    },
+    "sssg": {
+      "type": "ShaderNodeMath",
+      "label": "SSS Radius Green",
+      "location": [-900, 640],
+      "group": "skinGroup",
+      "operation": "MULTIPLY",
+      "values": {},
+      "create": true
+    },
+    "sssb": {
+      "type": "ShaderNodeMath",
+      "label": "SSS Radius Blue",
+      "location": [-900, 480],
+      "group": "skinGroup",
+      "operation": "MULTIPLY",
+      "values": {},
+      "create": true
+    },
+    "sssvector": {
+      "type": "ShaderNodeCombineRGB",
+      "label": "SSS Vector",
+      "location": [-600, 620],
+      "group": "skinGroup",
+      "values": {},
+      "create": true
+    }
+  },
+  "connections" : [
+    {
+      "outputNode": "principled",
+      "outputSocket": "BSDF",
+      "inputNode": "skinGroupOutputs",
+      "inputSocket": "shaderOutput"
+    },
+    {
+      "outputNode": "skinGroup",
+      "outputSocket": "shaderOutput",
+      "inputNode": "output",
+      "inputSocket": "Surface"
+    },
+    {
+      "outputNode": "diffuseTexture",
+      "outputSocket": "Color",
+      "inputNode": "colorMix",
+      "inputSocket": "Color1"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "colorMixIn",
+      "inputNode": "colorMix",
+      "inputSocket": "Color2"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "colorMixInStrength",
+      "inputNode": "colorMix",
+      "inputSocket": "Fac"
+    },
+    {
+      "outputNode": "colorMix",
+      "outputSocket": "Color",
+      "inputNode": "brightContrast",
+      "inputSocket": "Color"
+    },
+    {
+      "outputNode": "brightContrast",
+      "outputSocket": "Color",
+      "inputNode": "principled",
+      "inputSocket": "Base Color"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Brightness",
+      "inputNode": "brightContrast",
+      "inputSocket": "Bright"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Contrast",
+      "inputNode": "brightContrast",
+      "inputSocket": "Contrast"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Roughness",
+      "inputNode": "principled",
+      "inputSocket": "Roughness"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Clearcoat Roughness",
+      "inputNode": "principled",
+      "inputSocket": "Clearcoat Roughness"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Clearcoat",
+      "inputNode": "principled",
+      "inputSocket": "Clearcoat"
+    },
+    {
+      "outputNode": "diffuseTexture",
+      "outputSocket": "Alpha",
+      "inputNode": "principled",
+      "inputSocket": "Alpha"
+    },
+    {
+      "outputNode": "normalMapTexture",
+      "outputSocket": "Color",
+      "inputNode": "bumpOrNormal",
+      "inputSocket": "Color"
+    },
+    {
+      "outputNode": "bumpOrNormal",
+      "outputSocket": "Normal",
+      "inputNode": "noiseBump",
+      "inputSocket": "Normal"
+    },
+    {
+      "outputNode": "noise",
+      "outputSocket": "Fac",
+      "inputNode": "colorramp",
+      "inputSocket": "Fac"
+    },
+    {
+      "outputNode": "colorramp",
+      "outputSocket": "Color",
+      "inputNode": "noiseBump",
+      "inputSocket": "Height"
+    },
+    {
+      "outputNode": "noiseBump",
+      "outputSocket": "Normal",
+      "inputNode": "principled",
+      "inputSocket": "Normal"
+    },
+    {
+      "outputNode": "texco",
+      "outputSocket": "UV",
+      "inputNode": "noise",
+      "inputSocket": "Vector"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Pore scale",
+      "inputNode": "noise",
+      "inputSocket": "Scale"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Pore detail",
+      "inputNode": "noise",
+      "inputSocket": "Detail"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Pore distortion",
+      "inputNode": "noise",
+      "inputSocket": "Distortion"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "Pore strength",
+      "inputNode": "noiseBump",
+      "inputSocket": "Strength"
+    },
+    {
+      "outputNode": "texco",
+      "outputSocket": "UV",
+      "inputNode": "diffuseTexture",
+      "inputSocket": "Vector"
+    },
+    {
+      "outputNode": "texco",
+      "outputSocket": "UV",
+      "inputNode": "normalMapTexture",
+      "inputSocket": "Vector"
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "SSS radius R",
+      "inputNode": "sssr",
+      "inputSocket": 0
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "SSS radius scale",
+      "inputNode": "sssr",
+      "inputSocket": 1
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "SSS radius G",
+      "inputNode": "sssg",
+      "inputSocket": 0
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "SSS radius scale",
+      "inputNode": "sssg",
+      "inputSocket": 1
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "SSS radius B",
+      "inputNode": "sssb",
+      "inputSocket": 0
+    },
+    {
+      "outputNode": "skinGroupInputs",
+      "outputSocket": "SSS radius scale",
+      "inputNode": "sssb",
+      "inputSocket": 1
+    },
+    {
+      "outputNode": "sssr",
+      "outputSocket": "Value",
+      "inputNode": "sssvector",
+      "inputSocket": "R"
+    },
+    {
+      "outputNode": "sssg",
+      "outputSocket": "Value",
+      "inputNode": "sssvector",
+      "inputSocket": "G"
+    },
+    {
+      "outputNode": "sssb",
+      "outputSocket": "Value",
+      "inputNode": "sssvector",
+      "inputSocket": "B"
+    },
+    {
+      "outputNode": "sssvector",
+      "outputSocket": "Image",
+      "inputNode": "principled",
+      "inputSocket": "Subsurface Radius"
+    }
+  ]
+}

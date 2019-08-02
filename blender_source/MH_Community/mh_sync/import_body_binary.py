@@ -58,6 +58,7 @@ class ImportBodyBinary():
         self.hiddenFaces = bpy.context.scene.MhHiddenFaces
         self.subCollection = bpy.context.scene.MhSubCollection
         self.enhancedSkin = bpy.context.scene.MhEnhancedSkin
+        self.enhancedSSS = bpy.context.scene.MhEnhancedSSS
 
         self.baseColor = (1.0, 0.7, 0.7)
 
@@ -386,7 +387,10 @@ class ImportBodyBinary():
 
         matFile = "defaultMaterial.json"
         if self.enhancedSkin:
-            matFile = "skinMaterial.json"
+            if self.enhancedSSS:
+                matFile = "skinMaterialSSS.json"
+            else:
+                matFile = "skinMaterial.json"
 
         mat = createMHMaterial2(matname, data, baseColor=self.skinColor, ifExists=self.handleMaterials, materialFile=matFile)
 

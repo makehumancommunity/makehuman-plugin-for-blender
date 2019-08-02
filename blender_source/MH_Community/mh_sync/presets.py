@@ -25,6 +25,7 @@ _defaultSettings["MhAdjustPosition"] = True
 _defaultSettings["MhAddCollection"] = True
 _defaultSettings["MhSubCollection"] = False
 _defaultSettings["MhEnhancedSkin"] = True
+_defaultSettings["MhEnhancedSSS"] = True
 _defaultSettings["MhHost"] = '127.0.0.1'
 _defaultSettings["MhPort"] = 12345
 
@@ -54,6 +55,8 @@ def _getCleanMcMtSettings():
     settings = _defaultSettings.copy()
     settings["MhScaleMode"] = "DECIMETER"
     settings["MhDetailedHelpers"] = True
+    settings["MhEnhancedSkin"] = False
+    settings["MhEnhancedSSS"] = False
     return settings
 
 def getCleanMakeTargetSettings():

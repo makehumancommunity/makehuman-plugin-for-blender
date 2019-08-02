@@ -47,6 +47,8 @@ class ImportProxyBinary():
         self.matobjname = bpy.context.scene.MhMaterialObjectName
         self.prefixProxy = bpy.context.scene.MhPrefixProxy
         self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
+        self.enhancedSkin = bpy.context.scene.MhEnhancedSkin
+        self.enhancedSSS = bpy.context.scene.MhEnhancedSSS
 
         self.scaleFactor = 0.1
 
@@ -310,8 +312,14 @@ class ImportProxyBinary():
 
         print(self.proxyInfo["type"])
 
+        matFile = "defaultMaterial.json"
         if self.matobjname and self.proxyInfo["type"] == "Proxymeshes":
             matname = "body"
+            if self.enhancedSkin:
+                if self.enhancedSSS:
+                    matFile = "skinMaterialSSS.json"
+                else:
+                    matFile = "skinMaterial.json"
 
         if self.prefixMaterial:
             matname = self.humanName + "." + matname
@@ -321,7 +329,7 @@ class ImportProxyBinary():
         if len(baseColor) < 4:
             baseColor = tuple([*baseColor, data.get("viewPortAlpha", 1.0)])
 
-        mat = createMHMaterial2(matname, data, baseColor=baseColor, ifExists=self.handleMaterials)
+        mat = createMHMaterial2(matname, data, baseColor=baseColor, ifExists=self.handleMaterials, materialFile=matFile)
 
         self.obj.data.materials.append(mat)
         if not self.onFinished is None:
