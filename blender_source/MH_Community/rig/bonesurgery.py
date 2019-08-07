@@ -127,9 +127,10 @@ class BoneSurgery:
         return ret
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @staticmethod
-    def connectSkeleton(armature, connect = True):
+    def connectSkeleton(armature, connect = True, exceptions = []):
         bpy.ops.object.mode_set(mode='EDIT')
         eBones = armature.data.edit_bones
 
         for bone in eBones:
-            bone.use_connect = connect
+            if bone.parent is not None and bone.name not in exceptions:
+                bone.use_connect = connect

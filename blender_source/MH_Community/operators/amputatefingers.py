@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
-from ..rig import RigInfo, BoneSurgery, Kinect2RigInfo
+from ..rig import RigInfo, BoneSurgery
 
 class MHC_OT_AmputateFingersOperator(bpy.types.Operator):
     """Remove finger bones, and assign their weights to hand bone"""
@@ -23,11 +23,6 @@ class MHC_OT_AmputateFingersOperator(bpy.types.Operator):
 
         BoneSurgery.amputate(armature, meshes, rigInfo.hand(True ))
         BoneSurgery.amputate(armature, meshes, rigInfo.hand(False))
-
-        # kinect2 also needs to delete Thumbs, which got re-parent higher
-        if rigInfo.name == 'Kinect2 Rig':
-            BoneSurgery.deleteBone(armature, meshes, Kinect2RigInfo.boneFor('Thumb', True ), Kinect2RigInfo.boneFor('Hand', True ))
-            BoneSurgery.deleteBone(armature, meshes, Kinect2RigInfo.boneFor('Thumb', False), Kinect2RigInfo.boneFor('Hand', False))
 
         self.report({'INFO'}, 'Amputated fingers to ' + rigInfo.name)
         return {'FINISHED'}

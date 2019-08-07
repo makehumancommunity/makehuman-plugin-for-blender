@@ -4,10 +4,10 @@
 import bpy
 from ..rig import RigInfo
 
-class MHC_OT_ToKinect2Operator(bpy.types.Operator):
-    """Transform a default Rig, with or without toes, to one suited for use with an XBox One Kinect-2 device.\n\nCannot be done after fingers have been amputated,\nor a finger IK has been added."""
-    bl_idname = 'mh_community.to_kinect2'
-    bl_label = 'Convert Rig'
+class MHC_OT_ToSensorRigOperator(bpy.types.Operator):
+    """Transform a default Rig, with or without toes, to one suited for use with the selected device.\n\nCannot be done after fingers have been amputated,\nor a finger IK has been added."""
+    bl_idname = 'mh_community.to_sensor_rig'
+    bl_label = 'Custom Rig Conversion'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -19,13 +19,15 @@ class MHC_OT_ToKinect2Operator(bpy.types.Operator):
             self.report({'ERROR'}, 'Rig is not the default Rig')
             return {'FINISHED'}
 
-        #if not rigInfo.hasRestTpose():
-        #    self.report({'ERROR'}, 'Must be exported in T-Pose to use sensor')
-        #    return {'FINISHED'}
+        sensorType = context.scene.MhSensorType
+        if sensorType == 'KINECT2':
+            from ..rig.kinect2riginfo import Kinect2RigInfo
+            Kinect2RigInfo.convertFromDefault(rigInfo)
 
-        ToKinectV2(rigInfo).convert()
+        elif device == 'KINECT_AZURE':
+            pass
 
-        self.report({'INFO'}, 'Converted to a Kinect2 rig')
+        self.report({'INFO'}, 'Converted to a sensor specific rig')
         return {'FINISHED'}
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod

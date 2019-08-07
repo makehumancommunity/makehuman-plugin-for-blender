@@ -4,19 +4,19 @@
 import bpy
 from ..rig import RigInfo
 
-
-class MHC_OT_PoseRightOperator(bpy.types.Operator):
-    """This is a diagnostic operator, which poses both the capture & final armatures one frame at a time."""
-    bl_idname = 'mh_community.pose_right'
-    bl_label = '1 Right'
+class MHC_OT_ActionKeyframeReducerOperator(bpy.types.Operator):
+    """Both smooth and reduce the number of frames by detecting key frames.\n\nDo not do multiple times.  Undo, change args, & do again."""
+    bl_idname = 'mh_community.keyframe_animation'
+    bl_label = 'Smooth'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..mocap.sensor_runtime import Sensor
+        from ..mocap.keyframe_reduction import KeyFrameReduction
 
         armature = context.object
         rigInfo = RigInfo.determineRig(armature)
-        Sensor.oneRight(rigInfo, context.scene.MhSensorAnimation_index)
+        KeyFrameReduction(rigInfo, context.scene.MhReversalMinRetracement)
+
         return {'FINISHED'}
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
@@ -26,6 +26,6 @@ class MHC_OT_PoseRightOperator(bpy.types.Operator):
 
         # can now assume ob is an armature
         rigInfo = RigInfo.determineRig(ob)
-        if rigInfo is None or not rigInfo.isMocapCapable() or rigInfo.hasIKRigs(): return False
+        if rigInfo is None: return False
 
-        return len(context.scene.MhSensorAnimations) > 0
+        return ob.animation_data is not None

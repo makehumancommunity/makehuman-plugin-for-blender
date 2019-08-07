@@ -20,7 +20,7 @@ bl_info = {
 
 print("Loading MH community plug-in v %d.%d" % bl_info["version"])
 from . import mh_sync # directory
-from . import kinect_sensor # directory
+from . import mocap # directory
 from . import separate_eyes
 from .rig import RigInfo, BoneSurgery, IkRig, FingerRig
 from . import animation_trimming
@@ -28,7 +28,7 @@ from . import animation_trimming
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAndSettings, addImporterSettingsToTab
 from .mh_sync.bone_ui import addBoneUIToTab, registerBoneConstantsAndSettings
-from .kinect_sensor.kinect_ui import addKinectUIToTab, registerKinectConstantsAndSettings, unregisterKinect
+from .mocap.mocap_ui import addMocapUIToTab, registerMocapConstantsAndSettings, unregisterMocap
 
 #===============================================================================
 class MHC_PT_Community_Panel(bpy.types.Panel):
@@ -60,16 +60,15 @@ class MHC_PT_Community_Panel(bpy.types.Panel):
             addImporterSettingsToTab(layout, scn)
 
         else:
-            addKinectUIToTab(layout, scn)
+            addMocapUIToTab(layout, scn)
 #===============================================================================
 MESH_TAB   = 'A'
-KINECT_TAB = 'B'
+MOCAP_TAB = 'B'
 SETTINGS_TAB   = 'C'
 
-# While MHX2 may set this, do not to rely on MHX.  Required in multiple places.
 bpy.types.Armature.exportedUnits = bpy.props.StringProperty(
     name='Exported Units',
-    description='either METERS, DECIMETERS, or INCHES.  determined in RigInfo.determineExportedUnits().  Stored in armature do only do once.',
+    description='either METERS, DECIMETERS, or CENTIMETERS.  determined in RigInfo.determineExportedUnits().  Stored in armature do only do once.',
     default = ''
 )
 
@@ -86,10 +85,10 @@ def register():
         register_class(cls)
 
     bpy.types.Scene.mhTabs = bpy.props.EnumProperty(
-    name='meshOrBoneOrKinect',
+    name='meshOrBoneOrMocap',
     items = (
              (MESH_TAB  , "Mesh"  , "Operators related to Make Human meshes and rigs"),
-             (KINECT_TAB, "Kinect", "Motion Capture using Kinect V2 for converted Make Human meshes"),
+             (MOCAP_TAB, "Mocap", "Motion Capture using supported sensors"),
              (SETTINGS_TAB, "Settings", "Settings for MH operations"),
         ),
     default = MESH_TAB
@@ -97,7 +96,7 @@ def register():
 
     registerImporterConstantsAndSettings()
     registerBoneConstantsAndSettings()
-    registerKinectConstantsAndSettings()
+    registerMocapConstantsAndSettings()
 
 
 def unregister():
@@ -108,7 +107,7 @@ def unregister():
     del bpy.types.Scene.MhHandleHelper
     del bpy.types.Scene.MhScaleMode
 
-    unregisterKinect()
+    unregisterMocap()
 
 if __name__ == "__main__":
     unregister()

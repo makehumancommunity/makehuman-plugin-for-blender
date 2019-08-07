@@ -116,3 +116,6 @@ class DefaultRigInfo (RigInfo):
         ret.append(self.boneFor('finger5-2', isLeft))
         ret.append(self.boneFor('finger5-3', isLeft))
         return ret
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # for mocap support
+    def isMocapCapable(self): return False

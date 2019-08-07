@@ -46,18 +46,6 @@ class RigInfo:
 
         return False
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    def hasFeetOnGround(self):
-        current_mode = bpy.context.object.mode
-        bpy.ops.object.mode_set(mode='EDIT')
-        eBones = self.armature.data.edit_bones
-
-        # test if the Z of calf is negative, should be negative when feet NOT on ground
-        calfZ = eBones[self.calf(False)].head.z
-
-        bpy.ops.object.mode_set(mode=current_mode)
-        return calfZ > 0
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # While MHX2 may set this, do not to rely on MHX.
     def determineExportedUnits(self):
         if len(self.armature.data.exportedUnits) > 0: return self.armature.data.exportedUnits
 
@@ -72,7 +60,7 @@ class RigInfo:
         totalHeight = headTail - footTail # done this way to be feet on ground independent
         if totalHeight < 5: ret = 'METERS' # decimeter threshold
         elif totalHeight <= 22: ret = 'DECIMETERS' # 21.7 to 23.9 is sort of no man's land of decimeters of tallest & inches of smallest
-        else: ret = 'INCHES'
+        else: ret = 'CENTIMETERS'
 
         print ('armature exported units is ' + ret + ', headTail: ' + str(headTail) + ', footTail: ' + str(footTail))
 
@@ -82,9 +70,9 @@ class RigInfo:
     def unitMultplierToExported(self):
         units = self.determineExportedUnits()
 
-        if units == 'METERS': return 0.1
-        elif units == 'DECIMETERS': return 1
-        else: return 3.93701
+        if units == 'METERS': return 1
+        elif units == 'DECIMETERS': return 10
+        else: return 100
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def hasIKRigs(self):
         return self.hasFingerIK() or self.hasIK()
@@ -92,6 +80,7 @@ class RigInfo:
         return 'thumb.ik.L' in self.armature.data.bones
     def hasIK(self):
         return 'elbow.ik.L' in self.armature.data.bones
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def hasFingers(self):
         hand = self.hand(False)

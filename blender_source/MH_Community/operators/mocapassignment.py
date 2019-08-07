@@ -4,11 +4,10 @@
 import bpy
 from ..rig import RigInfo
 
-
-class MHC_OT_PoseRightOperator(bpy.types.Operator):
-    """This is a diagnostic operator, which poses both the capture & final armatures one frame at a time."""
-    bl_idname = 'mh_community.pose_right'
-    bl_label = '1 Right'
+class MHC_OT_MocapAssignmentOperator(bpy.types.Operator):
+    """Assign an animation to an action of the selected skeleton."""
+    bl_idname = 'mh_community.assign_mocap'
+    bl_label = 'Assign'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -16,7 +15,9 @@ class MHC_OT_PoseRightOperator(bpy.types.Operator):
 
         armature = context.object
         rigInfo = RigInfo.determineRig(armature)
-        Sensor.oneRight(rigInfo, context.scene.MhSensorAnimation_index)
+        baseActionName = context.scene.MhSensorBaseActionName
+
+        Sensor.assign(rigInfo, context.scene.MhSensorAnimation_index, baseActionName)
         return {'FINISHED'}
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
