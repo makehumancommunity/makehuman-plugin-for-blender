@@ -22,7 +22,7 @@ class IkRig():
             self.armature.data.draw_type = 'BBONE'
 
         # make all regular bone slightly smaller, so IK's fit around
-        unitMult = self.rigInfo.unitMultplierToExported()
+        unitMult = 0.1 * self.rigInfo.unitMultplierToExported()
         val = 0.6 * unitMult
         bpy.ops.transform.transform(mode='BONE_SIZE', value=(val, val, val, 0))
         bpy.ops.pose.select_all(action='DESELECT')
@@ -165,6 +165,7 @@ class IkRig():
         con = pBone.constraints.new('COPY_ROTATION')
         con.target = self.armature
         con.subtarget = subtargetName
+        con.name = 'IK_SNAPON_ROT'
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def addIK_Constraint(self, boneName, ikBoneName, chain_count):
@@ -178,6 +179,7 @@ class IkRig():
         con.target = self.armature
         con.subtarget = ikBoneName
         con.chain_count = chain_count
+        con.name = 'IK_SNAPON_IK'
 
     # ===============================================================================
     def changeLocks(self, locked):
@@ -202,9 +204,9 @@ class IkRig():
         self.changeLocks(True)
         self.removeSide(True)
         self.removeSide(False)
-        # reverse making all regular bone slightly smaller, so IK's fit around
-        unitMult = self.rigInfo.unitMultplierToExported()
-        val = unitMult / 0.6
+        # reverse making all regular bone slightly smaller, so IK's fit around; does not work; seems value cannot be > 1 in code
+        unitMult = 0.1 * self.rigInfo.unitMultplierToExported()
+        val = 1 / (0.6 * unitMult)
         bpy.ops.transform.transform(mode='BONE_SIZE', value=(val, val, val, 0))
 
         self.armature.data.display_type = 'WIRE'
@@ -212,8 +214,9 @@ class IkRig():
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def removeSide(self, isLeft):
         side = 'L' if isLeft else 'R'
-        self.demolish('elbow.ik.' + side, [self.rigInfo.upperArm(isLeft)])
-        self.demolish('hand.ik.' + side, [self.rigInfo.lowerArm(isLeft), self.rigInfo.hand(isLeft)])
+        if 'elbow.ik.L' in self.armature.pose.bones:
+            self.demolish('elbow.ik.' + side, [self.rigInfo.upperArm(isLeft)])
+            self.demolish('hand.ik.' + side, [self.rigInfo.lowerArm(isLeft), self.rigInfo.hand(isLeft)])
         self.demolish('knee.ik.' + side, [self.rigInfo.thigh(isLeft)])
         self.demolish('foot.ik.' + side, [self.rigInfo.calf(isLeft), self.rigInfo.foot(isLeft)])
 
@@ -229,10 +232,7 @@ class IkRig():
         for boneName in boneNames:
             self.armature.data.bones[boneName].hide = False
 
-        for bone in bpy.context.selected_pose_bones:
-            # Create a list of all the copy location constraints on this bone
-            copyRotConstraints = [c for c in bone.constraints if c.type == 'COPY_ROTATION' or c.type == 'IK']
-
-            # Iterate over all the bone's copy location constraints and delete them all
-            for c in copyRotConstraints:
-                bone.constraints.remove(c)  # Remove constraint
+        for bone in self.armature.pose.bones:
+            for c in bone.constraints:
+                if 'IK_SNAPON_' in c.name:
+                    bone.constraints.remove(c)

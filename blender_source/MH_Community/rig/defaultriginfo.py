@@ -11,6 +11,8 @@ class DefaultRigInfo (RigInfo):
         self.pelvis = 'spine05'
         self.root = 'root'
         self.head = 'head'
+        self.neckBase = 'neck01'
+        self.upperSpine = 'spine01'
         self.kneeIKChainLength =  2
         self.footIKChainLength =  4
         self.handIKChainLength =  4
@@ -35,10 +37,19 @@ class DefaultRigInfo (RigInfo):
         bpy.ops.object.mode_set(mode=current_mode)
         return left > minZ and left == right
 
-    def clavicle(self, isLeft): return 'clavicle.' + ('L' if isLeft else 'R')
-    def upperArm(self, isLeft): return 'upperarm02.' + ('L' if isLeft else 'R')
-    def lowerArm(self, isLeft): return 'lowerarm02.' + ('L' if isLeft else 'R')
-    def thigh(self, isLeft): return 'upperleg02.' + ('L' if isLeft else 'R')
+    def clavicle(self, isLeft, forMocap = False):
+        base = 'shoulder01.' if forMocap else 'clavicle.'
+        return base + ('L' if isLeft else 'R')
+    def upperArm(self, isLeft, forMocap = False):
+        base = 'upperarm01.' if forMocap else 'upperarm02.'
+        return base + ('L' if isLeft else 'R')
+    def lowerArm(self, isLeft, forMocap = False):
+        base = 'lowerarm01.' if forMocap else 'lowerarm02.'
+        return base + ('L' if isLeft else 'R')
+    def hip(self, isLeft, forMocap = False): return self.boneFor('pelvis', isLeft) # for mocap only
+    def thigh(self, isLeft, forMocap = False):
+        base = 'upperleg01.' if forMocap else 'upperleg02.'
+        return base + ('L' if isLeft else 'R')
 
     def _defaultLockInfo(self):
         out = {}
@@ -70,11 +81,15 @@ class DefaultRigInfo (RigInfo):
 
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # for IK rigging support, which DefaultRig does not have
+    # for IK & mocap rigging support
     def IKCapable(self): return True
-    def hand(self, isLeft): return self.boneFor('wrist', isLeft) # also used for amputation
-    def calf(self, isLeft): return 'lowerleg02.' + ('L' if isLeft else 'R')
-    def foot(self, isLeft): return self.boneFor('foot', isLeft) # used for super.determineExportedUnits()
+    def hand(self, isLeft, forMocap = False): return self.boneFor('wrist', isLeft) # also used for amputation
+    def handTip (self, isLeft, forMocap = False): return None # for mocap only, not IK
+    def thumb   (self, isLeft, forMocap = False): return None # for mocap only, not IK
+    def calf(self, isLeft, forMocap = False):
+        base = 'lowerleg01.' if forMocap else 'lowerleg02.'
+        return base + ('L' if isLeft else 'R')
+    def foot(self, isLeft, forMocap = False): return self.boneFor('foot', isLeft) # used for super.determineExportedUnits()
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for Finger rigging support
     def fingerIKCapable(self): return self.pinkyFingerParent(False) in self.armature.data.bones
@@ -118,4 +133,4 @@ class DefaultRigInfo (RigInfo):
         return ret
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for mocap support
-    def isMocapCapable(self): return False
+    def isMocapCapable(self): return True

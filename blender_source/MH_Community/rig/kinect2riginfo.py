@@ -33,6 +33,8 @@ class Kinect2RigInfo (RigInfo):
         self.pelvis = K2_SPINE_LOWER
         self.root = K2_ROOT
         self.head = K2_HEAD
+        self.neckBase = K2_NECK
+        self.upperSpine = K2_SPINE_UPPER
         self.kneeIKChainLength  = 1
         self.footIKChainLength  = 2
         self.handIKChainLength  = 2
@@ -42,22 +44,19 @@ class Kinect2RigInfo (RigInfo):
     def boneFor(baseName, isLeft):
         return baseName + ('.L' if isLeft else '.R')
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # for kinect animation scaling
-    def getSpineBaseHeightWorldSpace(self):
-        spineBaseBone = self.armature.pose.bones[self.pelvis]
-        worldMat = self.armature.convert_space(pose_bone = spineBaseBone, matrix = spineBaseBone.matrix, from_space = 'POSE',  to_space = 'WORLD')
-        return worldMat.to_translation()
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     # for IK rigging support
+     # for IK rigging & mocap support
     def IKCapable(self): return True
-    def clavicle(self, isLeft): return Kinect2RigInfo.boneFor(K2_SHOULDER, isLeft)
-    def upperArm(self, isLeft): return Kinect2RigInfo.boneFor(K2_ARM     , isLeft)
-    def lowerArm(self, isLeft): return Kinect2RigInfo.boneFor(K2_FORE_ARM, isLeft)
-    def hand    (self, isLeft): return Kinect2RigInfo.boneFor(K2_HAND    , isLeft) # also used for amputation
+    def clavicle(self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_SHOULDER, isLeft)
+    def upperArm(self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_ARM     , isLeft)
+    def lowerArm(self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_FORE_ARM, isLeft)
+    def hand    (self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_HAND    , isLeft) # also used for amputation
+    def handTip (self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_HAND_TIP, isLeft) # for mocap only, not IK
+    def thumb   (self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_THUMB   , isLeft) # for mocap only, not IK
     # - - -
-    def thigh   (self, isLeft): return Kinect2RigInfo.boneFor(K2_THIGH   , isLeft)
-    def calf    (self, isLeft): return Kinect2RigInfo.boneFor(K2_CALF    , isLeft) # also used by super.hasFeetOnGround()
-    def foot    (self, isLeft): return Kinect2RigInfo.boneFor(K2_FOOT    , isLeft) # also used for super.determineExportedUnits()
+    def hip     (self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_HIP     , isLeft) # for mocap only, not IK
+    def thigh   (self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_THIGH   , isLeft)
+    def calf    (self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_CALF    , isLeft) # also used by super.hasFeetOnGround()
+    def foot    (self, isLeft, forMocap = False): return Kinect2RigInfo.boneFor(K2_FOOT    , isLeft) # also used for super.determineExportedUnits()
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for Finger rigging support
     def fingerIKCapable(self): return False
@@ -65,65 +64,13 @@ class Kinect2RigInfo (RigInfo):
     # for mocap support
     def isMocapCapable(self): return True
 
-    # the retargeting constraint space for arm bones is 'WORLD', while 'LOCAL' for rest
-    def isArmBone(self, boneName):
-        return K2_SHOULDER in boneName or K2_ARM in boneName or K2_FORE_ARM in boneName or K2_HAND in boneName or K2_HAND_TIP in boneName or K2_THUMB in boneName
-
-    def isFinger(self, boneName):
-        return K2_HAND_TIP in boneName or K2_THUMB in boneName
-
-    def getSensorMapping(self, sensorType = 'KINECT2'):
-        if sensorType == 'KINECT2':
-
-            return {
-            # keys are kinect joints names coming from the sensor
-            # values are bone names whose tail is at the joint
-            'SpineBase'    : None,
-            'SpineMid'     : self.pelvis,
-            'SpineShoulder': K2_SPINE_UPPER,
-
-            'Neck'         : K2_NECK,
-            'Head'         : self.head,
-
-            'ShoulderLeft' : K2_SHOULDER + '.L',
-            'ElbowLeft'    : K2_ARM + '.L',
-            'WristLeft'    : K2_FORE_ARM + '.L',
-            'HandLeft'     : K2_HAND + '.L',
-            'HandTipLeft'  : K2_HAND_TIP + '.L',
-            'ThumbLeft'    : K2_THUMB + '.L',
-
-            'ShoulderRight': K2_SHOULDER + '.R',
-            'ElbowRight'   : K2_ARM + '.R',
-            'WristRight'   : K2_FORE_ARM + '.R',
-            'HandRight'    : K2_HAND + '.R',
-            'HandTipRight' : K2_HAND_TIP + '.R',
-            'ThumbRight'   : K2_THUMB + '.R',
-
-            'HipLeft'      : K2_HIP + '.L',
-            'KneeLeft'     : K2_THIGH + '.L',
-            'AnkleLeft'    : K2_CALF + '.L',
-            'FootLeft'     : K2_FOOT + '.L',
-
-            'HipRight'     : K2_HIP + '.R',
-            'KneeRight'    : K2_THIGH + '.R',
-            'AnkleRight'   : K2_CALF + '.R',
-            'FootRight'    : K2_FOOT + '.R',
-        }
-        # add next sensor, eg., KINECT_AZURE
-        elif sensorType == 'KINECT_AZURE':
-            return None
-
-        # this rig not supported by this sensor
-        else: return None
-
     @staticmethod
     def convertFromDefault(defaultRigInfo):
         armature = defaultRigInfo.armature
+        unitMult = defaultRigInfo.unitMultplierToExported()
 
-        # get root bone length while in POSE mode for later
+        current_mode = bpy.context.object.mode
         bpy.ops.object.mode_set(mode='POSE')
-        rootLength = armature.pose.bones[defaultRigInfo.root].length
-        print ('root len ' + str(rootLength))
 
         # find all meshes which use this armature
         meshes = defaultRigInfo.getMeshesForRig(bpy.context.scene)
@@ -183,13 +130,45 @@ class Kinect2RigInfo (RigInfo):
 
         # certain things kinect seems to want are always the same, so make them defaults
         bone = eBones[ K2_HIP + '.L' ]
-        xDiff = abs(bone.head.x - bone.tail.x)
+        xDiff = abs(bone.head.x - bone.tail.x) *.9
+        bone.tail.x = xDiff
         bone.tail.y = bone.head.y - (0.5 * xDiff)
 
         bone = eBones[ K2_HIP + '.R' ]
+        bone.tail.x = - xDiff
         bone.tail.y = bone.head.y - (0.5 * xDiff)
+        # - - - 
+        bone = eBones[ K2_THIGH + '.L' ]
+        x =(bone.head.x + bone.tail.x) / 2
+        bone.tail.x = x
+        bone.tail.y = bone.head.y * 1.5
+        bone.tail.z *= 0.90 # actually shortens bone, since legs below origin
+
+        bone = eBones[ K2_THIGH + '.R' ]
+        bone.tail.x = -x
+        bone.tail.y = bone.head.y * 1.5
+        bone.tail.z *= 0.90 # actually shortens bone, since legs below origin
+        # - - - 
+        bone = eBones[ K2_CALF + '.L' ]
+        bone.tail.x = bone.head.x
+        bone.tail.y = .04 * unitMult
+        bone.tail.z *= 0.95 # actually shortens bone, since legs below origin
+
+        bone = eBones[ K2_CALF + '.R' ]
+        bone.tail.x = bone.head.x
+        bone.tail.y = .04 * unitMult
+        bone.tail.z *= 0.95 # actually shortens bone, since legs below origin
+        # - - - 
+        bone = eBones[ K2_FOOT + '.L' ]
+        bone.tail.x = bone.head.x
+        bone.tail.y = -.04 * unitMult
+
+        bone = eBones[ K2_FOOT + '.R' ]
+        bone.tail.x = bone.head.x
+        bone.tail.y = -.04 * unitMult
 
         Kinect2RigInfo.unlockLocations(armature.pose.bones)
+        bpy.ops.object.mode_set(mode=current_mode)
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @staticmethod

@@ -13,13 +13,18 @@ class MHC_OT_ActionTrimRightOperator(bpy.types.Operator):
         from ..animation_trimming import AnimationTrimming
 
         armature = context.object
-        trimmer = AnimationTrimming(armature)
-        trimmer.dropToRight()
+        problemMsg = None
+        if armature.animation_data is None:
+            problemMsg = 'No current action on rig to trim'
+
+        if problemMsg is not None:
+            self.report({'ERROR'}, problemMsg)
+        else:
+            trimmer = AnimationTrimming(armature)
+            trimmer.dropToRight()
         return {'FINISHED'}
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
         ob = context.object
-        if ob is None or ob.type != 'ARMATURE': return False
-
-        return ob.animation_data is not None
+        return ob is not None and ob.type == 'ARMATURE'

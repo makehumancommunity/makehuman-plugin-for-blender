@@ -12,15 +12,16 @@ class MHC_OT_RemoveIkRigOperator(bpy.types.Operator):
 
     def execute(self, context):
         armature = context.object
-
+        problemMsg = None
         rigInfo = RigInfo.determineRig(armature)
         if rigInfo is None:
-            self.report({'ERROR'}, 'Rig cannot be identified')
-            return {'FINISHED'}
+            problemMsg = 'Unknown rigs are not supported.'
 
-        IkRig(rigInfo).remove()
-
-        self.report({'INFO'}, 'Removed IK Rig')
+        if problemMsg is not None:
+            self.report({'ERROR'}, problemMsg)
+        else:
+            IkRig(rigInfo).remove()
+            self.report({'INFO'}, 'Removed IK Rig')
         return {'FINISHED'}
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
@@ -30,4 +31,6 @@ class MHC_OT_RemoveIkRigOperator(bpy.types.Operator):
 
         # can now assume ob is an armature
         rigInfo = RigInfo.determineRig(ob)
+
+        # just need to check IK is there to be removed
         return rigInfo is not None and rigInfo.hasIK()

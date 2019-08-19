@@ -14,19 +14,27 @@ class MHC_OT_MocapAssignmentOperator(bpy.types.Operator):
         from ..mocap.sensor_runtime import Sensor
 
         armature = context.object
+        problemMsg = None
         rigInfo = RigInfo.determineRig(armature)
-        baseActionName = context.scene.MhSensorBaseActionName
+        if rigInfo is None:
+            problemMsg = 'Unknown rigs are not supported.'
+        elif not rigInfo.isMocapCapable():
+            problemMsg = 'Rig is not capable of motion capture.'
+        elif rigInfo.hasIKRigs():
+            problemMsg = 'Cannot be done while rig has an IK snap-on.'
+        elif len(context.scene.MhSensorAnimations) == 0:
+            problemMsg = 'No current capture being buffered.'
+        elif rigInfo.name == 'Default Rig' and not rigInfo.hasRestTpose():
+            problemMsg = 'The default rig can only be assigned when it has a rest T-Pose.'
 
-        Sensor.assign(rigInfo, context.scene.MhSensorAnimation_index, baseActionName)
+        if problemMsg is not None:
+            self.report({'ERROR'}, problemMsg)
+        else:
+            baseActionName = context.scene.MhSensorBaseActionName
+            Sensor.assign(rigInfo, context.scene.MhSensorAnimation_index, baseActionName)
         return {'FINISHED'}
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
     def poll(cls, context):
         ob = context.object
-        if ob is None or ob.type != 'ARMATURE': return False
-
-        # can now assume ob is an armature
-        rigInfo = RigInfo.determineRig(ob)
-        if rigInfo is None or not rigInfo.isMocapCapable() or rigInfo.hasIKRigs(): return False
-
-        return len(context.scene.MhSensorAnimations) > 0
+        return ob is not None and ob.type == 'ARMATURE'

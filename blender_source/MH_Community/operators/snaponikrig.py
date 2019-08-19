@@ -12,15 +12,18 @@ class MHC_OT_SnapOnIkRigOperator(bpy.types.Operator):
 
     def execute(self, context):
         armature = context.object
-
+        problemMsg = None
         rigInfo = RigInfo.determineRig(armature)
         if rigInfo is None:
-            self.report({'ERROR'}, 'Rig cannot be identified')
-            return {'FINISHED'}
+            problemMsg = 'Unknown rigs are not supported.'
+        elif not rigInfo.IKCapable():
+            problemMsg = 'Rig is not capable of having an IK rig.'
 
-        IkRig(rigInfo).add()
-
-        self.report({'INFO'}, 'Added IK Rig to ' + rigInfo.name)
+        if problemMsg is not None:
+            self.report({'ERROR'}, problemMsg)
+        else:
+            IkRig(rigInfo).add()
+            self.report({'INFO'}, 'Added IK Rig to ' + rigInfo.name)
         return {'FINISHED'}
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     @classmethod
@@ -30,7 +33,6 @@ class MHC_OT_SnapOnIkRigOperator(bpy.types.Operator):
 
         # can now assume ob is an armature
         rigInfo = RigInfo.determineRig(ob)
-        if rigInfo is None or not rigInfo.IKCapable(): return False
 
         # just need to check not already added
-        return not rigInfo.hasIK()
+        return rigInfo is not None and not rigInfo.hasIK()
