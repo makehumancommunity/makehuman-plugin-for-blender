@@ -22,8 +22,7 @@ class SyncPose(SyncOperator):
         
         self.skeleton = bpy.context.active_object
         self.rigInfo = RigInfo.determineRig(self.skeleton)
-        self.feetOnGround = self.rigInfo.hasFeetOnGround()
-        self.unitMultplier = self.rigInfo.unitMultplierToExported()
+        self.unitMultplier = self.rigInfo.unitMultplierToExported() / 10  # makehuman is internally in decimeters
 
         self.bones = self.skeleton.pose.bones
         self.haveDots = self.bonesHaveDots()
@@ -66,12 +65,6 @@ class SyncPose(SyncOperator):
             bpy.ops.pose.transforms_clear()
             self.selectFaceBones()
 
-        #feet on Ground processing
-        if self.feetOnGround:
-            self.rootBone.location[0] = 0
-            self.rootBone.location[1] = 0
-            self.rootBone.location[2] = 0
-            
         self.callBackComplete = time.time()
 
     def apply(self, bone, json_obj, MhNoLocation):

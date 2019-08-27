@@ -11,14 +11,14 @@ if bpy.app.version < (2, 80, 0):
 bl_info = {
     "name": "MH Community Plug-in",
     "author": "Joel Palmius",
-    "version": (0, 6),
+    "version": (0, 6, 1),
     "blender": (2, 80, 0),
     "location": "View3D > Properties > MH",
     "description": "MakeHuman interactive operations",
     "wiki_url": "https://github.com/makehumancommunity/makehuman-plugin-for-blender",
     "category": "MakeHuman"}
 
-print("Loading MH community plug-in v %d.%d" % bl_info["version"])
+print("Loading MH community plug-in v %d.%d.%d" % bl_info["version"])
 from . import mh_sync # directory
 from . import mocap # directory
 from . import separate_eyes
@@ -32,7 +32,7 @@ from .mocap.mocap_ui import addMocapUIToTab, registerMocapConstantsAndSettings, 
 
 #===============================================================================
 class MHC_PT_Community_Panel(bpy.types.Panel):
-    bl_label = "MakeHuman v %d.%d" % bl_info["version"]
+    bl_label = "MakeHuman v %d.%d.%d" % bl_info["version"]
     bl_space_type = "VIEW_3D"
     bl_region_type = BLENDER_REGION
     bl_category = "MakeHuman"
