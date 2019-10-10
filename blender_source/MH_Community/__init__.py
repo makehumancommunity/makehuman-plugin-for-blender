@@ -11,7 +11,7 @@ if bpy.app.version < (2, 80, 0):
 bl_info = {
     "name": "MH Community Plug-in",
     "author": "Joel Palmius",
-    "version": (0, 6, 1),
+    "version": (0, 6, 2),
     "blender": (2, 80, 0),
     "location": "View3D > Properties > MH",
     "description": "MakeHuman interactive operations",
