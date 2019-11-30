@@ -47,6 +47,7 @@ def registerImporterConstantsAndSettings():
     bpy.types.Scene.MhHandleHelper = bpy.props.EnumProperty(items=handleHelperItems, name="handle_helper", description="How to handle helpers (such as clothes helper geometry and joint cubes)", default=settings["MhHandleHelper"])
     bpy.types.Scene.MhScaleMode = bpy.props.EnumProperty(items=scaleModeItems, name="Scale mode", description="How long in real world terms is a blender unit?", default=settings["MhScaleMode"])
     bpy.types.Scene.MhDetailedHelpers = BoolProperty(name="Detailed helper groups", description="Create one vertex group per helper part. This is usually superfluous unless you want to work with MakeTarget or MakeClothes", default=settings["MhDetailedHelpers"])
+    bpy.types.Scene.MhAddSimpleMaterials = BoolProperty(name="Simple Materials for Helpers", description="Add simple Materials to Helpers", default=settings["MhAddSimpleMaterials"])
 
     bpy.types.Scene.MhImportWhat = bpy.props.EnumProperty(items=importProxyItems, name="Import what", description="What to import", default=settings["MhImportWhat"])
     bpy.types.Scene.MhPrefixProxy = BoolProperty(name="Prefix proxy names", description="Give all extra meshes (such as hair, clothes..) names that start with the name of the imported toon", default=settings["MhPrefixProxy"])
@@ -112,6 +113,7 @@ def addImporterSettingsToTab(layout, scn):
     helperBox.label(text="How to handle helpers")
     helperBox.prop(scn, 'MhHandleHelper', text="")
     helperBox.prop(scn, 'MhDetailedHelpers', text="Detailed helper groups")
+    helperBox.prop(scn, 'MhAddSimpleMaterials', text="Simple Materials for Helpers")
 
     #importHumanBox.separator()
     #importHumanBox.label(text="Body hidden faces:")
