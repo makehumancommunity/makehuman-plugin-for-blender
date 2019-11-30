@@ -61,7 +61,7 @@ COLORS = {'Body': (1.0, 1.0, 1.0, 1.0),
 
 class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
 
-    bl_idname = 'mh_community.add_simple_material'
+    bl_idname = 'mh_community.add_simple_materials'
     bl_label = 'Add simple material to Helpers'
     bl_options = {'REGISTER', 'UNDO'}
 
