@@ -44,7 +44,6 @@ class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
         return getattr(obj, 'MhHuman', False) and obj.vertex_groups.find('joint-ground') >= 0
 
     def execute(self, context):
-        context = bpy.context
         obj = context.object
 
         clearMaterialSlots(obj)
