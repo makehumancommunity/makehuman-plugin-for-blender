@@ -96,7 +96,7 @@ class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
 
 
 def clearMaterialSlots(obj):
-    for _ in range(len(obj.material_slots.keys())):
+    for _ in obj.material_slots.keys():
         bpy.ops.object.material_slot_remove()
 
 def createMaterial(name: str, color=(0.0, 0.0, 0.0, 1.0)):
@@ -104,7 +104,7 @@ def createMaterial(name: str, color=(0.0, 0.0, 0.0, 1.0)):
     material.diffuse_color = color
     return material
 
-def addMaterial(obj, name, color):
+def addMaterial(obj, name: str, color=(0.0, 0.0, 0.0, 1.0)):
     slotCount = len(obj.material_slots.keys())
     material = createMaterial(name, color)
     bpy.ops.object.material_slot_add()
