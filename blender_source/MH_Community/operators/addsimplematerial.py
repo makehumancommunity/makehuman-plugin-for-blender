@@ -68,7 +68,9 @@ class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         obj = context.object
-        return getattr(obj, 'MhHuman', False)
+        # Check if the MhHuman property is True and if the mesh has detailed vertex groups,
+        # assuming this is True when the joint-ground vertex group exists.
+        return getattr(obj, 'MhHuman', False) and obj.vertex_groups.find('joint-ground') >= 0
 
     def execute(self, context):
         context = bpy.context
