@@ -85,6 +85,7 @@ def registerImporterConstantsAndSettings():
 
     # In case MHX2 isn't loaded
     bpy.types.Object.MhHuman = BoolProperty(default=False)
+    bpy.types.Object.MhScaleFactor = FloatProperty(default=0.1)
 
     # TODO: hidden faces                MhHiddenFaces
     # TODO: Rig body and parts          MhRigBody

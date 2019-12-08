@@ -105,6 +105,7 @@ class ImportBodyBinary():
 
         self.obj.MhHuman = True
         self.obj.MhObjectType = "Basemesh"
+        self.obj.MhScaleFactor = self.scaleFactor
 
         # TODO: Set more info, for example name of toon
 
