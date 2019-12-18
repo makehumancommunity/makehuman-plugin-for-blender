@@ -24,6 +24,7 @@ from .stopmocaprecording import MHC_OT_StopMocapRecordingOperator
 from .toSensorRig import MHC_OT_ToSensorRigOperator
 from .loadpreset import MHC_OT_LoadPresetOperator
 from .savepreset import MHC_OT_SavePresetOperator
+from .addsimplematerial import MHC_OT_AddSimpleMaterials
 
 OPERATOR_CLASSES = (
     MHC_OT_ActionKeyframeReducerOperator,
@@ -47,7 +48,8 @@ OPERATOR_CLASSES = (
     MHC_OT_StopMocapRecordingOperator,
     MHC_OT_ToSensorRigOperator,
     MHC_OT_LoadPresetOperator,
-    MHC_OT_SavePresetOperator
+    MHC_OT_SavePresetOperator,
+    MHC_OT_AddSimpleMaterials
 )
 
 __all__ = [

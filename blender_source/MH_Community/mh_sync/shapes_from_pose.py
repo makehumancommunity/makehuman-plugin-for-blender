@@ -1,5 +1,8 @@
 
 import bpy
+
+MIN_PCT_CHANGED = 5 
+MIN_CHANGED = 50
 #===============================================================================
 def shapesFromPose(operator, skeleton, shapeName):
     nWarnings = 0
@@ -45,7 +48,11 @@ def shapesFromPose(operator, skeleton, shapeName):
                 nDiff += 1
 
         if nDiff > 0:
-            operator.report({'INFO'}, '     ' + mesh.name + ':  ' + str(nDiff) + ' of ' + str(tVerts))
+            if 100 * nDiff / tVerts > MIN_PCT_CHANGED or nDiff >= MIN_CHANGED:
+                operator.report({'INFO'}, '     ' + mesh.name + ':  ' + str(nDiff) + ' of ' + str(tVerts))
+            else:
+                operator.report({'WARNING'}, '     ' + mesh.name + ':  was skipped since the # of vertices changed was less then ' + str(MIN_PCT_CHANGED) + '%, and also less then the minimum # of ' + str(MIN_CHANGED) + ' (was ' + str(nDiff) + ' )')
+                mesh.shape_key_remove(key)
         else:
             # when no verts different, delete key for this mesh
             mesh.shape_key_remove(key)

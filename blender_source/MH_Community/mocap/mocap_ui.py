@@ -24,7 +24,7 @@ def registerMocapConstantsAndSettings():
     # Properties for mocap operations
     bpy.types.Scene.MhSensorType = EnumProperty(items = sensorTypeItems, name = 'Type', description = 'The type of sensor you have connected to your computer', default = 'KINECT2' )
 
-    bpy.types.Scene.MhSensorCameraHeight = FloatProperty(name="Sensor Height", description="How high the sensor THINKS it is above floor in inches.\nMake sure this matches reality.  If not, adjust angle.", default = -1)
+    bpy.types.Scene.MhSensorCameraHeight = StringProperty(name="Height", description="How high the sensor THINKS it is above floor.  Make sure\nthis is close to reality.  If not, adjust angle, &\ntry again.  Power cycle sensor when moving recommended.")
 
     bpy.types.Scene.MhSensorAnimations = CollectionProperty(type=AnimationProps)
     bpy.types.Scene.MhSensorAnimation_index = IntProperty(default=0)
@@ -78,9 +78,11 @@ def addMocapUIToTab(layout, scn):
     cuts.operator("mh_community.trim_right")
 
     actionSmoothing = layout.box()
-    actionSmoothing.label(text="Key Frame Reduction:")
+    actionSmoothing.label(text="Key Frame Reduction Smoothing:")
     actionSmoothing.prop(scn, "MhReversalMinRetracement")
     actionSmoothing.operator("mh_community.keyframe_animation")
 
     if MOCAP_DEBUG_OPS:
-       layout.operator("mh_community.pose_right")
+        diagnostics = layout.box()
+        diagnostics.label(text="Diagnostics:")
+        diagnostics.operator("mh_community.pose_right")

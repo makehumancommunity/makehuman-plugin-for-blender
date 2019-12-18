@@ -72,6 +72,18 @@ class Kinect2Sensor():
         'AnkleRight'   : 'KneeRight',
         'FootRight'    : 'AnkleRight',
     }
+    
+    @staticmethod
+    def getSensorInfo():
+        ret = SensorInfo()
+        ret.setJointDict(Kinect2Sensor.JOINTS)
+        ret.setPelvisName('SpineBase')
+        ret.setAnkleNames('AnkleLeft', 'AnkleRight')
+        ret.setKneeNames ('KneeLeft' , 'KneeRight')
+        ret.setWristNames('WristLeft', 'WristRight')
+        ret.setElbowNames('ElbowLeft', 'ElbowRight')
+        
+        return ret
 
     @staticmethod
     def loadLibrary():

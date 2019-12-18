@@ -8,6 +8,7 @@ _defaultSettings = dict()
 _defaultSettings["MhHandleHelper"] = "MASK"
 _defaultSettings["MhScaleMode"] = "METER"
 _defaultSettings["MhDetailedHelpers"] = False
+_defaultSettings["MhAddSimpleMaterials"] = False
 _defaultSettings["MhImportWhat"] = "EVERYTHING"
 _defaultSettings["MhPrefixProxy"] = True
 _defaultSettings["MhMaskBase"] = True
@@ -55,6 +56,8 @@ def _getCleanMcMtSettings():
     settings = _defaultSettings.copy()
     settings["MhScaleMode"] = "DECIMETER"
     settings["MhDetailedHelpers"] = True
+    settings["MhAddSimpleMaterials"] = True
+    settings["MhAdjustPosition"] = False
     settings["MhEnhancedSkin"] = False
     settings["MhEnhancedSSS"] = False
     return settings

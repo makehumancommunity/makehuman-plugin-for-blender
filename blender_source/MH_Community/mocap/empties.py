@@ -6,18 +6,22 @@ import bpy
 #===============================================================================
 ARMATURE_BASE = 'ARMATURE_BASE'
 class Empties:
-    def __init__(self, captureArmature, targetRigInfo, mappingToBones, sensorJointDict):
-        self.armature = captureArmature # member for nukeConstraints() & root bone rotation
-        self.targetRigInfo = targetRigInfo
+    def __init__(self, capturedRigInfo, sensorMappingToBones, sensorJointDict, firstBody):
+        self.capturedRigInfo = capturedRigInfo
+        self.capturedArmature = capturedRigInfo.armature
+        self.sensorMappingToBones = sensorMappingToBones
         self.sensorJointDict = sensorJointDict
-        self.mappingToBones = mappingToBones
+        self.firstBody = firstBody
+        for jointName, parentName in self.sensorJointDict.items():
+            if parentName is None:
+                self.sensorRoot = jointName
+                break
 
         self.constraintsApplied = False
-        self.mult = Vector((1, 1, 1))
 
-        # record the bone lengths of the armature getting proper location root bone base
-        self.rootLength = self.armature.pose.bones[targetRigInfo.root].length
-        self.spineBaseHeightWorldSpace = targetRigInfo.getSpineBaseHeightWorldSpace()
+        # grab stuff from rig info for scaling & placement
+        self.pelvisInWorldSpace = capturedRigInfo.pelvisInWorldSpace()
+        self.rootInWorldSpace   = capturedRigInfo.rootInWorldSpace()
 
         # Add all the empties in OBJECT Mode, one for each bone
         # use the Bone list, not bones though, since user could have removed fingers
@@ -27,7 +31,7 @@ class Empties:
             self.addEmpty(jointName)
 
         #  add one for the base of the root bone
-#        self.addEmpty(ARMATURE_BASE)
+        self.addEmpty(ARMATURE_BASE)
 
     def addEmpty(self, jointName):
         o = bpy.data.objects.new(jointName, None)
@@ -50,12 +54,13 @@ class Empties:
         objs = bpy.data.objects
         for jointName, parentName in self.sensorJointDict.items():
             objs.remove(objs[jointName], do_unlink = True)
-#        objs.remove(objs[ARMATURE_BASE], do_unlink = True)
+            
+        objs.remove(objs[ARMATURE_BASE], do_unlink = True)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                       Location Assignment Methods
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def assign(self, jointData):
-#        if not hasattr(self, 'mult'): self.calibrate(jointData[SENSOR_ROOT]['location'])
+        if not hasattr(self, 'mult'): self.calibrate(jointData)
 
         # assign empties based on location
         for sensorName in jointData:
@@ -69,15 +74,29 @@ class Empties:
     def assignEmpty(self, sensorName, loc):
         empty = self.empties[sensorName]
 
-        empty.location = Vector((loc['x']* self.mult.z, loc['z']* self.mult.z, loc['y']* self.mult.z))
+        empty.location = Vector((loc['x'], loc['z'], loc['y']))
 
-#        if sensorName == SENSOR_ROOT:
-#            self.empties[ARMATURE_BASE].location = empty.location.copy()
-#            self.empties[ARMATURE_BASE].location.z -= self.rootLength
+        if sensorName == self.sensorRoot:
+            changeInRootLoc = (empty.location - self.sensorRootBasis) * self.mult
+            # add-in current location, so recordings can be done when armature raised or moved when recording
+            # This is only placing the empty, which will then converted back from world to local.
+            self.empties[ARMATURE_BASE].location = changeInRootLoc + self.rootInWorldSpace
 
-    def calibrate(self, skeletonLoc):
-        self.mult.z = self.spineBaseHeightWorldSpace / skeletonLoc['y']
-        print('location multiplier- x: ' + str(self.mult.x) + ', y: ' + str(self.mult.y) + ', z: ' + str(self.mult.z))
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#                            Calibration Methods
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    def calibrate(self, jointData):
+        sensorRootLoc = jointData[self.sensorRoot]['location']
+        # since using sensor data, switch y with z
+        # for non-first bodies origin from sensor is first's; want to keep that
+        if self.firstBody:
+            self.sensorRootBasis = Vector((sensorRootLoc['x'], sensorRootLoc['z'], sensorRootLoc['y']))
+        else:
+            self.sensorRootBasis = Vector((                 0,                  0, sensorRootLoc['y']))
+        
+        self.mult = self.pelvisInWorldSpace.z / sensorRootLoc['y']
+        print('sensor to armature multiplier: ' + str(self.mult) + ', armature pelvis height: ' +str(self.pelvisInWorldSpace.z) + ' over sensors: ' + str(sensorRootLoc['y']))
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #                      Constraints add & removal Methods
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -85,15 +104,14 @@ class Empties:
         bpy.ops.object.mode_set(mode='POSE')
         bpy.ops.pose.transforms_clear()
 
-
         for jointName, parentName in self.sensorJointDict.items():
             if parentName is None: continue
 
             # bone whose tail is at this joint
-            boneName = self.mappingToBones[jointName]
-            if boneName is None: continue
+            boneName = self.sensorMappingToBones[jointName]
+            if boneName is None or boneName not in self.capturedArmature.pose.bones: continue
 
-            bone = self.armature.pose.bones[boneName]
+            bone = self.capturedArmature.pose.bones[boneName]
 
             # add a COPY_LOCATION of the empty which is the parent
             locConstraint = bone.constraints.new('COPY_LOCATION')
@@ -104,6 +122,12 @@ class Empties:
             stretchConstraint = bone.constraints.new('STRETCH_TO')
             stretchConstraint.target = self.empties[jointName]
             stretchConstraint.name = 'MOCAP_STRETCH'
+            
+        # also add copy location for root bone
+        bone = self.capturedArmature.pose.bones[self.capturedRigInfo.root]
+        constraint = bone.constraints.new('COPY_LOCATION')
+        constraint.target = self.empties[ARMATURE_BASE]
+        constraint.name = 'MOCAP_LOC'
 
         self.constraintsApplied = True
 
@@ -111,7 +135,7 @@ class Empties:
     # no need to check for hands, no constraint will found in this case
     def nukeConstraints(self):
         bpy.ops.object.mode_set(mode='POSE')
-        for bone in self.armature.pose.bones:
+        for bone in self.capturedArmature.pose.bones:
             for c in bone.constraints:
                 if c.name == 'MOCAP_LOC' or c.name == 'MOCAP_STRETCH':
                     bone.constraints.remove(c)

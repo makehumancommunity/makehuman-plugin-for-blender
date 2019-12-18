@@ -51,6 +51,7 @@ class ImportBodyBinary():
         self.matobjname = bpy.context.scene.MhMaterialObjectName
         self.importRig = bpy.context.scene.MhImportRig
         self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
+        self.addSimpleMaterials = bpy.context.scene.MhAddSimpleMaterials
         self.rigisparent = bpy.context.scene.MhRigIsParent
         self.adjust = bpy.context.scene.MhAdjustPosition
         self.addCollection = bpy.context.scene.MhAddCollection
@@ -104,6 +105,7 @@ class ImportBodyBinary():
 
         self.obj.MhHuman = True
         self.obj.MhObjectType = "Basemesh"
+        self.obj.MhScaleFactor = self.scaleFactor
 
         # TODO: Set more info, for example name of toon
 
@@ -255,7 +257,8 @@ class ImportBodyBinary():
 
                 if name.startswith("helper-"):
                     self.all_helper_verts.extend(verts)
-                if self.helpers == "MASK":
+
+                if self.helpers in ("MASK", "NOTHING"):
                     if name == "body" or self.detailedHelpers:
                         vgroup = self.obj.vertex_groups.new(name=name)
                         vgroup.add(verts, 1.0, 'ADD')
@@ -312,6 +315,9 @@ class ImportBodyBinary():
             mask.vertex_group = "body"
             mask.show_in_editmode = True
             mask.show_on_cage = True
+
+        if self.addSimpleMaterials:
+            bpy.ops.mh_community.add_simple_materials()
 
         self._profile("handleHelpers")
 

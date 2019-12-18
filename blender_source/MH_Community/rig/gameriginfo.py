@@ -11,22 +11,27 @@ class GameRigInfo (RigInfo):
         self.pelvis = 'pelvis'
         self.root = 'Root'
         self.head = 'head'
+        self.neckBase = 'neck_01'
+        self.upperSpine = 'spine_03'
         self.kneeIKChainLength  = 1
         self.footIKChainLength  = 2
         self.handIKChainLength  = 2
         self.elbowIKChainLength = 1
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # for IK rigging support
+    # for IK rigging & mocap support
     def IKCapable(self): return True
-    def clavicle(self, isLeft): return 'clavicle_' + ('l' if isLeft else 'r')
-    def upperArm(self, isLeft): return 'upperarm_' + ('l' if isLeft else 'r')
-    def lowerArm(self, isLeft): return 'lowerarm_' + ('l' if isLeft else 'r')
-    def hand    (self, isLeft): return 'hand_'     + ('l' if isLeft else 'r') # also used for amputation
+    def clavicle(self, isLeft, forMocap = False): return 'clavicle_' + ('l' if isLeft else 'r')
+    def upperArm(self, isLeft, forMocap = False): return 'upperarm_' + ('l' if isLeft else 'r')
+    def lowerArm(self, isLeft, forMocap = False): return 'lowerarm_' + ('l' if isLeft else 'r')
+    def hand    (self, isLeft, forMocap = False): return 'hand_'     + ('l' if isLeft else 'r') # also used for amputation
+    def handTip (self, isLeft, forMocap = False): return None # for mocap only, not IK
+    def thumb   (self, isLeft, forMocap = False): return None # for mocap only, not IK
     # - - -
-    def thigh   (self, isLeft): return 'thigh_'    + ('l' if isLeft else 'r')
-    def calf    (self, isLeft): return 'calf_'     + ('l' if isLeft else 'r') # also used by super.hasFeetOnGround()
-    def foot    (self, isLeft): return 'foot_'     + ('l' if isLeft else 'r') # also used for super.determineExportedUnits()
+    def hip     (self, isLeft, forMocap = False): return None # for mocap only, not IK
+    def thigh   (self, isLeft, forMocap = False): return 'thigh_'    + ('l' if isLeft else 'r')
+    def calf    (self, isLeft, forMocap = False): return 'calf_'     + ('l' if isLeft else 'r') # also used by super.hasFeetOnGround()
+    def foot    (self, isLeft, forMocap = False): return 'foot_'     + ('l' if isLeft else 'r') # also used for super.determineExportedUnits()
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for Finger rigging support
     def fingerIKCapable(self): return self.pinkyFingerParent(False) in self.armature.data.bones
@@ -71,46 +76,3 @@ class GameRigInfo (RigInfo):
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # for mocap support
     def isMocapCapable(self): return True
-    def getSensorMapping(self, sensorType = 'KINECT2'):
-        if sensorType == 'KINECT2':
-
-            return {
-            # keys are kinect joints names coming from the sensor
-            # values are bone names whose tail is at the joint
-            'SpineBase'    : self.root,
-            'SpineMid'     : self.pelvis,
-            'SpineShoulder': 'spine_03',
-
-            'Neck'         : 'neck_01',
-            'Head'         : self.head,
-
-            'ShoulderLeft' : 'clavicle_l',
-            'ElbowLeft'    : 'upperarm_l',
-            'WristLeft'    : 'lowerarm_l',
-            'HandLeft'     : 'hand_l',
-            'HandTipLeft'  : None,
-            'ThumbLeft'    : None,
-
-            'ShoulderRight': 'clavicle_r',
-            'ElbowRight'   : 'upperarm_r',
-            'WristRight'   : 'lowerarm_r',
-            'HandRight'    : 'hand_r',
-            'HandTipRight' : None,
-            'ThumbRight'   : None,
-
-            'HipLeft'      : None,
-            'KneeLeft'     : 'thigh_l',
-            'AnkleLeft'    : 'calf_l',
-            'FootLeft'     : 'foot_l',
-
-            'HipRight'     : None,
-            'KneeRight'    : 'thigh_r',
-            'AnkleRight'   : 'calf_r',
-            'FootRight'    : 'foot_r',
-        }
-        # add next sensor, eg., KINECT_AZURE
-        elif sensorType == 'KINECT_AZURE':
-            return None
-
-        # this rig not supported by this sensor
-        else: return None

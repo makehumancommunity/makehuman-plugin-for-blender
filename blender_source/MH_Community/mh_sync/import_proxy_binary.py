@@ -76,6 +76,7 @@ class ImportProxyBinary():
         self.obj.MhObjectType = proxyInfo["type"]
         self.obj.MhProxyUUID = proxyInfo["uuid"]
         self.obj.MhProxyName = proxyInfo["name"]
+        self.obj.MhScaleFactor = self.scaleFactor
 
         # TODO: Set more info, for example name of toon
 
