@@ -12,6 +12,7 @@ import pprint
 import struct
 import time
 import itertools
+from ..extra_groups import vgroupInfo
 
 from .material import *
 from .fetch_server_data import FetchServerData
@@ -287,6 +288,42 @@ class ImportProxyBinary():
             vgroup = self.obj.vertex_groups.new(name="Mid")
             vgroup.add(self.mid_verts, 1.0, 'ADD')
 
+    def assignExtraVgroups(self):
+        vgi = vgroupInfo[self.proxyInfo['uuid']]
+        for key in vgi:
+            verts = vgi[key]
+            newvg = self.obj.vertex_groups.new(name=key)
+            newvg.add(verts, 1.0, 'ADD')
+
+    def vgroupMaterials(self, mat):
+        vgi = vgroupInfo["basemesh"]
+        for ob in bpy.context.selected_objects:
+            deselectObject(ob)
+        activateObject(self.obj)
+
+        for key in vgi:
+            matname = key
+
+            if self.prefixMaterial:
+                matname = self.humanName + "." + matname
+
+            newMat = bpy.data.materials.get(matname)
+
+            if not newMat:
+                newMat = mat.copy()
+                newMat.name = matname
+            self.obj.data.materials.append(newMat)
+
+            matidx = self.obj.material_slots.find(matname)
+            bpy.context.object.active_material_index = matidx
+
+            bpy.ops.object.vertex_group_set_active(group=key)
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.vertex_group_select()
+            bpy.ops.object.material_slot_assign()
+            bpy.ops.object.editmode_toggle()
+
     def afterMeshData(self):
 
         bmesh.ops.recalc_face_normals(self.bm, faces=self.bm.faces)
@@ -298,6 +335,10 @@ class ImportProxyBinary():
             self.makeClothesExtras()
 
         self.maskFaces()
+
+        uuid = self.proxyInfo['uuid']
+        if uuid in vgroupInfo:
+            self.assignExtraVgroups()
 
         del self.vertCache
         del self.faceCache
@@ -335,6 +376,11 @@ class ImportProxyBinary():
         self.obj.data.materials.append(mat)
         if not self.onFinished is None:
             self.onFinished(self)
+
+        uuid = self.proxyInfo['uuid']
+        if uuid in vgroupInfo:
+            self.vgroupMaterials(mat)
+
 
 
 

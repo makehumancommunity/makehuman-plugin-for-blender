@@ -21,6 +21,7 @@ from .import_proxy_binary import ImportProxyBinary
 from .import_weighting import ImportWeighting
 from ..util import *
 from .meshutils import *
+from ..extra_groups import vgroupInfo
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -362,6 +363,41 @@ class ImportBodyBinary():
 
         self._profile("maskBody")
 
+    def assignExtraVgroups(self):
+        vgi = vgroupInfo["basemesh"]
+        for key in vgi:
+            verts = vgi[key]
+            newvg = self.obj.vertex_groups.new(name=key)
+            if verts and len(verts) > 0:
+                newvg.add(verts, 1.0, 'ADD')
+
+    def vgroupMaterials(self, mat):
+        vgi = vgroupInfo["basemesh"]
+        self._deselectAll()
+        activateObject(self.obj)
+
+        for key in vgi:
+            matname = key
+            verts = vgi[key]
+
+            if self.prefixMaterial:
+                matname = self.name + "." + matname
+
+            newMat = mat.copy()
+            newMat.name = matname
+            self.obj.data.materials.append(newMat)
+
+            matidx = self.obj.material_slots.find(matname)
+            bpy.context.object.active_material_index = matidx
+
+            bpy.ops.object.vertex_group_set_active(group=key)
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.vertex_group_select()
+            bpy.ops.object.material_slot_assign()
+            bpy.ops.object.editmode_toggle()
+
+
     def afterMeshData(self):
         self._profile()
         bmesh.ops.recalc_face_normals(self.bm, faces=self.bm.faces)
@@ -369,6 +405,7 @@ class ImportBodyBinary():
         self.bm.to_mesh(self.mesh)
         self.bm.free()
         self.handleHelpers()
+        self.assignExtraVgroups()
 
         if self.hiddenFaces == "MASK":
             self.maskBody()
@@ -380,6 +417,7 @@ class ImportBodyBinary():
         del self.vertPosCache
 
         FetchServerData('getBodyMaterialInfo',self.gotBodyMaterialInfo)
+
 
     def gotBodyMaterialInfo(self, data):
         self._profile()
@@ -401,6 +439,8 @@ class ImportBodyBinary():
         mat = createMHMaterial2(matname, data, baseColor=self.skinColor, ifExists=self.handleMaterials, materialFile=matFile)
 
         self.obj.data.materials.append(mat)
+
+        self.vgroupMaterials(mat)
 
         self._profile("gotBodyMaterialInfo")
 
