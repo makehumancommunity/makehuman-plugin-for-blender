@@ -33,7 +33,7 @@ class MHC_OT_PrintVGroupsOperator(bpy.types.Operator):
                 f.write("#!/usr/bin/python\n")
                 f.write("# -*- coding: utf-8 -*-\n\n")
                 f.write("vgroupInfo = dict()\n")
-                vn = "groupInfo[\"" + objuuid + "\"]"
+                vn = "vgroupInfo[\"" + objuuid + "\"]"
                 f.write(vn + " = dict()\n")
 
                 for vg in obj.vertex_groups:
