@@ -93,7 +93,8 @@ def createMakeSkinMaterial(name, materialSettingsHash, obj, ifExists="CREATENEW"
             mat = blendMatLoad(path, obj)
             mat.name = name
         else:
-            blendMatLoad(path, obj)
+            mat2 = blendMatLoad(path, obj)
+            mat2.name = name + ".blendMat"
     else:
         mat = mhmat.assignAsNodesMaterialForObj(obj)
         mat.name = name
