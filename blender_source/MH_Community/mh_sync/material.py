@@ -73,6 +73,33 @@ def _updateNormalMapAndBumpmapTexture(materialDefinition, materialSettingsHash):
         else:
             materialDefinition["nodes"]["bumpOrNormal"]["create"] = True
 
+def createMakeSkinMaterial(name, materialSettingsHash, obj, ifExists="CREATENEW", importBlendMat=False, onlyBlendMat=False):
+
+    # TODO: Support overwriting existing material
+    mat = bpy.data.materials.get(name)
+    if not mat is None and ifExists == "REUSE":
+        print("Resuing existing material " + name)
+        return mat
+
+    from makeskin import MHMat, blendMatLoad
+    mhmat = MHMat(fileName=materialSettingsHash["materialFile"])
+    mat = None
+    if importBlendMat and "blendMaterial" in mhmat.settings and mhmat.settings["blendMaterial"]:
+        if not onlyBlendMat:
+            mat = mhmat.assignAsNodesMaterialForObj(obj)
+            mat.name = name
+        path = mhmat.settings["blendMaterial"]
+        if not mat:
+            mat = blendMatLoad(path, obj)
+            mat.name = name
+        else:
+            blendMatLoad(path, obj)
+    else:
+        mat = mhmat.assignAsNodesMaterialForObj(obj)
+        mat.name = name
+    return mat
+
+
 def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0), ifExists="CREATENEW", materialFile="defaultMaterial.json"):
 
     mat = None

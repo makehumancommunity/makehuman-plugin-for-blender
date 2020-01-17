@@ -3,6 +3,7 @@
 
 import bpy
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
+from ..util import checkMakeSkinAvailable, LEAST_REQUIRED_MAKESKIN_VERSION
 
 overridePresets = []
 overridePresets.append( ("DEFAULT", "Default", "(re)load the default settings", 1) )
@@ -36,6 +37,9 @@ handleHiddenItems.append( ("MATERIAL", "Invis material", "Add an invisible mater
 handleHiddenItems.append( ("DELETE", "Delete", "Delete vertices for hidden surfaces", 4) )
 
 from .presets import loadOrCreateDefaultSettings
+
+_EVALUATED_MAKESKIN = False
+_MAKESKIN_AVAILABLE = False
 
 def registerImporterConstantsAndSettings():
     # Properties for human importer
@@ -82,7 +86,12 @@ def registerImporterConstantsAndSettings():
 
     bpy.types.Scene.MhEnhancedSkin = BoolProperty(name="Enhanced skin", description="Create enhanced skin node setup (rather than normal material)", default=settings["MhEnhancedSkin"])
     bpy.types.Scene.MhEnhancedSSS = BoolProperty(name="Enhanced skin SSS", description="When using enhanced skin, also add nodes for SSS", default=settings["MhEnhancedSSS"])
-
+    bpy.types.Scene.MhUseMakeSkin = BoolProperty(name="Use MakeSkin to import material",
+                                                 description="MakeSkin has a much more competent material importer than the one available in MPFB. By checking this, you will use MakeSkin to import materials when possible. This will be ignored for skin materials if you checked \"Enhanced skin\" above.",
+                                                 default=settings["MhUseMakeSkin"])
+    bpy.types.Scene.MhOnlyBlendMat = BoolProperty(name="Only use attached blend material",
+                                                 description="MakeSkin is capable of importing entire attached blender materials. The default is to import both the mhmat model and the attached blend material. If checking this box, only the attached material will be imported (if available). This will be ignored for skin materials if you checked \"Enhanced skin\" above.",
+                                                 default=settings["MhOnlyBlendMat"])
     # In case MHX2 isn't loaded
     bpy.types.Object.MhHuman = BoolProperty(default=False)
     bpy.types.Object.MhScaleFactor = FloatProperty(default=0.1)
@@ -152,6 +161,26 @@ def addImporterSettingsToTab(layout, scn):
     extrasBox.label(text="Extras", icon="OUTLINER_OB_LIGHT")
     extrasBox.prop(scn, 'MhEnhancedSkin', text='Enhanced skin material')
     extrasBox.prop(scn, 'MhEnhancedSSS', text='Enhanced skin SSS')
+
+    global _EVALUATED_MAKESKIN
+    global _MAKESKIN_AVAILABLE
+
+    if not _EVALUATED_MAKESKIN:
+        ms = checkMakeSkinAvailable()
+        if ms:
+            from makeskin import MAKESKIN_VERSION
+            if MAKESKIN_VERSION >= LEAST_REQUIRED_MAKESKIN_VERSION:
+                _MAKESKIN_AVAILABLE = True
+                print("A useful version of MakeSkin is available")
+            else:
+                print("MakeSkin is available, but in a too old version. At least " + str(LEAST_REQUIRED_MAKESKIN_VERSION) + " is required. Not showing related options.")
+        else:
+            print("MakeSkin is not available or not enabled. Not showing related options.")
+        _EVALUATED_MAKESKIN = True
+
+    if _MAKESKIN_AVAILABLE:
+        extrasBox.prop(scn, 'MhUseMakeSkin', text='Use MakeSkin')
+        extrasBox.prop(scn, 'MhOnlyBlendMat', text='Only blend mat')
 
     connectionBox = layout.box()
     connectionBox.label(text="Connect to MH", icon="LINKED")

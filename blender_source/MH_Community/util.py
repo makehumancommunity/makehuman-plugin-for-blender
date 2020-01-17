@@ -1,10 +1,12 @@
 import bpy
 import time
+from addon_utils import check,paths,enable,modules
 
 _startMillis = None
 _lastMillis = None
 
 ENABLE_PROFILING=True
+LEAST_REQUIRED_MAKESKIN_VERSION = 20200116
 
 def profile(position = "timestamp"):
     global ENABLE_PROFILING
@@ -52,3 +54,13 @@ def deselectObject(obj):
         obj.select_set(False)
     else:
         obj.select = False
+
+def checkMakeSkinAvailable():
+    for path in paths():
+        for mod_name, mod_path in bpy.path.module_names(path):
+            is_enabled, is_loaded = check(mod_name)
+            if mod_name == "makeskin":
+                return is_enabled and is_loaded
+    return False
+
+

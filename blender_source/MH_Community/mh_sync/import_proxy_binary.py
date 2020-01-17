@@ -49,6 +49,8 @@ class ImportProxyBinary():
         self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
         self.enhancedSkin = bpy.context.scene.MhEnhancedSkin
         self.enhancedSSS = bpy.context.scene.MhEnhancedSSS
+        self.makeSkin = bpy.context.scene.MhUseMakeSkin
+        self.blendMat = bpy.context.scene.MhOnlyBlendMat
 
         self.scaleFactor = 0.1
 
@@ -330,9 +332,20 @@ class ImportProxyBinary():
         if len(baseColor) < 4:
             baseColor = tuple([*baseColor, data.get("viewPortAlpha", 1.0)])
 
-        mat = createMHMaterial2(matname, data, baseColor=baseColor, ifExists=self.handleMaterials, materialFile=matFile)
+        makeSkin = self.makeSkin
 
-        self.obj.data.materials.append(mat)
+        if not "materialFile" in data:
+            if makeSkin:
+                print("Material did not provide info about file name. Cannot use MakeSkin for this import.")
+                makeSkin = False
+
+        if not makeSkin:
+            mat = createMHMaterial2(matname, data, baseColor=baseColor, ifExists=self.handleMaterials, materialFile=matFile)
+            self.obj.data.materials.append(mat)
+        else:
+            print("Using MakeSkin for this material")
+            createMakeSkinMaterial(matname, obj=self.obj, materialSettingsHash=data, importBlendMat=True, onlyBlendMat=self.blendMat)
+
         if not self.onFinished is None:
             self.onFinished(self)
 
