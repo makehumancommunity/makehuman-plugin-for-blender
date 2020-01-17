@@ -296,7 +296,7 @@ class ImportProxyBinary():
             newvg.add(verts, 1.0, 'ADD')
 
     def vgroupMaterials(self, mat):
-        vgi = vgroupInfo["basemesh"]
+        vgi = vgroupInfo[self.proxyInfo['uuid']]
         for ob in bpy.context.selected_objects:
             deselectObject(ob)
         activateObject(self.obj)
