@@ -29,6 +29,7 @@ from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, C
 from .mh_sync.importer_ui import addImporterUIToTab, registerImporterConstantsAndSettings, addImporterSettingsToTab
 from .mh_sync.bone_ui import addBoneUIToTab, registerBoneConstantsAndSettings
 from .mocap.mocap_ui import addMocapUIToTab, registerMocapConstantsAndSettings, unregisterMocap
+from .devtools import addDevtoolsToTab, registerDevtoolsConstantsAndSettings, DEVTOOLS_CLASSES
 
 #===============================================================================
 class MHC_PT_Community_Panel(bpy.types.Panel):
@@ -55,6 +56,7 @@ class MHC_PT_Community_Panel(bpy.types.Panel):
             generalSyncBox.operator("mh_community.separate_eyes")
 
             addBoneUIToTab(layout, scn)
+            addDevtoolsToTab(layout, scn)
 
         elif scn.mhTabs == SETTINGS_TAB:
             addImporterSettingsToTab(layout, scn)
@@ -78,6 +80,8 @@ classes =  [
 
 from .operators import *
 classes.extend(OPERATOR_CLASSES)
+
+classes.extend(DEVTOOLS_CLASSES)
 
 def register():
     from bpy.utils import register_class
