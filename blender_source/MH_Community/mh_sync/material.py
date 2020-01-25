@@ -76,6 +76,7 @@ def _updateNormalMapAndBumpmapTexture(materialDefinition, materialSettingsHash):
 def createMakeSkinMaterial(name, materialSettingsHash, obj, ifExists="CREATENEW", importBlendMat=False, onlyBlendMat=False):
 
     # TODO: Support overwriting existing material
+    # TODO: This will cause problem with blendMat attachments in second import
     mat = bpy.data.materials.get(name)
     if not mat is None and ifExists == "REUSE":
         print("Resuing existing material " + name)
