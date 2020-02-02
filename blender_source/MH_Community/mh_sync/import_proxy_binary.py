@@ -380,6 +380,8 @@ class ImportProxyBinary():
                 print("Material did not provide info about file name. Cannot use MakeSkin for this import.")
                 makeSkin = False
 
+        mat = None
+        
         if not makeSkin:
             mat = createMHMaterial2(matname, data, baseColor=baseColor, ifExists=self.handleMaterials, materialFile=matFile)
             self.obj.data.materials.append(mat)
@@ -391,7 +393,7 @@ class ImportProxyBinary():
             self.onFinished(self)
 
         uuid = self.proxyInfo['uuid']
-        if uuid in vgroupInfo:
+        if mat and uuid in vgroupInfo:
             self.vgroupMaterials(mat)
 
 
