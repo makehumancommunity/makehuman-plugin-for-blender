@@ -52,6 +52,8 @@ class ImportProxyBinary():
         self.enhancedSSS = bpy.context.scene.MhEnhancedSSS
         self.makeSkin = bpy.context.scene.MhUseMakeSkin
         self.blendMat = bpy.context.scene.MhOnlyBlendMat
+        self.extraGroups = bpy.context.scene.MhExtraGroups
+        self.extraSlots = bpy.context.scene.MhExtraSlots
 
         self.scaleFactor = 0.1
 
@@ -339,7 +341,7 @@ class ImportProxyBinary():
         self.maskFaces()
 
         uuid = self.proxyInfo['uuid']
-        if uuid in vgroupInfo:
+        if uuid in vgroupInfo and self.extraGroups:
             self.assignExtraVgroups()
 
         del self.vertCache
@@ -393,7 +395,7 @@ class ImportProxyBinary():
             self.onFinished(self)
 
         uuid = self.proxyInfo['uuid']
-        if mat and uuid in vgroupInfo:
+        if mat and uuid in vgroupInfo and self.extraGroups and self.extraSlots:
             self.vgroupMaterials(mat)
 
 

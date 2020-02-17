@@ -92,6 +92,9 @@ def registerImporterConstantsAndSettings():
     bpy.types.Scene.MhOnlyBlendMat = BoolProperty(name="Only use attached blend material",
                                                  description="MakeSkin is capable of importing entire attached blender materials. The default is to import both the mhmat model and the attached blend material. If checking this box, only the attached material will be imported (if available). This will be ignored for skin materials if you checked \"Enhanced skin\" above.",
                                                  default=settings["MhOnlyBlendMat"])
+    bpy.types.Scene.MhExtraGroups = BoolProperty(name="Extra vertex groups", description="Attempt to assign additional vertex groups for body parts, such as lips, fingernails, ears and so on. This works on the base mesh and most (but not all) proxies.", default=settings["MhExtraGroups"])
+    bpy.types.Scene.MhExtraSlots = BoolProperty(name="Extra material slots", description="When having assigned extra vertex groups, also create copies of the skin material and assign to separate material slots. This is useful if you for example want a different roughness on the fingernails than on the skin.", default=settings["MhExtraSlots"])
+
     # In case MHX2 isn't loaded
     bpy.types.Object.MhHuman = BoolProperty(default=False)
     bpy.types.Object.MhScaleFactor = FloatProperty(default=0.1)
@@ -161,6 +164,8 @@ def addImporterSettingsToTab(layout, scn):
     extrasBox.label(text="Extras", icon="OUTLINER_OB_LIGHT")
     extrasBox.prop(scn, 'MhEnhancedSkin', text='Enhanced skin material')
     extrasBox.prop(scn, 'MhEnhancedSSS', text='Enhanced skin SSS')
+    extrasBox.prop(scn, 'MhExtraGroups', text='Extra vertex groups')
+    extrasBox.prop(scn, 'MhExtraSlots', text='Slots for extra groups')
 
     global _EVALUATED_MAKESKIN
     global _MAKESKIN_AVAILABLE
