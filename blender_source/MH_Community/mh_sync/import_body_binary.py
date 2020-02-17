@@ -61,6 +61,8 @@ class ImportBodyBinary():
         self.subCollection = bpy.context.scene.MhSubCollection
         self.enhancedSkin = bpy.context.scene.MhEnhancedSkin
         self.enhancedSSS = bpy.context.scene.MhEnhancedSSS
+        self.extraGroups = bpy.context.scene.MhExtraGroups
+        self.extraSlots = bpy.context.scene.MhExtraSlots
 
         self.baseColor = (1.0, 0.7, 0.7)
 
@@ -405,7 +407,8 @@ class ImportBodyBinary():
         self.bm.to_mesh(self.mesh)
         self.bm.free()
         self.handleHelpers()
-        self.assignExtraVgroups()
+        if self.extraGroups:
+            self.assignExtraVgroups()
 
         if self.hiddenFaces == "MASK":
             self.maskBody()
@@ -440,7 +443,8 @@ class ImportBodyBinary():
 
         self.obj.data.materials.append(mat)
 
-        self.vgroupMaterials(mat)
+        if self.extraGroups and self.extraSlots:
+            self.vgroupMaterials(mat)
 
         self._profile("gotBodyMaterialInfo")
 
