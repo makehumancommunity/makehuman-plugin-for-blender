@@ -382,7 +382,7 @@ class ImportProxyBinary():
 
         mat = None
         
-        if not makeSkin:
+        if not makeSkin or (self.enhancedSkin and self.proxyInfo["type"] == "Proxymeshes"):
             mat = createMHMaterial2(matname, data, baseColor=baseColor, ifExists=self.handleMaterials, materialFile=matFile)
             self.obj.data.materials.append(mat)
         else:
