@@ -11,7 +11,6 @@ class MHC_OT_ToSensorRigOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ..kinect_sensor.to_kinect2 import ToKinectV2
         armature = context.object
         problemMsg = None
         rigInfo = RigInfo.determineRig(armature)
