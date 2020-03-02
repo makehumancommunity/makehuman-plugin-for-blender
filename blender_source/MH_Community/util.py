@@ -52,3 +52,13 @@ def deselectObject(obj):
         obj.select_set(False)
     else:
         obj.select = False
+
+def showMessageBox(message='', title='MessageBox', icon='INFO'):
+
+    def draw(self, context):
+        lines = message.split('\n')
+        for line in lines:
+            self.layout.label(text=line)
+
+    print(message)
+    bpy.context.window_manager.popup_menu(draw, title=title, icon=icon)
