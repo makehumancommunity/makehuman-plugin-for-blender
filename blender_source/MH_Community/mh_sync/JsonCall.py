@@ -3,6 +3,7 @@
 import re
 import json
 import socket
+from ..util import showMessageBox
 
 # Why is the encoding routine even necessary? Why not simply use the 
 # json.dumps function already available in the imported json library?
@@ -16,6 +17,10 @@ import socket
 # that isn't scalar, array or dict)
 
 DEBUG_JSON = False
+
+CONNECTION_REFUSED_MESSAGE = '\nCannot connect to MakeHuman App!\n\n' \
+                             'Check settings in MPFB and MakeHuman.\n' \
+                             'Check security settings of the OS.'
 
 class JsonCall():
 
@@ -207,7 +212,11 @@ class JsonCall():
 
     def send(self, host = "127.0.0.1", port = 12345, expectBinaryResponse = False):
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect((host, port))
+        try:
+            client.connect((host, port))
+        except ConnectionRefusedError:
+            showMessageBox(message=CONNECTION_REFUSED_MESSAGE, title='CONNECTION REFUSED', icon='ERROR')
+            return None
         client.send(bytes(self.serialize(), 'utf-8'))
 
         data = None
