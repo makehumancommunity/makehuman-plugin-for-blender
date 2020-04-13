@@ -22,6 +22,9 @@ pp = pprint.PrettyPrinter(indent=4)
 
 ENABLE_PROFILING_OUTPUT = False
 
+_EVALUATED_MAKESKIN = False
+_MAKESKIN_AVAILABLE = False
+
 PROXY_COLORS = {"Proxymeshes": (1.0, 0.7, 0.7, 1.0),
                 "Clothes": (0.5, 1.0, 1.0, 1.0),
                 "Hair": (0.08, 0.015, 0.015, 1.0),
@@ -35,6 +38,22 @@ class ImportProxyBinary():
     def __init__(self, humanObject, humanName, proxyInfo, onFinished=None, collection=None):
         print("Importing proxy: " + proxyInfo["name"])
 
+        global _EVALUATED_MAKESKIN
+        global _MAKESKIN_AVAILABLE
+
+        if not _EVALUATED_MAKESKIN:
+            ms = checkMakeSkinAvailable()
+            if ms:
+                from makeskin import MAKESKIN_VERSION
+                if MAKESKIN_VERSION >= LEAST_REQUIRED_MAKESKIN_VERSION:
+                    _MAKESKIN_AVAILABLE = True
+                    print("A useful version of MakeSkin is available")
+                else:
+                    print("MakeSkin is available, but in a too old version. At least " + str(LEAST_REQUIRED_MAKESKIN_VERSION) + " is required. Not showing related options.")
+            else:
+                print("MakeSkin is not available or not enabled. Not showing related options.")
+            _EVALUATED_MAKESKIN = True
+            
         #pp.pprint(proxyInfo)
 
         self.humanObject = humanObject
@@ -50,7 +69,11 @@ class ImportProxyBinary():
         self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
         self.enhancedSkin = bpy.context.scene.MhEnhancedSkin
         self.enhancedSSS = bpy.context.scene.MhEnhancedSSS
-        self.makeSkin = bpy.context.scene.MhUseMakeSkin
+        self.makeSkin = False
+        if _MAKESKIN_AVAILABLE:
+            self.makeSkin = bpy.context.scene.MhUseMakeSkin
+        else:
+            print("makeskin is not available")
         self.blendMat = bpy.context.scene.MhOnlyBlendMat
         self.extraGroups = bpy.context.scene.MhExtraGroups
         self.extraSlots = bpy.context.scene.MhExtraSlots
