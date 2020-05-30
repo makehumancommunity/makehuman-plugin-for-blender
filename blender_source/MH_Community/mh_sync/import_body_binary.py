@@ -7,6 +7,8 @@ bl_info = {
 }
 
 import bpy
+import bpy.types
+from bpy.types import ShaderNodeGroup
 import bmesh
 import pprint
 import struct
@@ -21,7 +23,7 @@ from .import_proxy_binary import ImportProxyBinary
 from .import_weighting import ImportWeighting
 from ..util import *
 from .meshutils import *
-from ..extra_groups import vgroupInfo
+from ..extra_groups import vgroupInfo, vgroupOverrides
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -378,6 +380,7 @@ class ImportBodyBinary():
         self._deselectAll()
         activateObject(self.obj)
 
+        print("\n\n\nVGROUPMATERIALS")
         for key in vgi:
             matname = key
             verts = vgi[key]
@@ -398,6 +401,24 @@ class ImportBodyBinary():
             bpy.ops.object.vertex_group_select()
             bpy.ops.object.material_slot_assign()
             bpy.ops.object.editmode_toggle()
+
+            overrides = vgroupOverrides[key]
+
+            tree = newMat.node_tree
+            nodes = tree.nodes
+
+            grp = None
+
+            for node in nodes:
+                if isinstance(node, ShaderNodeGroup):
+                    grp = node
+
+            if grp:
+                for setting in overrides.keys():
+                    if setting in grp.inputs:
+                        grp.inputs[setting].default_value = overrides[setting]
+
+        print("\n\n\n////VGROUPMATERIALS")
 
 
     def afterMeshData(self):

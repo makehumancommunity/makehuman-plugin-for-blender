@@ -1,6 +1,34 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+vgroupOverrides = dict()
+
+vgroupOverrides["nippleTip"] = {}
+
+vgroupOverrides["nipple"] = {}
+vgroupOverrides["nipple"]["Pore scale"] = 1500
+vgroupOverrides["nipple"]["Pore distortion"] = 0.5
+
+vgroupOverrides["lips"] = {}
+vgroupOverrides["lips"]["Pore scale"] = 500
+vgroupOverrides["lips"]["Pore strength"] = 0.15
+vgroupOverrides["lips"]["Pore detail"] = 1.0
+
+vgroupOverrides["fingernails"] = {}
+vgroupOverrides["fingernails"]["Roughness"] = 0.2
+vgroupOverrides["fingernails"]["Pore strength"] = 0.05
+
+vgroupOverrides["toenails"] = {}
+vgroupOverrides["toenails"]["Roughness"] = 0.2
+vgroupOverrides["toenails"]["Pore strength"] = 0.05
+
+vgroupOverrides["ears"] = {}
+
+vgroupOverrides["genitals"] = {}
+vgroupOverrides["genitals"]["Roughness"] = 0.3
+vgroupOverrides["genitals"]["Pore scale"] = 1000
+vgroupOverrides["genitals"]["Pore strength"] = 0.1
+
 vgroupInfo = dict()
 
 # Base mesh

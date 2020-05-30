@@ -13,7 +13,7 @@
         },
         "Roughness": {
           "type": "NodeSocketFloat",
-          "value": 0.7
+          "value": 0.5
         },
         "Brightness": {
           "type": "NodeSocketFloat",
