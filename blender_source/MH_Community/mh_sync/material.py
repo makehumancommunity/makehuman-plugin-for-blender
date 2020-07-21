@@ -81,13 +81,14 @@ def createMakeSkinMaterial(name, materialSettingsHash, obj, ifExists="CREATENEW"
     if not mat is None and ifExists == "REUSE":
         print("Resuing existing material " + name)
         return mat
+    scn = bpy.context.scene
 
     from makeskin import MHMat, blendMatLoad
     mhmat = MHMat(fileName=materialSettingsHash["materialFile"])
     mat = None
     if importBlendMat and "blendMaterial" in mhmat.settings and mhmat.settings["blendMaterial"]:
         if not onlyBlendMat:
-            mat = mhmat.assignAsNodesMaterialForObj(obj)
+            mat = mhmat.assignAsNodesMaterialForObj(scn, obj, True)
             mat.name = name
         path = mhmat.settings["blendMaterial"]
         if not mat:
@@ -97,7 +98,7 @@ def createMakeSkinMaterial(name, materialSettingsHash, obj, ifExists="CREATENEW"
             mat2 = blendMatLoad(path, obj)
             mat2.name = name + ".blendMat"
     else:
-        mat = mhmat.assignAsNodesMaterialForObj(obj)
+        mat = mhmat.assignAsNodesMaterialForObj(scn, obj, True)
         mat.name = name
     return mat
 
