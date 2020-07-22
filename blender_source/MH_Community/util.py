@@ -6,7 +6,7 @@ _startMillis = None
 _lastMillis = None
 
 ENABLE_PROFILING=True
-LEAST_REQUIRED_MAKESKIN_VERSION = 20200116
+LEAST_REQUIRED_MAKESKIN_VERSION = 20200718
 
 def profile(position = "timestamp"):
     global ENABLE_PROFILING
