@@ -323,7 +323,9 @@ class ImportBodyBinary():
             mask.show_in_editmode = True
             mask.show_on_cage = True
 
-        if self.addSimpleMaterials:
+        # since we need groups to color the body materials are only added when groups are created
+        #
+        if self.detailedHelpers and self.addSimpleMaterials:
             bpy.ops.mh_community.add_simple_materials()
 
         self._profile("handleHelpers")
