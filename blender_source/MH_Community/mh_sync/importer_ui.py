@@ -126,7 +126,8 @@ def addImporterSettingsToTab(layout, scn):
     helperBox.label(text="How to handle helpers")
     helperBox.prop(scn, 'MhHandleHelper', text="")
     helperBox.prop(scn, 'MhDetailedHelpers', text="Detailed helper groups")
-    helperBox.prop(scn, 'MhAddSimpleMaterials', text="Simple Materials for Helpers")
+    if scn.MhDetailedHelpers:
+        helperBox.prop(scn, 'MhAddSimpleMaterials', text="Simple Materials for Helpers")
 
     #importHumanBox.separator()
     #importHumanBox.label(text="Body hidden faces:")
