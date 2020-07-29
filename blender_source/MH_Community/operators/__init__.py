@@ -16,6 +16,7 @@ from .poseright import MHC_OT_PoseRightOperator
 from .posesync import MHC_OT_PoseSyncOperator
 from .removefingerrig import MHC_OT_RemoveFingerRigOperator
 from .removeikrig import MHC_OT_RemoveIkRigOperator
+from .rigify import MHC_OT_RigifyOperator
 from .separateeyes import MHC_OT_SeparateEyesOperator
 from .snaponfingerrig import MHC_OT_SnapOnFingerRigOperator
 from .snaponikrig import MHC_OT_SnapOnIkRigOperator
@@ -41,6 +42,7 @@ OPERATOR_CLASSES = (
     MHC_OT_PoseSyncOperator,
     MHC_OT_RemoveFingerRigOperator,
     MHC_OT_RemoveIkRigOperator,
+    MHC_OT_RigifyOperator,
     MHC_OT_SeparateEyesOperator,
     MHC_OT_SnapOnFingerRigOperator,
     MHC_OT_SnapOnIkRigOperator,
@@ -65,6 +67,7 @@ __all__ = [
     'MHC_OT_MeshSyncOperator',
     'MHC_OT_PoseRightOperator',
     'MHC_OT_PoseSyncOperator',
+    'MHC_OT_RigifyOperator',
     'MHC_OT_RemoveFingerRigOperator',
     'MHC_OT_RemoveIkRigOperator',
     'MHC_OT_SeparateEyesOperator',

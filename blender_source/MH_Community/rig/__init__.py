@@ -9,6 +9,7 @@ from .kinect2riginfo import Kinect2RigInfo
 from .bonesurgery import BoneSurgery
 from .ikrig import IkRig
 from .fingerrig import FingerRig
+from .rigifyutils import RigifyUtils
 
 __all__ = [
     RigInfo,

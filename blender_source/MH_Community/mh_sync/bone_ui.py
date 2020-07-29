@@ -17,7 +17,11 @@ def registerBoneConstantsAndSettings():
 
 
 def addBoneUIToTab(layout, scn):
-    layout.label(text="Bone Operations:", icon="ARMATURE_DATA")
+    
+    layout.label(text="Bone Operations:", icon="ARMATURE_DATA")    
+
+    rigifyBox = layout.box()
+    rigifyBox.operator("mh_community.rigify")
 
     armSyncBox = layout.box()
     armSyncBox.label(text="Skeleton Sync:")
