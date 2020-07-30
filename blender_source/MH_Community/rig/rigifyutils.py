@@ -144,7 +144,6 @@ _SIDEDMATCHES["eye.#"]["head"] = "joint-#-eye"
 _SIDEDMATCHES["eye.#"]["tail"] = "joint-#-eye-target"
 
 
-
 _BONEMATCHER = dict()
 
 # Spine
@@ -198,6 +197,37 @@ _BONEMATCHER["breast.R"]["tail"] = 1764
 _BONEMATCHER["breast.L"] = dict()
 _BONEMATCHER["breast.L"]["head"] = 10619
 _BONEMATCHER["breast.L"]["tail"] = 8436
+
+# Lips
+
+_BONEMATCHER["lip.T.R"] = dict()
+_BONEMATCHER["lip.T.R"]["head"] = 467
+_BONEMATCHER["lip.T.R"]["tail"] = 5352
+_BONEMATCHER["lip.T.R.001"] = dict()
+_BONEMATCHER["lip.T.R.001"]["head"] = 5352
+_BONEMATCHER["lip.T.R.001"]["tail"] = 425
+
+_BONEMATCHER["lip.T.L"] = dict()
+_BONEMATCHER["lip.T.L"]["head"] = 467
+_BONEMATCHER["lip.T.L"]["tail"] = 11954
+_BONEMATCHER["lip.T.L.001"] = dict()
+_BONEMATCHER["lip.T.L.001"]["head"] = 11954
+_BONEMATCHER["lip.T.L.001"]["tail"] = 7185
+
+_BONEMATCHER["lip.B.R"] = dict()
+_BONEMATCHER["lip.B.R"]["head"] = 495
+_BONEMATCHER["lip.B.R"]["tail"] = 483
+_BONEMATCHER["lip.B.R.001"] = dict()
+_BONEMATCHER["lip.B.R.001"]["head"] = 483
+_BONEMATCHER["lip.B.R.001"]["tail"] = 425
+
+_BONEMATCHER["lip.B.L"] = dict()
+_BONEMATCHER["lip.B.L"]["head"] = 495
+_BONEMATCHER["lip.B.L"]["tail"] = 7283
+_BONEMATCHER["lip.B.L.001"] = dict()
+_BONEMATCHER["lip.B.L.001"]["head"] = 7238
+_BONEMATCHER["lip.B.L.001"]["tail"] = 7185
+
 
 for side in ['l', 'r']:
     sideUp = side.upper()    
