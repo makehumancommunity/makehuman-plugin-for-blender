@@ -501,6 +501,31 @@ _BONEMATCHER["lid.B.L.003"] = dict()
 _BONEMATCHER["lid.B.L.003"]["head"] = 6833
 _BONEMATCHER["lid.B.L.003"]["tail"] = 6852
 
+# Teeth
+
+_BONEMATCHER["teeth.B"] = dict()
+_BONEMATCHER["teeth.B"]["head"] = 15012
+_BONEMATCHER["teeth.B"]["tail"] = "15044 | 15009"
+
+_BONEMATCHER["teeth.T"] = dict()
+_BONEMATCHER["teeth.T"]["head"] = 15079
+_BONEMATCHER["teeth.T"]["tail"] = "15081 | 15114"
+
+# Tongue
+
+_BONEMATCHER["tongue"] = dict()
+_BONEMATCHER["tongue"]["head"] = "joint-tongue-4"
+_BONEMATCHER["tongue"]["tail"] = "joint-tongue-3"
+
+_BONEMATCHER["tongue.001"] = dict()
+_BONEMATCHER["tongue.001"]["head"] = "joint-tongue-3"
+_BONEMATCHER["tongue.001"]["tail"] = "joint-tongue-2"
+
+_BONEMATCHER["tongue.002"] = dict()
+_BONEMATCHER["tongue.002"]["head"] = "joint-tongue-2"
+_BONEMATCHER["tongue.002"]["tail"] = "joint-tongue-1"
+
+
 for side in ['l', 'r']:
     sideUp = side.upper()    
     for boneNameSided in _SIDEDMATCHES.keys():
@@ -584,7 +609,12 @@ class RigifyUtils:
                 (left, right) = str(matchSub).split("|", 2)
                 left = str(left).strip()
                 right = str(right).strip()
-                position = self._average([self._vgMeans[left], self._vgMeans[right]])        
+                if str(left).isnumeric() and str(right).isnumeric():
+                    leftCo = self._vertCoords[int(left)]
+                    rightCo = self._vertCoords[int(right)]
+                    position = self._average([leftCo, rightCo])
+                else:
+                    position = self._average([self._vgMeans[left], self._vgMeans[right]])        
             else:                    
                 position = self._vgMeans[matchSub]
         return position
