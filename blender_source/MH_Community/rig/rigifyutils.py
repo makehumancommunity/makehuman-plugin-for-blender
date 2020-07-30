@@ -220,6 +220,9 @@ _BONEMATCHER["lip.B.R"]["tail"] = 483
 _BONEMATCHER["lip.B.R.001"] = dict()
 _BONEMATCHER["lip.B.R.001"]["head"] = 483
 _BONEMATCHER["lip.B.R.001"]["tail"] = 425
+_BONEMATCHER["ear.R.001"] = dict()
+_BONEMATCHER["ear.R.001"]["head"] = 467
+_BONEMATCHER["ear.R.001"]["tail"] = 5352
 
 _BONEMATCHER["lip.B.L"] = dict()
 _BONEMATCHER["lip.B.L"]["head"] = 495
@@ -227,6 +230,223 @@ _BONEMATCHER["lip.B.L"]["tail"] = 7283
 _BONEMATCHER["lip.B.L.001"] = dict()
 _BONEMATCHER["lip.B.L.001"]["head"] = 7238
 _BONEMATCHER["lip.B.L.001"]["tail"] = 7185
+
+# Ears
+
+_BONEMATCHER["ear.R"] = dict()
+_BONEMATCHER["ear.R"]["head"] = 5456
+_BONEMATCHER["ear.R"]["tail"] = 5447
+_BONEMATCHER["ear.R.001"] = dict()
+_BONEMATCHER["ear.R.001"]["head"] = 5447
+_BONEMATCHER["ear.R.001"]["tail"] = 5438
+_BONEMATCHER["ear.R.002"] = dict()
+_BONEMATCHER["ear.R.002"]["head"] = 5438
+_BONEMATCHER["ear.R.002"]["tail"] = 5462
+_BONEMATCHER["ear.R.003"] = dict()
+_BONEMATCHER["ear.R.003"]["head"] = 5462
+_BONEMATCHER["ear.R.003"]["tail"] = 5420
+_BONEMATCHER["ear.R.004"] = dict()
+_BONEMATCHER["ear.R.004"]["head"] = 5420
+_BONEMATCHER["ear.R.004"]["tail"] = 5465
+
+_BONEMATCHER["ear.L"] = dict()
+_BONEMATCHER["ear.L"]["head"] = 12064
+_BONEMATCHER["ear.L"]["tail"] = 12055
+_BONEMATCHER["ear.L.001"] = dict()
+_BONEMATCHER["ear.L.001"]["head"] = 12055
+_BONEMATCHER["ear.L.001"]["tail"] = 12046
+_BONEMATCHER["ear.L.002"] = dict()
+_BONEMATCHER["ear.L.002"]["head"] = 12046
+_BONEMATCHER["ear.L.002"]["tail"] = 12037
+_BONEMATCHER["ear.L.003"] = dict()
+_BONEMATCHER["ear.L.003"]["head"] = 12037
+_BONEMATCHER["ear.L.003"]["tail"] = 12061
+_BONEMATCHER["ear.L.004"] = dict()
+_BONEMATCHER["ear.L.004"]["head"] = 12061
+_BONEMATCHER["ear.L.004"]["tail"] = 12019
+
+# Eyebrow right side top/bottom
+
+_BONEMATCHER["brow.T.R"] = dict()
+_BONEMATCHER["brow.T.R"]["head"] = 263
+_BONEMATCHER["brow.T.R"]["tail"] = 254
+_BONEMATCHER["brow.T.R.001"] = dict()
+_BONEMATCHER["brow.T.R.001"]["head"] = 254
+_BONEMATCHER["brow.T.R.001"]["tail"] = 206
+_BONEMATCHER["brow.T.R.002"] = dict()
+_BONEMATCHER["brow.T.R.002"]["head"] = 206
+_BONEMATCHER["brow.T.R.002"]["tail"] = 208
+_BONEMATCHER["brow.T.R.003"] = dict()
+_BONEMATCHER["brow.T.R.003"]["head"] = 208
+_BONEMATCHER["brow.T.R.003"]["tail"] = 132
+
+_BONEMATCHER["brow.B.R"] = dict()
+_BONEMATCHER["brow.B.R"]["head"] = 188
+_BONEMATCHER["brow.B.R"]["tail"] = 160
+_BONEMATCHER["brow.B.R.001"] = dict()
+_BONEMATCHER["brow.B.R.001"]["head"] = 160
+_BONEMATCHER["brow.B.R.001"]["tail"] = 172
+_BONEMATCHER["brow.B.R.002"] = dict()
+_BONEMATCHER["brow.B.R.002"]["head"] = 172
+_BONEMATCHER["brow.B.R.002"]["tail"] = 174
+_BONEMATCHER["brow.B.R.003"] = dict()
+_BONEMATCHER["brow.B.R.003"]["head"] = 174
+_BONEMATCHER["brow.B.R.003"]["tail"] = 166
+
+# Eyebrow left side top/bottom
+
+_BONEMATCHER["brow.T.L"] = dict()
+_BONEMATCHER["brow.T.L"]["head"] = 7032
+_BONEMATCHER["brow.T.L"]["tail"] = 7023
+_BONEMATCHER["brow.T.L.001"] = dict()
+_BONEMATCHER["brow.T.L.001"]["head"] = 7023
+_BONEMATCHER["brow.T.L.001"]["tail"] = 6981
+_BONEMATCHER["brow.T.L.002"] = dict()
+_BONEMATCHER["brow.T.L.002"]["head"] = 6981
+_BONEMATCHER["brow.T.L.002"]["tail"] = 6983
+_BONEMATCHER["brow.T.L.003"] = dict()
+_BONEMATCHER["brow.T.L.003"]["head"] = 6983
+_BONEMATCHER["brow.T.L.003"]["tail"] = 132
+
+_BONEMATCHER["brow.B.L"] = dict()
+_BONEMATCHER["brow.B.L"]["head"] = 6964
+_BONEMATCHER["brow.B.L"]["tail"] = 6938
+_BONEMATCHER["brow.B.L.001"] = dict()
+_BONEMATCHER["brow.B.L.001"]["head"] = 6938
+_BONEMATCHER["brow.B.L.001"]["tail"] = 6948
+_BONEMATCHER["brow.B.L.002"] = dict()
+_BONEMATCHER["brow.B.L.002"]["head"] = 6948
+_BONEMATCHER["brow.B.L.002"]["tail"] = 6950
+_BONEMATCHER["brow.B.L.003"] = dict()
+_BONEMATCHER["brow.B.L.003"]["head"] = 6950
+_BONEMATCHER["brow.B.L.003"]["tail"] = 6943
+
+# Cheek
+
+_BONEMATCHER["cheek.T.R"] = dict()
+_BONEMATCHER["cheek.T.R"]["head"] = 263
+_BONEMATCHER["cheek.T.R"]["tail"] = 5133
+_BONEMATCHER["cheek.T.R.001"] = dict()
+_BONEMATCHER["cheek.T.R.001"]["head"] = 5133
+_BONEMATCHER["cheek.T.R.001"]["tail"] = 5100
+
+_BONEMATCHER["cheek.B.R"] = dict()
+_BONEMATCHER["cheek.B.R"]["head"] = 425
+_BONEMATCHER["cheek.B.R"]["tail"] = 5153
+_BONEMATCHER["cheek.B.R.001"] = dict()
+_BONEMATCHER["cheek.B.R.001"]["head"] = 5153
+_BONEMATCHER["cheek.B.R.001"]["tail"] = 263
+
+_BONEMATCHER["cheek.T.L"] = dict()
+_BONEMATCHER["cheek.T.L"]["head"] = 7032
+_BONEMATCHER["cheek.T.L"]["tail"] = 11748
+_BONEMATCHER["cheek.T.L.001"] = dict()
+_BONEMATCHER["cheek.T.L.001"]["head"] = 11748
+_BONEMATCHER["cheek.T.L.001"]["tail"] = 11715
+
+_BONEMATCHER["cheek.B.L"] = dict()
+_BONEMATCHER["cheek.B.L"]["head"] = 7185
+_BONEMATCHER["cheek.B.L"]["tail"] = 11767
+_BONEMATCHER["cheek.B.L.001"] = dict()
+_BONEMATCHER["cheek.B.L.001"]["head"] = 11767
+_BONEMATCHER["cheek.B.L.001"]["tail"] = 7032
+
+# Nose
+
+_BONEMATCHER["nose"] = dict()
+_BONEMATCHER["nose"]["head"] = 132
+_BONEMATCHER["nose"]["tail"] = 164
+_BONEMATCHER["nose.001"] = dict()
+_BONEMATCHER["nose.001"]["head"] = 164
+_BONEMATCHER["nose.001"]["tail"] = 297
+_BONEMATCHER["nose.002"] = dict()
+_BONEMATCHER["nose.002"]["head"] = 297
+_BONEMATCHER["nose.002"]["tail"] = 312
+_BONEMATCHER["nose.003"] = dict()
+_BONEMATCHER["nose.003"]["head"] = 312
+_BONEMATCHER["nose.003"]["tail"] = 343
+_BONEMATCHER["nose.004"] = dict()
+_BONEMATCHER["nose.004"]["head"] = 343
+_BONEMATCHER["nose.004"]["tail"] = 467
+
+_BONEMATCHER["nose.R"] = dict()
+_BONEMATCHER["nose.R"]["head"] = 5100
+_BONEMATCHER["nose.R"]["tail"] = 337
+_BONEMATCHER["nose.R.001"] = dict()
+_BONEMATCHER["nose.R.001"]["head"] = 337
+_BONEMATCHER["nose.R.001"]["tail"] = 297
+
+_BONEMATCHER["nose.L"] = dict()
+_BONEMATCHER["nose.L"]["head"] = 11715
+_BONEMATCHER["nose.L"]["tail"] = 7099
+_BONEMATCHER["nose.L.001"] = dict()
+_BONEMATCHER["nose.L.001"]["head"] = 7099
+_BONEMATCHER["nose.L.001"]["tail"] = 297
+
+# Chin
+
+_BONEMATCHER["chin"] = dict()
+_BONEMATCHER["chin"]["head"] = 5296
+_BONEMATCHER["chin"]["tail"] = 5162
+_BONEMATCHER["chin.001"] = dict()
+_BONEMATCHER["chin.001"]["head"] = 5162
+_BONEMATCHER["chin.001"]["tail"] = 724 
+
+_BONEMATCHER["chin.R"] = dict()
+_BONEMATCHER["chin.R"]["head"] = 5222
+_BONEMATCHER["chin.R"]["tail"] = 425
+_BONEMATCHER["chin.L"] = dict()
+_BONEMATCHER["chin.L"]["head"] = 11832
+_BONEMATCHER["chin.L"]["tail"] = 7185
+
+# Jaw / temple
+
+_BONEMATCHER["jaw"] = dict()
+_BONEMATCHER["jaw"]["head"] = 783
+_BONEMATCHER["jaw"]["tail"] = 724
+
+_BONEMATCHER["temple.R"] = dict()
+_BONEMATCHER["temple.R"]["head"] = 5562
+_BONEMATCHER["temple.R"]["tail"] = 867
+_BONEMATCHER["jaw.R"] = dict()
+_BONEMATCHER["jaw.R"]["head"] = 867
+_BONEMATCHER["jaw.R"]["tail"] = 739
+_BONEMATCHER["jaw.R.001"] = dict()
+_BONEMATCHER["jaw.R.001"]["head"] = 739
+_BONEMATCHER["jaw.R.001"]["tail"] = 5222
+
+_BONEMATCHER["temple.L"] = dict()
+_BONEMATCHER["temple.L"]["head"] = 12159
+_BONEMATCHER["temple.L"]["tail"] = 7572
+_BONEMATCHER["jaw.L"] = dict()
+_BONEMATCHER["jaw.L"]["head"] = 7572
+_BONEMATCHER["jaw.L"]["tail"] = 7459
+_BONEMATCHER["jaw.L.001"] = dict()
+_BONEMATCHER["jaw.L.001"]["head"] = 7459
+_BONEMATCHER["jaw.L.001"]["tail"] = 11832
+
+# Forehead
+
+_BONEMATCHER["forehead.R"] = dict()
+_BONEMATCHER["forehead.R"]["head"] = 245
+_BONEMATCHER["forehead.R"]["tail"] = 208
+_BONEMATCHER["forehead.R.001"] = dict()
+_BONEMATCHER["forehead.R.001"]["head"] = 240
+_BONEMATCHER["forehead.R.001"]["tail"] = 206
+_BONEMATCHER["forehead.R.002"] = dict()
+_BONEMATCHER["forehead.R.002"]["head"] = 248
+_BONEMATCHER["forehead.R.002"]["tail"] = 254
+
+_BONEMATCHER["forehead.L"] = dict()
+_BONEMATCHER["forehead.L"]["head"] = 7015
+_BONEMATCHER["forehead.L"]["tail"] = 6983
+_BONEMATCHER["forehead.L.001"] = dict()
+_BONEMATCHER["forehead.L.001"]["head"] = 7011
+_BONEMATCHER["forehead.L.001"]["tail"] = 6981
+_BONEMATCHER["forehead.L.002"] = dict()
+_BONEMATCHER["forehead.L.002"]["head"] = 7018
+_BONEMATCHER["forehead.L.002"]["tail"] = 7023
+
 
 
 for side in ['l', 'r']:
