@@ -1,4 +1,4 @@
-import bpy
+import bpy, bmesh
 from ..util import bl28
 from pprint import pprint
 
@@ -642,4 +642,50 @@ class RigifyUtils:
         self._createRig()
         self._moveBonePositions()
         pprint(_BONEMATCHER)
+        
+    def generateFinalRig(self, deleteMetaRig=True):
+        bpy.ops.pose.rigify_generate()
+        self._finalRig = bpy.context.object
+        if deleteMetaRig:
+            objRef = bpy.data.objects[self._rig.name]
+            bpy.data.objects.remove(objRef, do_unlink=True)
+            
+    
+    def removeHelpersAndCubes(self):
+        
+        helperIdx = None
+        cubeIdx = None
+        
+        for vg in self._obj.vertex_groups:
+            if vg.name.lower() == "jointcubes":
+                cubeIdx = vg.index
+            if vg.name.lower() == "helpergeometry":
+                helperIdx = vg.index
+        
+        print("jointcubes " + str(cubeIdx))
+        print("helpers " + str(helperIdx))
+                
+        bpy.context.view_layer.objects.active = self._obj
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_mode(type="VERT")
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        for vert in self._obj.data.vertices:            
+            print("\n")
+            print(vert.index)
+            for group in vert.groups:                
+                if int(group.group) == int(helperIdx) or int(group.group) == int(cubeIdx):            
+                    vert.select = True
+            
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.delete(type='VERT')
+        bpy.ops.object.mode_set(mode='OBJECT')
+                    
+    def parentWithWeights(self):
+        self._obj.select_set(True)
+        self._finalRig.select_set(True)
+        bpy.context.view_layer.objects.active = self._finalRig
+        bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+        self._finalRig.show_in_front = True
         

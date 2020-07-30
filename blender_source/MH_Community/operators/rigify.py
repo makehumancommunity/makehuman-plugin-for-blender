@@ -39,4 +39,7 @@ class MHC_OT_RigifyOperator(bpy.types.Operator):
             self.report({'ERROR'}, "Mesh must have been imported with \"detailed helpers\" enabled")
             return {'FINISHED'}
         ru.createMetaRig()
+        ru.generateFinalRig()
+        ru.removeHelpersAndCubes()
+        ru.parentWithWeights()
         return {'FINISHED'}
