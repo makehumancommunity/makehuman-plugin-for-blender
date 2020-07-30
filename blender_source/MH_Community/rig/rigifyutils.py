@@ -447,7 +447,59 @@ _BONEMATCHER["forehead.L.002"] = dict()
 _BONEMATCHER["forehead.L.002"]["head"] = 7018
 _BONEMATCHER["forehead.L.002"]["tail"] = 7023
 
+# Eyelids
 
+_BONEMATCHER["lid.T.R"] = dict()
+_BONEMATCHER["lid.T.R"]["head"] = 68
+_BONEMATCHER["lid.T.R"]["tail"] = 58
+_BONEMATCHER["lid.T.R.001"] = dict()
+_BONEMATCHER["lid.T.R.001"]["head"] = 58 
+_BONEMATCHER["lid.T.R.001"]["tail"] = 3
+_BONEMATCHER["lid.T.R.002"] = dict()
+_BONEMATCHER["lid.T.R.002"]["head"] = 3
+_BONEMATCHER["lid.T.R.002"]["tail"] = 10
+_BONEMATCHER["lid.T.R.003"] = dict()
+_BONEMATCHER["lid.T.R.003"]["head"] = 10
+_BONEMATCHER["lid.T.R.003"]["tail"] = 85
+
+_BONEMATCHER["lid.B.R"] = dict()
+_BONEMATCHER["lid.B.R"]["head"] = 85
+_BONEMATCHER["lid.B.R"]["tail"] = 34
+_BONEMATCHER["lid.B.R.001"] = dict()
+_BONEMATCHER["lid.B.R.001"]["head"] = 34 
+_BONEMATCHER["lid.B.R.001"]["tail"] = 43
+_BONEMATCHER["lid.B.R.002"] = dict()
+_BONEMATCHER["lid.B.R.002"]["head"] = 43
+_BONEMATCHER["lid.B.R.002"]["tail"] = 49
+_BONEMATCHER["lid.B.R.003"] = dict()
+_BONEMATCHER["lid.B.R.003"]["head"] = 49
+_BONEMATCHER["lid.B.R.003"]["tail"] = 68
+
+_BONEMATCHER["lid.T.L"] = dict()
+_BONEMATCHER["lid.T.L"]["head"] = 6852
+_BONEMATCHER["lid.T.L"]["tail"] = 6842
+_BONEMATCHER["lid.T.L.001"] = dict()
+_BONEMATCHER["lid.T.L.001"]["head"] = 6842
+_BONEMATCHER["lid.T.L.001"]["tail"] = 6787
+_BONEMATCHER["lid.T.L.002"] = dict()
+_BONEMATCHER["lid.T.L.002"]["head"] = 6787
+_BONEMATCHER["lid.T.L.002"]["tail"] = 6794
+_BONEMATCHER["lid.T.L.003"] = dict()
+_BONEMATCHER["lid.T.L.003"]["head"] = 6794
+_BONEMATCHER["lid.T.L.003"]["tail"] = 6869
+
+_BONEMATCHER["lid.B.L"] = dict()
+_BONEMATCHER["lid.B.L"]["head"] = 6869
+_BONEMATCHER["lid.B.L"]["tail"] = 6818
+_BONEMATCHER["lid.B.L.001"] = dict()
+_BONEMATCHER["lid.B.L.001"]["head"] = 6818
+_BONEMATCHER["lid.B.L.001"]["tail"] = 6827
+_BONEMATCHER["lid.B.L.002"] = dict()
+_BONEMATCHER["lid.B.L.002"]["head"] = 6827
+_BONEMATCHER["lid.B.L.002"]["tail"] = 6833
+_BONEMATCHER["lid.B.L.003"] = dict()
+_BONEMATCHER["lid.B.L.003"]["head"] = 6833
+_BONEMATCHER["lid.B.L.003"]["tail"] = 6852
 
 for side in ['l', 'r']:
     sideUp = side.upper()    
