@@ -55,11 +55,15 @@ class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
             bpy.ops.mesh.select_all(action='DESELECT')
             for group in groups:
                 vgIdx = obj.vertex_groups.find(group)
-                obj.vertex_groups.active_index = vgIdx
-                bpy.ops.object.vertex_group_select()
+                if vgIdx >= 0:
+                    obj.vertex_groups.active_index = vgIdx
+                    bpy.ops.object.vertex_group_select()
             mslotIdx = obj.material_slots.find(name)
-            obj.active_material_index = mslotIdx
-            bpy.ops.object.material_slot_assign()
+            if mslotIdx >= 0:
+                obj.active_material_index = mslotIdx
+                bpy.ops.object.material_slot_assign()
+            else:
+                print ("No group " + name)
 
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode='OBJECT')
