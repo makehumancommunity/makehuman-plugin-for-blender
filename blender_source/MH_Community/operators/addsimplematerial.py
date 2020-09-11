@@ -85,8 +85,13 @@ def clearMaterialSlots(obj):
         bpy.ops.object.material_slot_remove()
 
 def createMaterial(name: str, color=(0.0, 0.0, 0.0, 1.0)):
-    material = bpy.data.materials.new(name)
-    material.diffuse_color = color
+    if not name in bpy.data.materials:
+        material = bpy.data.materials.new(name)
+        material.diffuse_color = color
+    else:
+        material = bpy.data.materials.get(name)
+        if DEBUG_MODE:
+            print(f'Material already exists {name}')
     return material
 
 def addMaterial(obj, name: str, color=(0.0, 0.0, 0.0, 1.0)):
