@@ -3,6 +3,8 @@
 
 import bpy
 
+DEBUG_MODE = True
+
 HELPER_GROUPS = {'Body': ['body'],
                  'Tongue': ['helper-tongue'],
                  'Joints': ['JointCubes'],
@@ -46,6 +48,9 @@ class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
     def execute(self, context):
         obj = context.object
 
+        if DEBUG_MODE:
+            print('\n\n+++ Adding simple materials to helper vertex groups +++\n')
+
         clearMaterialSlots(obj)
 
         bpy.ops.object.mode_set(mode='EDIT')
@@ -58,15 +63,19 @@ class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
                 if vgIdx >= 0:
                     obj.vertex_groups.active_index = vgIdx
                     bpy.ops.object.vertex_group_select()
+                else:
+                    if DEBUG_MODE:
+                        print(f'Missing vertex group: {group}')
             mslotIdx = obj.material_slots.find(name)
             if mslotIdx >= 0:
                 obj.active_material_index = mslotIdx
                 bpy.ops.object.material_slot_assign()
-            else:
-                print ("No group " + name)
 
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode='OBJECT')
+
+        if DEBUG_MODE:
+            print('\n+++ {FINISHED} +++\n\n')
 
         return {'FINISHED'}
 
