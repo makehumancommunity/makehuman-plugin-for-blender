@@ -49,6 +49,7 @@ class ImportBodyBinary():
         self.importWhat = str(bpy.context.scene.MhImportWhat)
         self.helpers = str(bpy.context.scene.MhHandleHelper)
         self.subdiv = bpy.context.scene.MhAddSubdiv
+        self.subdivLevels = bpy.context.scene.MhSubdivLevels
         self.matobjname = bpy.context.scene.MhMaterialObjectName
         self.importRig = bpy.context.scene.MhImportRig
         self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
@@ -639,12 +640,12 @@ class ImportBodyBinary():
         if self.subdiv:
             print("Adding subdiv")
             subdiv = self.obj.modifiers.new("Subdivision", 'SUBSURF')
-            subdiv.levels = 0
-            subdiv.render_levels = 2
+            subdiv.levels = self.subdivLevels
+            subdiv.render_levels = self.subdivLevels
             for proxy in self.importedProxies:
                 subdiv = proxy.obj.modifiers.new("Subdivision", 'SUBSURF')
-                subdiv.levels = 0
-                subdiv.render_levels = 2
+                subdiv.levels = self.subdivLevels
+                subdiv.render_levels = self.subdivLevels
 
         print("DONE!")
 

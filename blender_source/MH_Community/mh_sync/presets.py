@@ -13,6 +13,7 @@ _defaultSettings["MhImportWhat"] = "EVERYTHING"
 _defaultSettings["MhPrefixProxy"] = True
 _defaultSettings["MhMaskBase"] = True
 _defaultSettings["MhAddSubdiv"] = True
+_defaultSettings["MhSubdivLevels"] = 1
 _defaultSettings["MhHandleMaterials"] = "REUSE"
 _defaultSettings["MhMaterialObjectName"] = True
 _defaultSettings["MhPrefixMaterial"] = True
@@ -70,6 +71,7 @@ def getCleanMakeTargetSettings():
     mt = _getCleanMcMtSettings()
     mt["MhMaskBase"] = False
     mt["MhAddSubdiv"] = False
+    mt["MhSubdivLevels"] = 0
     mt["MhHiddenFaces"] = "NOTHING"
     mt["MhImportRig"] = False
     mt["MhRigBody"] = False

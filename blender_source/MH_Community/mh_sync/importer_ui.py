@@ -57,6 +57,7 @@ def registerImporterConstantsAndSettings():
     bpy.types.Scene.MhPrefixProxy = BoolProperty(name="Prefix proxy names", description="Give all extra meshes (such as hair, clothes..) names that start with the name of the imported toon", default=settings["MhPrefixProxy"])
     bpy.types.Scene.MhMaskBase = BoolProperty(name="Mask base mesh if proxy available", description="If both the base mesh and a body proxy have been imported, then mask the base mesh.", default=settings["MhMaskBase"])
     bpy.types.Scene.MhAddSubdiv = BoolProperty(name="Add a subdivision", description="Add subdivision modifiers to all imported meshes", default=settings["MhAddSubdiv"])
+    bpy.types.Scene.MhSubdivLevels = IntProperty(name="Number of subdivision levels", description="Set number of subdivision levels in view port and render", default=settings["MhSubdivLevels"], min=0, max=6)
 
     bpy.types.Scene.MhHandleMaterials = bpy.props.EnumProperty(items=handleMaterialsItems, name="When material exists", description="What to do if a material with the same name already exists", default=settings["MhHandleMaterials"])
     bpy.types.Scene.MhMaterialObjectName = BoolProperty(name="Name material after object", description="When creating a material, give it a name based on what mesh object it belongs to.", default=settings["MhMaterialObjectName"])
@@ -120,6 +121,7 @@ def addImporterSettingsToTab(layout, scn):
     meshBox.prop(scn, 'MhPrefixProxy', text="Prefix object name with toon")
     meshBox.prop(scn, 'MhMaskBase', text="Mask body when there is a proxy")
     meshBox.prop(scn, 'MhAddSubdiv', text="Add subdiv modifier")
+    meshBox.prop(scn, 'MhSubdivLevels', text="Subdiv levels")
 
     helperBox = layout.box()
     helperBox.label(text="Helper settings", icon="VPAINT_HLT")
