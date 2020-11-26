@@ -51,6 +51,7 @@ class ImportBodyBinary():
         self.importWhat = str(bpy.context.scene.MhImportWhat)
         self.helpers = str(bpy.context.scene.MhHandleHelper)
         self.subdiv = bpy.context.scene.MhAddSubdiv
+        self.subdivLevels = bpy.context.scene.MhSubdivLevels
         self.matobjname = bpy.context.scene.MhMaterialObjectName
         self.importRig = bpy.context.scene.MhImportRig
         self.detailedHelpers = bpy.context.scene.MhDetailedHelpers
@@ -274,21 +275,26 @@ class ImportBodyBinary():
 
 
         if self.helpers == "DELETE":
-            if len(self.all_joint_verts) > 0:
-                # TODO: delete vertices
-                pass
-            if len(self.all_helper_verts) > 0:
-                # TODO: delete vertices
-                pass
+            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+            for vert in self.obj.data.vertices:
+                if vert.index in self.all_joint_verts:
+                    vert.select = True
+                if vert.index in self.all_helper_verts:
+                    vert.select = True
+
+            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+            bpy.ops.mesh.delete(type='VERT')
+            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
         else:
             vgroup = self.obj.vertex_groups.new(name="HelperGeometry")
             vgroup.add(self.all_helper_verts, 1.0, 'ADD')
             vgroup = self.obj.vertex_groups.new(name="JointCubes")
             vgroup.add(self.all_joint_verts, 1.0, 'ADD')
 
-
         if self.detailedHelpers:
-            print("IS MAKECLOTHES")
 
             for i in range(len(self.vertPosCache)):
                 vert = self.vertPosCache[i]
@@ -301,7 +307,6 @@ class ImportBodyBinary():
                         self.right_verts.append(i)
                     if x > 0.0:
                         self.left_verts.append(i)
-
 
             if len(self.right_verts) > 0:
                 vgroup = self.obj.vertex_groups.new(name="Right")
@@ -321,7 +326,9 @@ class ImportBodyBinary():
             mask.show_in_editmode = True
             mask.show_on_cage = True
 
-        if self.addSimpleMaterials:
+        # since we need groups to color the body materials are only added when groups are created
+        #
+        if self.detailedHelpers and self.addSimpleMaterials:
             bpy.ops.mh_community.add_simple_materials()
 
         self._profile("handleHelpers")
@@ -654,12 +661,12 @@ class ImportBodyBinary():
         if self.subdiv:
             print("Adding subdiv")
             subdiv = self.obj.modifiers.new("Subdivision", 'SUBSURF')
-            subdiv.levels = 0
-            subdiv.render_levels = 2
+            subdiv.levels = self.subdivLevels
+            subdiv.render_levels = self.subdivLevels
             for proxy in self.importedProxies:
                 subdiv = proxy.obj.modifiers.new("Subdivision", 'SUBSURF')
-                subdiv.levels = 0
-                subdiv.render_levels = 2
+                subdiv.levels = self.subdivLevels
+                subdiv.render_levels = self.subdivLevels
 
         print("DONE!")
 

@@ -3,11 +3,14 @@
 
 import bpy
 
+DEBUG_MODE = True
+
 HELPER_GROUPS = {'Body': ['body'],
                  'Tongue': ['helper-tongue'],
                  'Joints': ['JointCubes'],
                  'Eyes': ['helper-l-eye', 'helper-r-eye'],
-                 'Eyelashes': ['helper-l-eyelashes', 'helper-r-eyelashes'],
+                 'Eyelashes': ['helper-l-eyelashes-1', 'helper-l-eyelashes-2',
+                               'helper-r-eyelashes-1', 'helper-r-eyelashes-2'],
                  'Teeth': ['helper-upper-teeth','helper-lower-teeth'],
                  'Genitals': ['helper-genital'],
                  'Tights': ['helper-tights'],
@@ -46,6 +49,9 @@ class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
     def execute(self, context):
         obj = context.object
 
+        if DEBUG_MODE:
+            print('\n\n+++ Adding simple materials to helper vertex groups +++\n')
+
         clearMaterialSlots(obj)
 
         bpy.ops.object.mode_set(mode='EDIT')
@@ -55,14 +61,22 @@ class MHC_OT_AddSimpleMaterials(bpy.types.Operator):
             bpy.ops.mesh.select_all(action='DESELECT')
             for group in groups:
                 vgIdx = obj.vertex_groups.find(group)
-                obj.vertex_groups.active_index = vgIdx
-                bpy.ops.object.vertex_group_select()
+                if vgIdx >= 0:
+                    obj.vertex_groups.active_index = vgIdx
+                    bpy.ops.object.vertex_group_select()
+                else:
+                    if DEBUG_MODE:
+                        print(f'Missing vertex group: {group}')
             mslotIdx = obj.material_slots.find(name)
-            obj.active_material_index = mslotIdx
-            bpy.ops.object.material_slot_assign()
+            if mslotIdx >= 0:
+                obj.active_material_index = mslotIdx
+                bpy.ops.object.material_slot_assign()
 
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode='OBJECT')
+
+        if DEBUG_MODE:
+            print('\n+++ {FINISHED} +++\n\n')
 
         return {'FINISHED'}
 
@@ -72,8 +86,13 @@ def clearMaterialSlots(obj):
         bpy.ops.object.material_slot_remove()
 
 def createMaterial(name: str, color=(0.0, 0.0, 0.0, 1.0)):
-    material = bpy.data.materials.new(name)
-    material.diffuse_color = color
+    if not name in bpy.data.materials:
+        material = bpy.data.materials.new(name)
+        material.diffuse_color = color
+    else:
+        material = bpy.data.materials.get(name)
+        if DEBUG_MODE:
+            print(f'Material already exists {name}')
     return material
 
 def addMaterial(obj, name: str, color=(0.0, 0.0, 0.0, 1.0)):
