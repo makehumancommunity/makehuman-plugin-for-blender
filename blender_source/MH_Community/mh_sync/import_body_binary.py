@@ -23,7 +23,7 @@ from .import_proxy_binary import ImportProxyBinary
 from .import_weighting import ImportWeighting
 from ..util import *
 from .meshutils import *
-from ..extra_groups import vgroupInfo, vgroupOverrides
+from ..extra_groups import vgroupInfo
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -383,14 +383,26 @@ class ImportBodyBinary():
                 newvg.add(verts, 1.0, 'ADD')
 
     def vgroupMaterials(self, mat):
+        
+        overridesDir = os.path.join(os.path.dirname(__file__),"..","data","nodes","skinOverridePresets")
+        overrideName = "default";
+        overrideFile = os.path.join(overridesDir, overrideName + ".json")
+        
+        with open(overrideFile,"r") as f:
+            vgroupOverrides = json.load(f)
+        
         vgi = vgroupInfo["basemesh"]
         self._deselectAll()
         activateObject(self.obj)
 
-        print("\n\n\nVGROUPMATERIALS")
-        for key in vgi:
+        #print("\n\n\nVGROUPMATERIALS\n")    
+        #print("Overrides:")
+        #pprint.pprint(vgroupOverrides)
+        #print("vgi:")
+        #pprint.pprint(vgi.keys())
+        
+        for key in vgi:            
             matname = key
-            verts = vgi[key]
 
             if self.prefixMaterial:
                 matname = self.name + "." + matname
@@ -408,8 +420,7 @@ class ImportBodyBinary():
             bpy.ops.object.vertex_group_select()
             bpy.ops.object.material_slot_assign()
             bpy.ops.object.editmode_toggle()
-
-            overrides = vgroupOverrides[key]
+            
 
             tree = newMat.node_tree
             nodes = tree.nodes
@@ -418,14 +429,13 @@ class ImportBodyBinary():
 
             for node in nodes:
                 if isinstance(node, ShaderNodeGroup):
-                    grp = node
+                    grp = node                        
 
-            if grp:
-                for setting in overrides.keys():
+            if grp and key in vgroupOverrides:
+                overrides = vgroupOverrides[key]                
+                for setting in overrides.keys():                    
                     if setting in grp.inputs:
                         grp.inputs[setting].default_value = overrides[setting]
-
-        print("\n\n\n////VGROUPMATERIALS")
 
 
     def afterMeshData(self):
