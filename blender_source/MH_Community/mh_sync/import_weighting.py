@@ -22,15 +22,15 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class ImportWeighting():
 
-    def __init__(self, objectToWorkWith, skeletonObject=None, onFinished=None):
-
-        profile("start weighting")
+    def __init__(self, objectToWorkWith, skeletonObject=None, onFinished=None):        
 
         self.myObject = objectToWorkWith
         self.skeletonObj = skeletonObject
         self.onFinished = onFinished
         self.processedVertices = 0
         self.debug = False
+        
+        if self.debug: profile("start weighting")
 
         self.isBaseMesh = (self.myObject.MhObjectType == "Basemesh")
 
@@ -48,7 +48,7 @@ class ImportWeighting():
 
 
     def gotWeightInfo(self, data):
-        profile("gotWeightInfo")
+        if self.debug: profile("gotWeightInfo")
 
         #pp.pprint(data)
         assert(not data is None)
@@ -63,7 +63,7 @@ class ImportWeighting():
 
     def gotVertListData(self, data):
 
-        profile("gotVertListData")
+        if self.debug: profile("gotVertListData")
 
         if self.debug:
             print("vert list: " + str(len(data)) + " bytes")
@@ -75,7 +75,7 @@ class ImportWeighting():
 
     def gotWeightsData(self, data):
 
-        profile("gotWeightsData")
+        if self.debug: profile("gotWeightsData")
 
         if self.debug:
             print("weight data: " + str(len(data)) + " bytes")
@@ -83,7 +83,7 @@ class ImportWeighting():
         for info in self.weights:
             self.handleWeight(info)
 
-        profile("weightsHandled")
+        if self.debug: profile("weightsHandled")
         self.finalize()
 
     def handleWeight(self, info):

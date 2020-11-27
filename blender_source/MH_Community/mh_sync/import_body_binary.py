@@ -27,7 +27,7 @@ from ..extra_groups import vgroupInfo, noMatGroups
 
 pp = pprint.PrettyPrinter(indent=4)
 
-ENABLE_PROFILING_OUTPUT = True
+ENABLE_PROFILING_OUTPUT = False
 
 class ImportBodyBinary():
 

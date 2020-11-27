@@ -8,6 +8,8 @@ import json
 from ..util import *
 import pprint
 
+DEBUG = False
+
 def _createMHImageTextureNode(nodes, imagePathAbsolute, color_space='sRGB'):
     fn = os.path.basename(imagePathAbsolute)
     if fn in bpy.data.images:
@@ -171,7 +173,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
         nodeDef = defaultMaterial["nodes"][nodeName]
         usedNodes = nodes
         if nodeDef["create"]:
-            print("Will create node " + nodeName + " with type " + nodeDef["type"])
+            if DEBUG: print("Will create node " + nodeName + " with type " + nodeDef["type"])
             if nodeDef["group"]:
                 groupName = nodeDef["group"]
                 if defaultMaterial["groups"][groupName]["create"]:
@@ -185,7 +187,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
 
             for propertyName in nodeDef["values"].keys():
                 value = nodeDef["values"][propertyName]
-                print("Will attempt to set " + nodeName + "[" + propertyName + "] to " + str(value))
+                if DEBUG: print("Will attempt to set " + nodeName + "[" + propertyName + "] to " + str(value))
                 nodeDef["object"].inputs[propertyName].default_value = value
 
             if nodeDef["type"] == "ShaderNodeMath":
@@ -223,7 +225,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
                 inputNode = inputNodeDef["object"]
                 outputSocket = connection["outputSocket"]
                 inputSocket = connection["inputSocket"]
-                print("Will attempt to link " + connection["outputNode"] + "[" + str(outputSocket) + "] to " + connection["inputNode"] + "[" + str(inputSocket) + "]")
+                if DEBUG: print("Will attempt to link " + connection["outputNode"] + "[" + str(outputSocket) + "] to " + connection["inputNode"] + "[" + str(inputSocket) + "]")
 
                 usedLinks.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
         else:
@@ -247,7 +249,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
             if inputNode and outputNode:
                 outputSocket = connection["outputSocket"]
                 inputSocket = connection["inputSocket"]
-                print("Will attempt to link " + connection["outputNode"] + "[" + str(outputSocket) + "] to " + connection["inputNode"] + "[" + str(inputSocket) + "]")
+                if DEBUG: print("Will attempt to link " + connection["outputNode"] + "[" + str(outputSocket) + "] to " + connection["inputNode"] + "[" + str(inputSocket) + "]")
                 # We won't support groups inside groups, so always assume this is top level
                 links.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
 
