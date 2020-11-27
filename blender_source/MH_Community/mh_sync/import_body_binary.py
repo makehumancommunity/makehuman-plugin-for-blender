@@ -23,7 +23,7 @@ from .import_proxy_binary import ImportProxyBinary
 from .import_weighting import ImportWeighting
 from ..util import *
 from .meshutils import *
-from ..extra_groups import vgroupInfo
+from ..extra_groups import vgroupInfo, noMatGroups
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -66,6 +66,7 @@ class ImportBodyBinary():
         self.enhancedSSS = bpy.context.scene.MhEnhancedSSS
         self.extraGroups = bpy.context.scene.MhExtraGroups
         self.extraSlots = bpy.context.scene.MhExtraSlots
+        self.tweakSlots = bpy.context.scene.MhTweakSlots
 
         self.baseColor = (1.0, 0.7, 0.7)
 
@@ -384,14 +385,23 @@ class ImportBodyBinary():
 
     def vgroupMaterials(self, mat):
         
-        overridesDir = os.path.join(os.path.dirname(__file__),"..","data","nodes","skinOverridePresets")
-        overrideName = "default";
-        overrideFile = os.path.join(overridesDir, overrideName + ".json")
+        vgroupOverrides = dict();
         
-        with open(overrideFile,"r") as f:
-            vgroupOverrides = json.load(f)
+        if self.tweakSlots != "NONE":
+            overrideName = "default";
+            if self.tweakSlots == "PALE": overrideName="pale"
+            if self.tweakSlots == "TAN": overrideName="tan"
+            if self.tweakSlots == "ASIAN": overrideName="asian"
+            
+            overridesDir = os.path.join(os.path.dirname(__file__),"..","data","nodes","skinOverridePresets")            
+            overrideFile = os.path.join(overridesDir, overrideName + ".json")
+            
+            with open(overrideFile,"r") as f:
+                vgroupOverrides = json.load(f)
         
-        vgi = vgroupInfo["basemesh"]
+        vgi = dict(vgroupInfo["basemesh"])
+        vgi["body"] = []
+        
         self._deselectAll()
         activateObject(self.obj)
 
@@ -401,41 +411,43 @@ class ImportBodyBinary():
         #print("vgi:")
         #pprint.pprint(vgi.keys())
         
-        for key in vgi:            
-            matname = key
+        for key in vgi:
 
-            if self.prefixMaterial:
-                matname = self.name + "." + matname
-
-            newMat = mat.copy()
-            newMat.name = matname
-            self.obj.data.materials.append(newMat)
-
-            matidx = self.obj.material_slots.find(matname)
-            bpy.context.object.active_material_index = matidx
-
-            bpy.ops.object.vertex_group_set_active(group=key)
-            bpy.ops.object.editmode_toggle()
-            bpy.ops.mesh.select_all(action='DESELECT')
-            bpy.ops.object.vertex_group_select()
-            bpy.ops.object.material_slot_assign()
-            bpy.ops.object.editmode_toggle()
-            
-
-            tree = newMat.node_tree
-            nodes = tree.nodes
-
-            grp = None
-
-            for node in nodes:
-                if isinstance(node, ShaderNodeGroup):
-                    grp = node                        
-
-            if grp and key in vgroupOverrides:
-                overrides = vgroupOverrides[key]                
-                for setting in overrides.keys():                    
-                    if setting in grp.inputs:
-                        grp.inputs[setting].default_value = overrides[setting]
+            if not key in noMatGroups:            
+                matname = key
+    
+                if self.prefixMaterial:
+                    matname = self.name + "." + matname
+    
+                newMat = mat.copy()
+                newMat.name = matname
+                
+                self.obj.data.materials.append(newMat)
+    
+                matidx = self.obj.material_slots.find(matname)
+                bpy.context.object.active_material_index = matidx
+    
+                bpy.ops.object.vertex_group_set_active(group=key)
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.mesh.select_all(action='DESELECT')
+                bpy.ops.object.vertex_group_select()
+                bpy.ops.object.material_slot_assign()
+                bpy.ops.object.editmode_toggle()
+                
+                tree = newMat.node_tree
+                nodes = tree.nodes
+    
+                grp = None
+    
+                for node in nodes:
+                    if isinstance(node, ShaderNodeGroup):
+                        grp = node                        
+    
+                if grp and key in vgroupOverrides:
+                    overrides = vgroupOverrides[key]                
+                    for setting in overrides.keys():                    
+                        if setting in grp.inputs:
+                            grp.inputs[setting].default_value = overrides[setting]
 
 
     def afterMeshData(self):

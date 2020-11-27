@@ -12,7 +12,7 @@ import pprint
 import struct
 import time
 import itertools
-from ..extra_groups import vgroupInfo
+from ..extra_groups import vgroupInfo, noMatGroups
 
 from .material import *
 from .fetch_server_data import FetchServerData
@@ -329,27 +329,28 @@ class ImportProxyBinary():
         activateObject(self.obj)
 
         for key in vgi:
-            matname = key
-
-            if self.prefixMaterial:
-                matname = self.humanName + "." + matname
-
-            newMat = bpy.data.materials.get(matname)
-
-            if not newMat:
-                newMat = mat.copy()
-                newMat.name = matname
-            self.obj.data.materials.append(newMat)
-
-            matidx = self.obj.material_slots.find(matname)
-            bpy.context.object.active_material_index = matidx
-
-            bpy.ops.object.vertex_group_set_active(group=key)
-            bpy.ops.object.editmode_toggle()
-            bpy.ops.mesh.select_all(action='DESELECT')
-            bpy.ops.object.vertex_group_select()
-            bpy.ops.object.material_slot_assign()
-            bpy.ops.object.editmode_toggle()
+            if not key in noMatGroups:
+                matname = key
+    
+                if self.prefixMaterial:
+                    matname = self.humanName + "." + matname
+    
+                newMat = bpy.data.materials.get(matname)
+    
+                if not newMat:
+                    newMat = mat.copy()
+                    newMat.name = matname
+                self.obj.data.materials.append(newMat)
+    
+                matidx = self.obj.material_slots.find(matname)
+                bpy.context.object.active_material_index = matidx
+    
+                bpy.ops.object.vertex_group_set_active(group=key)
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.mesh.select_all(action='DESELECT')
+                bpy.ops.object.vertex_group_select()
+                bpy.ops.object.material_slot_assign()
+                bpy.ops.object.editmode_toggle()
 
     def afterMeshData(self):
 

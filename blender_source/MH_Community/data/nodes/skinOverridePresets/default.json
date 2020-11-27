@@ -1,35 +1,41 @@
 {
 	"body": {
-		"Roughness": 0.45
-	},
-	"scalp": {
-		"Roughness": 0.45
+		"Roughness": 0.45,
+		"colorMixInStrength": 0.0
 	},
 	"ears": {
-		"Roughness": 0.45
+		"Roughness": 0.45,
+		"colorMixInStrength": 0.0
 	},
 	"nipple": {
 		"Roughness": 0.45,
 		"Pore scale": 1500,
-		"Pore distortion": 0.5
+		"Pore distortion": 0.5,
+		"colorMixInStrength": 0.0
 	},
 	"lips": {
 		"Roughness": 0.3,
 		"Pore scale": 500,
 		"Pore strength": 0.15,
-		"Pore detail": 1.0
+		"Pore detail": 1.0,
+		"colorMixInStrength": 0.0
 	},
 	"fingernails": {
+		"colorMixIn": [1.0, 1.0, 1.0, 1.0],
+		"colorMixInStrength": 0.2,
 		"Roughness": 0.2,
 		"Pore strength": 0.05
 	},
 	"toenails": {
+		"colorMixIn": [1.0, 1.0, 1.0, 1.0],
+		"colorMixInStrength": 0.2,
 		"Roughness": 0.2,
 		"Pore strength": 0.05
 	},
 	"genitals": {
 		"Roughness": 0.2,
 		"Pore scale": 1000,
-		"Pore strength": 0.1		
+		"Pore strength": 0.1,
+		"colorMixInStrength": 0.0	
 	}
 }

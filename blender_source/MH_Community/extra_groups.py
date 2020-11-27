@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+noMatGroups = ["nippleTip", "scalp"]
+
 vgroupInfo = dict()
 
 # Base mesh

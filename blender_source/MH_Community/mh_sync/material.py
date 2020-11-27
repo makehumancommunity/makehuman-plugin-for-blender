@@ -224,8 +224,7 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
                 outputSocket = connection["outputSocket"]
                 inputSocket = connection["inputSocket"]
                 print("Will attempt to link " + connection["outputNode"] + "[" + str(outputSocket) + "] to " + connection["inputNode"] + "[" + str(inputSocket) + "]")
-                print(outputNode.outputs[outputSocket])
-                print(inputNode.inputs[inputSocket])
+
                 usedLinks.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
         else:
             # either side or both is probably a group
@@ -249,8 +248,6 @@ def createMHMaterial2(name, materialSettingsHash, baseColor=(0.8, 0.8, 0.8, 1.0)
                 outputSocket = connection["outputSocket"]
                 inputSocket = connection["inputSocket"]
                 print("Will attempt to link " + connection["outputNode"] + "[" + str(outputSocket) + "] to " + connection["inputNode"] + "[" + str(inputSocket) + "]")
-                print(outputNode.outputs[outputSocket])
-                print(inputNode.inputs[inputSocket])
                 # We won't support groups inside groups, so always assume this is top level
                 links.new(outputNode.outputs[outputSocket], inputNode.inputs[inputSocket])
 

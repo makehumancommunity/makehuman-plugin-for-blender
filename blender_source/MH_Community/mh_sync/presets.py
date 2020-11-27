@@ -32,6 +32,7 @@ _defaultSettings["MhUseMakeSkin"] = True
 _defaultSettings["MhOnlyBlendMat"] = False
 _defaultSettings["MhExtraGroups"] = False
 _defaultSettings["MhExtraSlots"] = False
+_defaultSettings["MhTweakSlots"] = "NONE"
 _defaultSettings["MhHost"] = '127.0.0.1'
 _defaultSettings["MhPort"] = 12345
 

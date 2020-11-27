@@ -36,6 +36,13 @@ handleHiddenItems.append( ("MASK", "Mask", "Add a mask modifier to hide hidden s
 handleHiddenItems.append( ("MATERIAL", "Invis material", "Add an invisible material to hidden surfaces", 3) )
 handleHiddenItems.append( ("DELETE", "Delete", "Delete vertices for hidden surfaces", 4) )
 
+tweakItems = []
+tweakItems.append( ("NONE", "Leave as is", "Do not tweak materials to match slots", 1) )
+tweakItems.append( ("DEFAULT", "Generic tweaks", "Do generic tweaks for material slots", 2) )
+tweakItems.append( ("PALE", "Pale", "Generic tweaks for a slighly paler look", 3) )
+tweakItems.append( ("TAN", "Tan", "Generic tweks for a slightly more tan look", 4) )
+tweakItems.append( ("ASIAN", "Asian", "Generic tweks for a slightly more east-asian look", 5) )
+
 from .presets import loadOrCreateDefaultSettings
 
 _EVALUATED_MAKESKIN = False
@@ -95,7 +102,8 @@ def registerImporterConstantsAndSettings():
                                                  default=settings["MhOnlyBlendMat"])
     bpy.types.Scene.MhExtraGroups = BoolProperty(name="Extra vertex groups", description="Attempt to assign additional vertex groups for body parts, such as lips, fingernails, ears and so on. This works on the base mesh and most (but not all) proxies.", default=settings["MhExtraGroups"])
     bpy.types.Scene.MhExtraSlots = BoolProperty(name="Extra material slots", description="When having assigned extra vertex groups, also create copies of the skin material and assign to separate material slots. This is useful if you for example want a different roughness on the fingernails than on the skin.", default=settings["MhExtraSlots"])
-
+    bpy.types.Scene.MhTweakSlots = bpy.props.EnumProperty(items=tweakItems, name="Tweak material slots", description="In the default mode, the skin material is simply copied to each slot. With the other options, settings are tweaked a bit to look better for the respective slot material. This is only relevant for enhanced skin materials.", default=settings["MhTweakSlots"])
+    
     # In case MHX2 isn't loaded
     bpy.types.Object.MhHuman = BoolProperty(default=False)
     bpy.types.Object.MhScaleFactor = FloatProperty(default=0.1)
@@ -169,6 +177,8 @@ def addImporterSettingsToTab(layout, scn):
     extrasBox.prop(scn, 'MhEnhancedSSS', text='Enhanced skin SSS')
     extrasBox.prop(scn, 'MhExtraGroups', text='Extra vertex groups')
     extrasBox.prop(scn, 'MhExtraSlots', text='Slots for extra groups')
+    extrasBox.label(text="Tweak slots:")
+    extrasBox.prop(scn, 'MhTweakSlots', text='')
 
     global _EVALUATED_MAKESKIN
     global _MAKESKIN_AVAILABLE
