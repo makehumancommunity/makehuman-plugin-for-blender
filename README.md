@@ -1,4 +1,9 @@
-# MH Community Plug-in for Blender #
+# MH Community Plug-in for Blender (MPFB1) #
+
+*MPFB1 HAS BEEN DEPRECATED IN FAVOR OF [MPFB2](https://github.com/makehumancommunity/mpfb2), SEE [DIFFERENCES BETWEEB MPFB1 AND MPFB2](https://static.makehumancommunity.org/mpfb/faq/differences_between_mpfb1_and_mpfb2.html)*
+
+The contents of this repo are still available, but mainly for historical reasons. You will need a very old blender version in order
+to run the stuff here, probably something like blender 2.8.
 
 <img src="doc-assist/MH_server_socket.png">
 
